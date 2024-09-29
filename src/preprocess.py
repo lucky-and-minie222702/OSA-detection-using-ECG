@@ -9,6 +9,8 @@ from librosa.feature import mfcc
 if not path.isdir("numpy"):
     os.makedirs("numpy")
 
+print("*** Make sure that you have changed the dataset directory name to \"database\" before")
+
 f = open(path.join("database", "list"))
 records = f.read().splitlines()
 
