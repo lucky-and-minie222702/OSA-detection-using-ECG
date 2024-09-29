@@ -1,9 +1,9 @@
 import numpy as np
-import wfdb
 from os import path
 import os
 import sys
 import argparse
+import wfdb
 from librosa.feature import mfcc
 
 if not path.isdir("numpy"):
