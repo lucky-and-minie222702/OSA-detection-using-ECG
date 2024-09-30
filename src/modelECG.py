@@ -113,25 +113,32 @@ pipeline = Pipeline([("clf", clf)])
 
 X_total, y_total = shuffle(X_total, y_total, random_state=22022009)
 scores = []
-for i, (train_index, test_index) in enumerate(kf.split(X_total)):
-    X = X_total[train_index]
-    y = y_total[train_index]
-    counts = Counter(y)
-    print(f"Fold {i+1}:")
-    print(f"=> Train set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-    pipeline.fit(X, y)
-    X = X_total[test_index]
-    y = y_total[test_index]
-    counts = Counter(y)
-    print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-    score = np.round(clf.score(X, y), 3)
-    scores.append(score)
-    print(f"Accuracy (correct / total): {score}\n{"-"*50}")
-    # reset
-    reset_model(clf.model)
-    
-print("*** SUMMARY ***")
-for i, score in enumerate(scores):
-    print(f"Fold {i+1}: Accuracy: {score}")
-print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
+if sys.argv[1] == "test":
+    for i, (train_index, test_index) in enumerate(kf.split(X_total)):
+        X = X_total[train_index]
+        y = y_total[train_index]
+        counts = Counter(y)
+        print(f"Fold {i+1}:")
+        print(f"=> Train set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
+        pipeline.fit(X, y)
+        X = X_total[test_index]
+        y = y_total[test_index]
+        counts = Counter(y)
+        print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
+        score = np.round(clf.score(X, y), 3)
+        scores.append(score)
+        print(f"Accuracy (correct / total): {score}\n{"-"*50}")
+        # reset
+        reset_model(clf.model)
+        
+    print("*** SUMMARY ***")
+    for i, score in enumerate(scores):
+        print(f"Fold {i+1}: Accuracy: {score}")
+    print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
 
+elif sys.argv[1] == "build":
+    print("Training...")
+    pipeline.fit(X_total, y_total)
+    print("Exporting...")
+    joblib.dump(pipeline, save_path)
+    print("Done!")
