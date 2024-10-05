@@ -53,7 +53,6 @@ def create_model():
     x = layers.MaxPooling2D(pool_size=(2, 2))(x)
     x = layers.Flatten()(x)
     x = layers.Reshape((1,) + x.shape[1:])(x)
-    x = layers.SimpleRNN(3, return_sequences=True)(x)
     x = layers.Dense(1, activation='sigmoid')(x)
  
     model = Model(inputs=inp, outputs=x, name="NHCT")
@@ -65,7 +64,7 @@ def create_model():
     model.summary()
     return model
 
-save_path = path.join("res", "model.keras")
+save_path = path.join("res", "modelECG.keras")
 epochs = 5
 batch_size = 16
 
