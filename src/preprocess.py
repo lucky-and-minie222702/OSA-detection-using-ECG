@@ -32,7 +32,7 @@ for i in range(len(records)):
     
     buffer = 10
     rec = rec[buffer*6000::]
-    rec = rec[:len(rec)-buffer*6000:]
+    rec = rec[:len(rec)-buffer*6000:].flatten()
     ann = ann[buffer::]
     ann = ann[:len(ann)-buffer:]
     
