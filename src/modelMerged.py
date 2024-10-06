@@ -55,6 +55,8 @@ def get_patients_ECG(plist):
     return X, y
 
 def calc_pred(pred1, pred2, bias = 0.0):
+    pred1 = np.squeeze(pred1)
+    pred2 = np.squeeze(pred2)
     rg = abs(pred1 - pred2) * bias
     cof = 1 if pred1 > pred2 else -1
     pred2 += cof * rg
@@ -71,9 +73,10 @@ SpO2_path = path.join("res", "modelSpO2.keras")
 ECG_model = load_model(ECG_path)
 SpO2_model = load_model(SpO2_path)
 
-pred1 = ECG_model.predict(X_ECG)[20][0]
-pred2 = SpO2_model.predict(X_SpO2)[0][0]
+# print(X_ECG.shape, X_SpO2.shape)
+pred1 = ECG_model.predict(X_ECG)[20]
+pred2 = SpO2_model.predict(X_SpO2)[0]
 print(pred1, pred2)
-pred = calc_pred(pred1, pred2, bias=0.5)
+pred = calc_pred(pred1, pred2, bias=0.25)
 print(pred)
     
