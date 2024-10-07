@@ -1,3 +1,3 @@
 # OSA detection using machine learning
 
-![](OSA.jpg)
+Viewing OSA.pdf

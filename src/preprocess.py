@@ -4,7 +4,7 @@ import os
 import sys
 import argparse
 import wfdb
-from librosa.feature import mfcc
+from librosa.feature import mfcc, delta, poly_features, tempogram
 
 if not path.isdir("numpy"):
     os.makedirs("numpy")

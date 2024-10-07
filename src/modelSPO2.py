@@ -25,7 +25,7 @@ import keras.applications as apl
 import keras.regularizers as reg
 import joblib
 import tensorflow.python.keras.backend as K
-from librosa.feature import mfcc, delta
+
 def reset_model(model):
     weights = []
     initializers = []
