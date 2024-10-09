@@ -1,62 +1,62 @@
 
-Total: Apnea cases [1]: 6328 - Normal cases [0]: 9982
+Total: Apnea cases [1]: 6328 - Normal cases [0]: 6328
 Fold 1:
-=> Train set: Apnea cases [1]: 5075 - Normal cases [0]: 7973
-=> Test set: Apnea cases [1]: 1253 - Normal cases [0]: 2009
+=> Train set: Apnea cases [1]: 5078 - Normal cases [0]: 5046
+=> Test set: Apnea cases [1]: 1250 - Normal cases [0]: 1282
               precision    recall  f1-score   support
 
-      NO OSA       0.88      0.90      0.89      2009
-         OSA       0.84      0.80      0.82      1253
+      NO OSA       0.84      0.81      0.82      1282
+         OSA       0.81      0.85      0.83      1250
 
-    accuracy                           0.86      3262
-   macro avg       0.86      0.85      0.86      3262
-weighted avg       0.86      0.86      0.86      3262
+    accuracy                           0.83      2532
+   macro avg       0.83      0.83      0.83      2532
+weighted avg       0.83      0.83      0.83      2532
 
 Fold 2:
-=> Train set: Apnea cases [1]: 5074 - Normal cases [0]: 7974
-=> Test set: Apnea cases [1]: 1254 - Normal cases [0]: 2008
+=> Train set: Apnea cases [1]: 5068 - Normal cases [0]: 5057
+=> Test set: Apnea cases [1]: 1260 - Normal cases [0]: 1271
               precision    recall  f1-score   support
 
-      NO OSA       0.92      0.87      0.90      2008
-         OSA       0.81      0.88      0.84      1254
+      NO OSA       0.79      0.84      0.82      1271
+         OSA       0.83      0.78      0.80      1260
 
-    accuracy                           0.87      3262
-   macro avg       0.87      0.88      0.87      3262
-weighted avg       0.88      0.87      0.88      3262
+    accuracy                           0.81      2531
+   macro avg       0.81      0.81      0.81      2531
+weighted avg       0.81      0.81      0.81      2531
 
 Fold 3:
-=> Train set: Apnea cases [1]: 5028 - Normal cases [0]: 8020
-=> Test set: Apnea cases [1]: 1300 - Normal cases [0]: 1962
+=> Train set: Apnea cases [1]: 5020 - Normal cases [0]: 5105
+=> Test set: Apnea cases [1]: 1308 - Normal cases [0]: 1223
               precision    recall  f1-score   support
 
-      NO OSA       0.92      0.86      0.88      1962
-         OSA       0.80      0.88      0.84      1300
+      NO OSA       0.81      0.85      0.82      1223
+         OSA       0.85      0.81      0.83      1308
 
-    accuracy                           0.87      3262
-   macro avg       0.86      0.87      0.86      3262
-weighted avg       0.87      0.87      0.87      3262
+    accuracy                           0.83      2531
+   macro avg       0.83      0.83      0.83      2531
+weighted avg       0.83      0.83      0.83      2531
 
 Fold 4:
-=> Train set: Apnea cases [1]: 5056 - Normal cases [0]: 7992
-=> Test set: Apnea cases [1]: 1272 - Normal cases [0]: 1990
+=> Train set: Apnea cases [1]: 5079 - Normal cases [0]: 5046
+=> Test set: Apnea cases [1]: 1249 - Normal cases [0]: 1282
               precision    recall  f1-score   support
 
-      NO OSA       0.91      0.85      0.88      1990
-         OSA       0.78      0.87      0.83      1272
+      NO OSA       0.85      0.78      0.81      1282
+         OSA       0.79      0.86      0.82      1249
 
-    accuracy                           0.86      3262
-   macro avg       0.85      0.86      0.85      3262
-weighted avg       0.86      0.86      0.86      3262
+    accuracy                           0.81      2531
+   macro avg       0.82      0.82      0.81      2531
+weighted avg       0.82      0.81      0.81      2531
 
 Fold 5:
-=> Train set: Apnea cases [1]: 5079 - Normal cases [0]: 7969
-=> Test set: Apnea cases [1]: 1249 - Normal cases [0]: 2013
+=> Train set: Apnea cases [1]: 5067 - Normal cases [0]: 5058
+=> Test set: Apnea cases [1]: 1261 - Normal cases [0]: 1270
               precision    recall  f1-score   support
 
-      NO OSA       0.93      0.86      0.89      2013
-         OSA       0.79      0.89      0.84      1249
+      NO OSA       0.81      0.81      0.81      1270
+         OSA       0.81      0.81      0.81      1261
 
-    accuracy                           0.87      3262
-   macro avg       0.86      0.87      0.86      3262
-weighted avg       0.88      0.87      0.87      3262
+    accuracy                           0.81      2531
+   macro avg       0.81      0.81      0.81      2531
+weighted avg       0.81      0.81      0.81      2531
 

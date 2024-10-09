@@ -90,7 +90,18 @@ def get_patients(plist):
     return X, y
 
 kf = KFold(n_splits=5)
-X_total, y_total = get_patients(range(1, 9))
+_X_total, _y_total = get_patients(range(1, 9))
+counts = Counter(_y_total)
+ideal = min(counts[0], counts[1])
+c = [0 ,0] 
+X_total, y_total = [], []
+for X, y in zip(_X_total, _y_total):
+    if c[y] <    ideal:
+        c[y] += 1
+        X_total.append(X)
+        y_total.append(y)
+X_total = np.array(X_total)
+y_total = np.array(y_total)
 counts = Counter(y_total)
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
