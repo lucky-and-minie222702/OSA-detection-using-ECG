@@ -1,0 +1,62 @@
+
+Total: Apnea cases [1]: 1466 - Normal cases [0]: 2001
+Fold 1:
+=> Train set: Apnea cases [1]: 1180 - Normal cases [0]: 1593
+=> Test set: Apnea cases [1]: 286 - Normal cases [0]: 408
+              precision    recall  f1-score   support
+
+      NO OSA       0.91      0.99      0.95       408
+         OSA       0.98      0.87      0.92       286
+
+    accuracy                           0.94       694
+   macro avg       0.95      0.93      0.93       694
+weighted avg       0.94      0.94      0.94       694
+
+Fold 2:
+=> Train set: Apnea cases [1]: 1168 - Normal cases [0]: 1605
+=> Test set: Apnea cases [1]: 298 - Normal cases [0]: 396
+              precision    recall  f1-score   support
+
+      NO OSA       0.93      0.91      0.92       396
+         OSA       0.89      0.90      0.90       298
+
+    accuracy                           0.91       694
+   macro avg       0.91      0.91      0.91       694
+weighted avg       0.91      0.91      0.91       694
+
+Fold 3:
+=> Train set: Apnea cases [1]: 1168 - Normal cases [0]: 1606
+=> Test set: Apnea cases [1]: 298 - Normal cases [0]: 395
+              precision    recall  f1-score   support
+
+      NO OSA       0.90      0.98      0.94       395
+         OSA       0.97      0.85      0.91       298
+
+    accuracy                           0.92       693
+   macro avg       0.93      0.91      0.92       693
+weighted avg       0.93      0.92      0.92       693
+
+Fold 4:
+=> Train set: Apnea cases [1]: 1169 - Normal cases [0]: 1605
+=> Test set: Apnea cases [1]: 297 - Normal cases [0]: 396
+              precision    recall  f1-score   support
+
+      NO OSA       0.80      0.99      0.88       396
+         OSA       0.98      0.67      0.80       297
+
+    accuracy                           0.85       693
+   macro avg       0.89      0.83      0.84       693
+weighted avg       0.88      0.85      0.85       693
+
+Fold 5:
+=> Train set: Apnea cases [1]: 1179 - Normal cases [0]: 1595
+=> Test set: Apnea cases [1]: 287 - Normal cases [0]: 406
+              precision    recall  f1-score   support
+
+      NO OSA       0.98      0.83      0.90       406
+         OSA       0.80      0.98      0.88       287
+
+    accuracy                           0.89       693
+   macro avg       0.89      0.90      0.89       693
+weighted avg       0.91      0.89      0.89       693
+

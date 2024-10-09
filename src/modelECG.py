@@ -25,6 +25,7 @@ import keras.applications as apl
 import keras.regularizers as reg
 import joblib
 import tensorflow.python.keras.backend as K
+from sklearn.metrics import classification_report
 from librosa.feature import mfcc, delta
 
 def reset_model(model):
@@ -61,18 +62,15 @@ def create_model():
         loss="binary_crossentropy",
         metrics=["binary_accuracy"],
     )
-    model.summary()
+    if sys.argv[1] != "report":
+        model.summary()
     return model
 
 save_path = path.join("res", "modelECG.keras")
 epochs = 5
 batch_size = 16
 
-clf = KerasClassifier(create_model(), 
-   epochs=epochs,
-   batch_size=batch_size,
-   verbose=False,
-)
+model = create_model()
 
 scaler = prep.MinMaxScaler()
 def get_patients(plist):
@@ -108,36 +106,40 @@ X_total, y_total = get_patients(range(1, 36))
 counts = Counter(y_total)
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
-pipeline = Pipeline([("clf", clf)])
-
 X_total, y_total = shuffle(X_total, y_total, random_state=22022009)
 scores = []
-if sys.argv[1] == "test":
+if sys.argv[1] == "test" or sys.argv[1] == "report":
     for i, (train_index, test_index) in enumerate(kf.split(X_total)):
         X = X_total[train_index]
         y = y_total[train_index]
         counts = Counter(y)
         print(f"Fold {i+1}:")
         print(f"=> Train set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-        pipeline.fit(X, y)
+        y = np.expand_dims(y, 1)
+        model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=False)
         X = X_total[test_index]
         y = y_total[test_index]
         counts = Counter(y)
         print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-        score = np.round(clf.score(X, y), 3)
-        scores.append(score)
-        print(f"Accuracy (correct / total): {score}\n{"-"*50}")
+        if sys.argv[1] == "test":
+            score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 3)
+            scores.append(score)
+            print(f"Accuracy (correct / total): {score}\n{"-"*50}")
+        else:
+            pred = model.predict(X, verbose=False)
+            pred = [np.round(np.squeeze(x)) for x in pred]
+            print(classification_report(y, pred, target_names=["NO OSA", "OSA"]))
         # reset
-        reset_model(clf.model)
-        
-    print("*** SUMMARY ***")
-    for i, score in enumerate(scores):
-        print(f"Fold {i+1}: Accuracy: {score}")
-    print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
+        reset_model(model)
+    if sys.argv[1] == "test":
+        print("*** SUMMARY ***")
+        for i, score in enumerate(scores):
+            print(f"Fold {i+1}: Accuracy: {score}")
+        print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
 
 elif sys.argv[1] == "build":
     print("Training...")
-    pipeline.fit(X_total, y_total)
+    model.fit(X_total, y_total, epochs=epochs, batch_size=batch_size, verbose=False)
     print("Exporting...")
-    joblib.dump(pipeline, save_path)
+    model.save(save_path)
     print("Done!")
