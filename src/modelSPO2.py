@@ -105,7 +105,7 @@ y_total = np.array(y_total)
 counts = Counter(y_total)
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
-X_total, y_total = shuffle(X_total, y_total, random_state=22022009)
+X_total, y_total = shuffle(X_total, y_total, random_state=27022009)
 scores = []
 if sys.argv[1] == "test" or sys.argv[1] == "report":
     for i, (train_index, test_index) in enumerate(kf.split(X_total)):
