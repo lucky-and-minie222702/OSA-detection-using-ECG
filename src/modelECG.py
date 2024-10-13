@@ -54,6 +54,9 @@ def create_model():
     x = layers.MaxPooling2D(pool_size=(2, 2))(x)
     x = layers.Flatten()(x)
     x = layers.Reshape((1,) + x.shape[1:])(x)
+    if "compare" in sys.argv:
+        x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
+    x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
  
     model = Model(inputs=inp, outputs=x, name="NHCT")

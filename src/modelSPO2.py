@@ -51,6 +51,8 @@ def create_model():
     x = layers.Conv1D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
     x = layers.MaxPooling1D(pool_size=4)(x)
+    if "compare" in sys.argv:
+        x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
  
