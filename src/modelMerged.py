@@ -54,13 +54,10 @@ def get_patients_ECG(plist):
     X = np.expand_dims(X, 3)
     return X, y
 
-def calc_pred(pred1, pred2, bias = 0.0):
+def calc_pred(pred1, pred2, weight1, weight2):
     pred1 = np.squeeze(pred1)
     pred2 = np.squeeze(pred2)
-    rg = abs(pred1 - pred2) * bias
-    cof = 1 if pred1 > pred2 else -1
-    pred2 += cof * rg
-    res = (pred1 + pred2) / 2;
+    res = pred1 * weight1 + pred2 * weight2
     return (res)
 
 # test data
@@ -77,6 +74,5 @@ SpO2_model = load_model(SpO2_path)
 pred1 = ECG_model.predict(X_ECG)[20]
 pred2 = SpO2_model.predict(X_SpO2)[0]
 print(pred1, pred2)
-pred = calc_pred(pred1, pred2, bias=0.25)
+pred = calc_pred(pred1, pred2, 0.8, 0.2)
 print(pred)
-    
