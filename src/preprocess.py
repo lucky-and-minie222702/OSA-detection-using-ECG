@@ -5,6 +5,7 @@ import sys
 import argparse
 import wfdb
 from librosa.feature import mfcc, delta, poly_features, tempogram
+import sklearn.preprocessing as prep
 
 if not path.isdir("numpy"):
     os.makedirs("numpy")
@@ -17,6 +18,7 @@ records = f.read().splitlines()
 total_sig_len = 0 
 total_minutes = 0
 
+scaler = prep.MinMaxScaler()
 for i in range(len(records)):
     if records[i][0] == "x":
         break
@@ -35,6 +37,7 @@ for i in range(len(records)):
     rec = rec[:len(rec)-buffer*6000:].flatten()
     ann = ann[buffer::]
     ann = ann[:len(ann)-buffer:]
+    rec = scaler.fit_transform(rec.reshape(-1, 1)).flatten()
     
     np.save(path.join("numpy", f"patient_{i+1}"), rec)
     np.save(path.join("numpy", f"annotation_{i+1}"), ann)
