@@ -26,7 +26,7 @@ import keras.regularizers as reg
 import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
-from librosa.feature import mfcc, delta
+from data_functions import *
 
 def reset_model(model):
     weights = []
@@ -42,18 +42,16 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 def create_model():
-    inp = layers.Input(shape=(72, 12, 1))
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(inp)
+    inp = layers.Input(shape=(6000, 1))
+    x = layers.Conv1D(filters=16, kernel_size=3, padding="same")(inp)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(x)
+    x = layers.MaxPooling1D(pool_size=4)(x)
+    x = layers.Conv1D(filters=32, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(x)
+    x = layers.MaxPooling1D(pool_size=4)(x)
+    x = layers.Conv1D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
-    x = layers.Flatten()(x)
-    x = layers.Reshape((1,) + x.shape[1:])(x)
+    x = layers.MaxPooling1D(pool_size=4)(x)
     if "compare" in sys.argv:
         x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
     x = layers.Flatten()(x)
@@ -69,54 +67,19 @@ def create_model():
         model.summary()
     return model
 
-save_path = path.join("res", "modelECG.keras")
+save_path = path.join("res", "model_SpO2.keras")
 epochs = 5
-batch_size = 16
+batch_size = 32
 
 model = create_model()
 
-scaler = prep.MinMaxScaler()
-def get_patients(plist):
-    def get_patient(patientid):
-        rec = np.load(path.join("numpy", f"patient_{patientid}.npy"))
-        ann = np.load(path.join("numpy", f"annotation_{patientid}.npy"))
-        return rec, ann
-
-    X, y = get_patient(plist[0])
-    siglen = len(y)
-    plist = plist[1::]
-    for i in plist:
-        rec, ann = get_patient(i)
-        X = np.hstack((X, rec))
-        y = np.hstack((y, ann))
-        siglen += len(ann)
-
-    X = np.array(np.split(X, siglen))
-    temp = []
-    for x in X:
-        mfccs = mfcc(y=x, sr=100, n_mfcc=24)
-        delta1 = delta(mfccs, order=1)
-        delta2 = delta(mfccs, order=2)
-        data = np.concatenate([mfccs, delta1, delta2])
-        temp.append(scaler.fit_transform(data))
-    X = np.array(temp)
-    X = np.expand_dims(X, 3)
-    return X, y
-
-
 kf = KFold(n_splits=5)
-_X_total, _y_total = get_patients(range(1, 36))
-counts = Counter(_y_total)
-ideal = min(counts[0], counts[1])
-c = [0 ,0] 
-X_total, y_total = [], []
-for X, y in zip(_X_total, _y_total):
-    if c[y] <    ideal:
-        c[y] += 1
-        X_total.append(X)
-        y_total.append(y)
-X_total = np.array(X_total)
-y_total = np.array(y_total)
+X_total = np.vstack([np.load(path.join("gen_data", "ECG_normal.npy")),
+                     np.load(path.join("gen_data", "ECG_apnea.npy"))
+                     ])
+y_total = np.array([[0] * (len(X_total) // 2) +
+                    [1] * (len(X_total) // 2)
+                    ]).flatten()
 counts = Counter(y_total)
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
@@ -129,14 +92,12 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
         counts = Counter(y)
         print(f"Fold {i+1}:")
         print(f"=> Train set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-        y = np.expand_dims(y, 1)
         model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=False)
         X = X_total[test_index]
         y = y_total[test_index]
         counts = Counter(y)
         print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
         if sys.argv[1] == "test":
-            y = np.expand_dims(y, 1)
             score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 3)
             scores.append(score)
             print(f"Accuracy (correct / total): {score}\n{"-"*50}")
@@ -154,7 +115,7 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
 
 elif sys.argv[1] == "build":
     print("Training...")
-    model.fit(X_total, y_total, epochs=epochs, batch_size=batch_size, verbose=False)
+    model.fit(X_total, y_total, epochs=epochs, batch_size=(batch_size * 2), validation_split=0.2)
     print("Exporting...")
     model.save(save_path)
     print("Done!")

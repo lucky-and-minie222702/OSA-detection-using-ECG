@@ -1,0 +1,51 @@
+Model ECG has been pre-fitted!
+Fold 1:
+=> Train set: Apnea cases [1]: 1182 - Normal cases [0]: 1591
+=> Test set: Apnea cases [1]: 284 - Normal cases [0]: 410
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9423630833625793
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9474063515663147
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9538905024528503
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9596541523933411
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9619596600532532
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9620557427406311
+W_ECG = 1.0 - W_Sp7O2 = 0.0 => Accuracy (correct / total): 0.9598600268363953
+Fold 2:
+=> Train set: Apnea cases [1]: 1164 - Normal cases [0]: 1609
+=> Test set: Apnea cases [1]: 302 - Normal cases [0]: 392
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9556916356086731
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9538905024528503
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9544668793678284
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.954807460308075
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.954971194267273
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9547772407531738
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9544051289558411
+Fold 3:
+=> Train set: Apnea cases [1]: 1170 - Normal cases [0]: 1604
+=> Test set: Apnea cases [1]: 296 - Normal cases [0]: 397
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9514842629432678
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9511799812316895
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9516744613647461
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9521140456199646
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9528108835220337
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.95322185754776
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.953456461429596
+Fold 4:
+=> Train set: Apnea cases [1]: 1174 - Normal cases [0]: 1600
+=> Test set: Apnea cases [1]: 292 - Normal cases [0]: 401
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9506552815437317
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9507929682731628
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9509191513061523
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9510352611541748
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.951142430305481
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.951241672039032
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9513338208198547
+Fold 5:
+=> Train set: Apnea cases [1]: 1174 - Normal cases [0]: 1600
+=> Test set: Apnea cases [1]: 292 - Normal cases [0]: 401
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9499279260635376
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9490963220596313
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9489696025848389
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9491662979125977
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9494384527206421
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9496097564697266
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9495241045951843
