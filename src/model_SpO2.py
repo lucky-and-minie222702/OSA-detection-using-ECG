@@ -74,8 +74,8 @@ batch_size = 32
 model = create_model()
 
 kf = KFold(n_splits=5)
-X_total = np.vstack([np.load(path.join("gen_data", "ECG_normal.npy")),
-                     np.load(path.join("gen_data", "ECG_apnea.npy"))
+X_total = np.vstack([np.load(path.join("gen_data", "SpO2_normal.npy")),
+                     np.load(path.join("gen_data", "SpO2_apnea.npy"))
                      ])
 y_total = np.array([[0] * (len(X_total) // 2) +
                     [1] * (len(X_total) // 2)
