@@ -27,6 +27,7 @@ import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
+from keras.preprocessing.sequence import pad_sequences
 
 def reset_model(model):
     weights = []
@@ -42,7 +43,7 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 def create_model():
-    inp = layers.Input(shape=(6000, 1))
+    inp = layers.Input(shape=(None, 1))
     x = layers.Conv1D(filters=16, kernel_size=3, padding="same")(inp)
     x = layers.Activation("relu")(x)
     x = layers.MaxPooling1D(pool_size=4)(x)
@@ -51,7 +52,7 @@ def create_model():
     x = layers.MaxPooling1D(pool_size=4)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling1D(pool_size=4)(x)
+    x = layers.GlobalMaxPooling1D()(x)
     if "compare" in sys.argv:
         x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
     x = layers.Flatten()(x)

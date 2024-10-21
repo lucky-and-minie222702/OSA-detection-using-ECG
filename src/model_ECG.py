@@ -42,7 +42,7 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 def create_model():
-    inp = layers.Input(shape=(72, 12, 1))
+    inp = layers.Input(shape=(72, None, 1))
     x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(inp)
     x = layers.Activation("relu")(x)
     x = layers.MaxPooling2D(pool_size=(2, 2))(x)
@@ -51,7 +51,7 @@ def create_model():
     x = layers.MaxPooling2D(pool_size=(2, 2))(x)
     x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
+    x = layers.GlobalMaxPooling2D()(x)
     x = layers.Flatten()(x)
     x = layers.Reshape((1,) + x.shape[1:])(x)
     if "compare" in sys.argv:
