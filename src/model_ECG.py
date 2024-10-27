@@ -8,7 +8,7 @@ import pandas as pd
 from keras import Sequential, Model
 from keras import layers
 from os import path
-from keras.saving import load_model 
+from keras.saving import load_model
 import argparse
 from keras.utils import to_categorical
 from keras import optimizers
@@ -27,6 +27,7 @@ import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
+import time
 
 def reset_model(model):
     weights = []
@@ -41,16 +42,29 @@ def reset_model(model):
         for w, init in zip(weights, initializers):
             w.assign(init(w.shape, dtype=w.dtype))
 
+def block(inp, filters):
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(inp)
+    shorcut = x
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(x)
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(x)
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(inp)
+    x = layers.BatchNormalization()(x)
+    x = layers.Add()([x, shorcut])
+    x = layers.Activation("relu")(x)
+    return x
+
 def create_model():
-    inp = layers.Input(shape=(72, None, 1))
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(inp)
+    inp = layers.Input(shape=(24, None, 1))
+    
+    x = layers.Conv2D(filters=32, kernel_size=3, padding="same")(inp)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(x)
+    x = layers.Conv2D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
-    x = layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same")(x)
+    x = layers.Conv2D(filters=128, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
+    x = layers.Conv2D(filters=256, kernel_size=3, padding="same")(x)
+    x = layers.Activation("relu")(x)
+    
     x = layers.GlobalMaxPooling2D()(x)
     x = layers.Flatten()(x)
     x = layers.Reshape((1,) + x.shape[1:])(x)
@@ -76,14 +90,16 @@ batch_size = 16
 model = create_model()
 
 kf = KFold(n_splits=5)
+print("Loading data...")
 X_total = np.vstack([np.load(path.join("gen_data", "ECG_normal.npy")),
                      np.load(path.join("gen_data", "ECG_apnea.npy"))
                      ])
 y_total = np.array([[0] * (len(X_total) // 2) +
                     [1] * (len(X_total) // 2)
                     ]).flatten()
-X_total = to_mfcc(X_total)
+X_total = feature_extract(X_total)
 counts = Counter(y_total)
+print("Done!")
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
 X_total, y_total = shuffle(X_total, y_total, random_state=27022009)
@@ -103,7 +119,7 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
         print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
         if sys.argv[1] == "test":
             y = np.expand_dims(y, 1)
-            score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 3)
+            score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 4)
             scores.append(score)
             print(f"Accuracy (correct / total): {score}\n{"-"*50}")
         else:
@@ -116,7 +132,32 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
         print("*** SUMMARY ***")
         for i, score in enumerate(scores):
             print(f"Fold {i+1}: Accuracy: {score}")
-        print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
+        print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 4)}")
+
+elif sys.argv[1] == "std":
+    X_train, X_test, y_train, y_test = train_test_split(X_total, y_total, test_size=0.2, random_state=22022009)
+    count_train = Counter(y_train)
+    count_test = Counter(y_test)
+    print(f"=> Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
+    print(f"=> Test set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
+
+    if "build" in sys.argv:
+        model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size*2, validation_split=0.1)
+    elif "test" in sys.argv:
+        model = load_model(save_path)
+    print("Evaluating...")
+    pred = model.predict(X_test)
+    pred = [np.round(np.squeeze(x)) for x in pred]
+    print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]))
+    model.evaluate(X_test, y_test)
+    
+    if "build" in sys.argv:
+        prompt = input("Enter \"save\" to save or anything else to discard: ")
+        if prompt == "save":
+            model.save(save_path)
+            print("Saving done!")
+        else:
+            print("Discard!")
 
 elif sys.argv[1] == "build":
     print("Training...")

@@ -1,16 +1,19 @@
 import numpy as np
 import sklearn.preprocessing as prep
 from os import path
-from librosa.feature import mfcc, delta
+from librosa.feature import *
+from scipy.signal import lfilter, savgol_filter
 
-def to_mfcc(X):
+def feature_extract(X):
     scaler = prep.MinMaxScaler()
     temp = []
     for x in X:
-        mfccs = mfcc(y=x, sr=100, n_mfcc=24)
-        delta1 = delta(mfccs, order=1)
-        delta2 = delta(mfccs, order=2)
-        data = np.concatenate([mfccs, delta1, delta2])
+        # x_f = savgol_filter(x, 2, 0)
+        key = mfcc(y=x, hop_length=256, sr=100, n_mfcc=12)
+        delta1 = delta(key, order=1)
+        delta2 = delta(delta1, order=2)
+        data = np.concatenate([key, delta1])
+        # data = key
         temp.append(scaler.fit_transform(data))
     temp = np.array(temp)
     temp = np.expand_dims(temp, 3)

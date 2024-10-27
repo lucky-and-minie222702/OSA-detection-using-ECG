@@ -44,14 +44,19 @@ def reset_model(model):
 
 def create_model():
     inp = layers.Input(shape=(None, 1))
-    x = layers.Conv1D(filters=16, kernel_size=3, padding="same")(inp)
+
+    x = layers.Conv1D(filters=32, kernel_size=3, padding="same")(inp)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPooling1D(pool_size=4)(x)
-    x = layers.Conv1D(filters=32, kernel_size=3, padding="same")(x)
-    x = layers.Activation("relu")(x)
-    x = layers.MaxPooling1D(pool_size=4)(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=128, kernel_size=3, padding="same")(x)
+    x = layers.Activation("relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=256, kernel_size=3, padding="same")(x)
+    x = layers.Activation("relu")(x)
+
     x = layers.GlobalMaxPooling1D()(x)
     if "compare" in sys.argv:
         x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
@@ -70,11 +75,12 @@ def create_model():
 
 save_path = path.join("res", "model_SpO2.keras")
 epochs = 5
-batch_size = 32
+batch_size = 16
 
 model = create_model()
 
 kf = KFold(n_splits=5)
+print("Loading data...")
 X_total = np.vstack([np.load(path.join("gen_data", "SpO2_normal.npy")),
                      np.load(path.join("gen_data", "SpO2_apnea.npy"))
                      ])
@@ -82,6 +88,7 @@ y_total = np.array([[0] * (len(X_total) // 2) +
                     [1] * (len(X_total) // 2)
                     ]).flatten()
 counts = Counter(y_total)
+print("Done!")
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
 X_total, y_total = shuffle(X_total, y_total, random_state=27022009)
@@ -99,7 +106,7 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
         counts = Counter(y)
         print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
         if sys.argv[1] == "test":
-            score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 3)
+            score = np.round(model.evaluate(X, y, batch_size=batch_size, verbose=False)[1], 4)
             scores.append(score)
             print(f"Accuracy (correct / total): {score}\n{"-"*50}")
         else:
@@ -112,7 +119,32 @@ if sys.argv[1] == "test" or sys.argv[1] == "report":
         print("*** SUMMARY ***")
         for i, score in enumerate(scores):
             print(f"Fold {i+1}: Accuracy: {score}")
-        print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 3)}")
+        print(f"Average accuracy: {np.round(np.mean(scores, axis=0), 4)}")
+
+elif sys.argv[1] == "std":
+    X_train, X_test, y_train, y_test = train_test_split(X_total, y_total, test_size=0.2, random_state=22022009)
+    count_train = Counter(y_train)
+    count_test = Counter(y_test)
+    print(f"=> Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
+    print(f"=> Test set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
+
+    if "build" in sys.argv:
+        model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size*2, validation_split=0.1)
+    elif "test" in sys.argv:
+        model = load_model(save_path)
+    print("Evaluating...")
+    pred = model.predict(X_test)
+    pred = [np.round(np.squeeze(x)) for x in pred]
+    print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]))
+    model.evaluate(X_test, y_test)
+    
+    if "build" in sys.argv:
+        prompt = input("Enter \"save\" to save or anything else to discard: ")
+        if prompt == "save":
+            model.save(save_path)
+            print("Saving done!")
+        else:
+            print("Discard!")
 
 elif sys.argv[1] == "build":
     print("Training...")
@@ -120,3 +152,4 @@ elif sys.argv[1] == "build":
     print("Exporting...")
     model.save(save_path)
     print("Done!")
+

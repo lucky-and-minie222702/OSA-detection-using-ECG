@@ -28,6 +28,7 @@ import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
+import time
 
 def reset_model(model):
     weights = []
@@ -75,7 +76,7 @@ if "pre_fit" in sys.argv:
     ]
     X_prefit, y_prefit = get_patients_ECG(list_prefit)
     X_prefit = to_mfcc(X_prefit)
-    model_pre_fitted.fit( 
+    model_pre_fitted.fit(
         X_prefit, y_prefit,
         batch_size=batch_size,
         epochs=epochs,
@@ -93,24 +94,25 @@ if "test" in sys.argv:
         print(f"Fold {i+1}:")
         print(f"=> Train set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
         y = np.expand_dims(y, 1)
-        
+
         model_ECG.fit(X_e, y, epochs=epochs, batch_size=batch_size, verbose=False)
         model_SpO2.fit(X_s, y, epochs=epochs, batch_size=batch_size, verbose=False)
-        
+
         X_e = X_ECG[test_index]
         X_s = X_SpO2[test_index]
         y = y_total[test_index]
-        
+
         counts = Counter(y)
         print(f"=> Test set: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
         pred_e = model_ECG.predict(X_e, verbose=False).flatten()
         pred_s = model_SpO2.predict(X_s, verbose=False).flatten()
-        
+
         for rate in [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]:
-            pred = pred_e * rate + pred_s * (1 - rate)
+            pred = pred_e * rate + pred_s * round(1 - rate, 1)
             m.update_state(y, pred)
             score = m.result()
-            print(f"W_ECG = {rate} - W_SpO2 = {1 - rate} => Accuracy (correct / total): {score}")
-        
+            score = round(score, 4)
+            print(f"W_ECG = {rate} - W_SpO2 = {round(1 - rate, 1)} => Accuracy (correct / total): {score}")
+
         model_ECG.set_weights(model_pre_fitted.get_weights())
         reset_model(model_SpO2)
