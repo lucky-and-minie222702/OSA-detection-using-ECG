@@ -1,0 +1,15 @@
+.vscode
+*.DS_Store
+*.__pycache__
+numpy
+database
+report*
+compresseddata.zip
+res
+final
+*test*
+real_data
+augmented_data
+gen_data
+stat
+exported
