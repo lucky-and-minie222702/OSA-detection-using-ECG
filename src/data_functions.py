@@ -3,20 +3,49 @@ import sklearn.preprocessing as prep
 from os import path
 from librosa.feature import *
 from scipy.signal import lfilter, savgol_filter
+import sys
 
-def feature_extract(X):
+def feature_extract(X, verbose=False):
     scaler = prep.MinMaxScaler()
     temp = []
+    hl = 256
+    sr = 100
+    total = len(X)
+    count = 0
     for x in X:
-        # x_f = savgol_filter(x, 2, 0)
-        key = mfcc(y=x, hop_length=256, sr=100, n_mfcc=12)
-        delta1 = delta(key, order=1)
-        delta2 = delta(delta1, order=2)
-        data = np.concatenate([key, delta1])
-        # data = key
-        temp.append(scaler.fit_transform(data))
+        # mfcc dct 1
+        mfccs1 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)
+        delta1 = delta(mfccs1, order=1)
+        mfccs1 = np.concatenate([mfccs1, delta1])
+        # mfcc dct 2
+        mfccs2 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)
+        delta1 = delta(mfccs2, order=1)
+        mfccs2 = np.concatenate([mfccs2, delta1])
+        # mfcc dct 3
+        mfccs3 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=3)
+        delta1 = delta(mfccs3, order=1)
+        mfccs3 = np.concatenate([mfccs3, delta1])
+        # final data
+        data = np.stack([
+            mfccs1, 
+            mfccs2, 
+            mfccs3, 
+        ], axis=2)
+        temp.append(data)
+        # Progress
+        count += 1
+        if verbose:
+            percent = int(count / total * 100)
+            loaded = "=" * (percent//2)
+            if loaded != "" and count < total:
+                loaded = loaded[:-1:] + ">"
+            unloaded = " " * (50 - (percent//2))
+            print(f" {percent:3d}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
+        else:
+            print(f"{count} / {total}", end="\r")
+        sys.stdout.flush()
     temp = np.array(temp)
-    temp = np.expand_dims(temp, 3)
+    print()
     return temp
 
 def get_patients_SpO2(plist):

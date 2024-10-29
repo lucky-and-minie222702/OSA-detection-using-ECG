@@ -42,34 +42,47 @@ def reset_model(model):
         for w, init in zip(weights, initializers):
             w.assign(init(w.shape, dtype=w.dtype))
 
-def block(inp, filters):
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(inp)
-    shorcut = x
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(x)
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(x)
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), padding="same")(inp)
+def block(inp, filters, down_sample=False):
+    shorcut = inp
+    strides = [2, 1] if down_sample else [1, 1]
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[1], padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    
+    if down_sample:
+        shorcut = layers.Conv2D(filters=filters, kernel_size=(1, 1), strides=2, padding="same")(shorcut)
+        shorcut = layers.BatchNormalization()(shorcut)
+    
     x = layers.Add()([x, shorcut])
     x = layers.Activation("relu")(x)
     return x
 
 def create_model():
-    inp = layers.Input(shape=(24, None, 1))
+    # 2d + mfcc
+    inp = layers.Input(shape=(24, None, 3)) # the seccond size is sampling rate dimension
     
-    x = layers.Conv2D(filters=32, kernel_size=3, padding="same")(inp)
-    x = layers.Activation("relu")(x)
-    x = layers.Conv2D(filters=64, kernel_size=3, padding="same")(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Conv2D(filters=128, kernel_size=3, padding="same")(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Conv2D(filters=256, kernel_size=3, padding="same")(x)
+    x = layers.Conv2D(64, kernel_size=3)(inp)
+    x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     
-    x = layers.GlobalMaxPooling2D()(x)
-    x = layers.Flatten()(x)
-    x = layers.Reshape((1,) + x.shape[1:])(x)
+    x = block(x, 64)
+    x = block(x, 64)
+    x = block(x, 64)
+    x = block(x, 128, True)
+    x = block(x, 128)
+    x = block(x, 128)
+    x = block(x, 256, True)
+    x = block(x, 256)
+    x = block(x, 256)
+    x = block(x, 512, True)
+    x = block(x, 512)
+    
+    x = layers.GlobalAvgPool2D()(x)
     if "compare" in sys.argv:
         x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
+
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
 
@@ -91,13 +104,13 @@ model = create_model()
 
 kf = KFold(n_splits=5)
 print("Loading data...")
-X_total = np.vstack([np.load(path.join("gen_data", "ECG_normal.npy")),
-                     np.load(path.join("gen_data", "ECG_apnea.npy"))
+X_total = np.vstack([np.load(path.join("gen_data", "f_ECG_normal.npy")),
+                     np.load(path.join("gen_data", "f_ECG_apnea.npy"))
                      ])
 y_total = np.array([[0] * (len(X_total) // 2) +
                     [1] * (len(X_total) // 2)
                     ]).flatten()
-X_total = feature_extract(X_total)
+# X_total = feature_extract(X_total) 
 counts = Counter(y_total)
 print("Done!")
 print(f"\nTotal: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")

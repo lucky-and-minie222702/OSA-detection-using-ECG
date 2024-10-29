@@ -136,3 +136,15 @@ if "create_pair_data" in sys.argv:
     np.save(path.join("gen_data", "rec_pair_data"), X_pair)
     np.save(path.join("gen_data", "ann_pair_data"), y)
     print("Done!")
+
+if "save_features":
+    X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+    print("Extracting normal patients...")
+    X_0 = feature_extract(X_0, True)
+    print("Extracting Apnea patients...")
+    X_1 = feature_extract(X_1, True)
+    print("Exporting...")
+    np.save(path.join("gen_data", "f_ECG_normal"), X_0)
+    np.save(path.join("gen_data", "f_ECG_apnea"), X_1)
+    print("Done!")

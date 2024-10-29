@@ -1,0 +1,20 @@
+26 / 10:
+All test using same train and test set
+Test set consists of 105,5 hours of sleep
+
+27 / 10 
+Choosing model 2 SpO2
+Choosing model 2 ECG
+
+28 / 10
+Choosing model 11 ECG
+
+29 / 10
+Testing model 11 ECG with mfcc + tempogram channels
+Result see at report14
+Accuracy low
+Then
+Change to 3 layers of 3 type of discrete cosine transform
+=> Better accuracy than temporgram
+Choosing 18
+Train time: 18 minutes

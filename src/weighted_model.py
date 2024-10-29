@@ -75,7 +75,7 @@ if "pre_fit" in sys.argv:
             if not x in [1, 2, 3, 4, 21, 26, 27, 28]
     ]
     X_prefit, y_prefit = get_patients_ECG(list_prefit)
-    X_prefit = to_mfcc(X_prefit)
+    X_prefit = feature_extract(X_prefit)
     model_pre_fitted.fit(
         X_prefit, y_prefit,
         batch_size=batch_size,
@@ -116,3 +116,6 @@ if "test" in sys.argv:
 
         model_ECG.set_weights(model_pre_fitted.get_weights())
         reset_model(model_SpO2)
+
+if "v2" in sys.argv:
+    pass
