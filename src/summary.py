@@ -14,5 +14,5 @@ SpO2_model = load_model(SpO2_path)
 sECG_path = path.join("summary", "model_ECG.png")
 sSpO2_path = path.join("summary", "model_SpO2.png")
 
-plot_model(ECG_model, sECG_path, show_shapes=True, show_layer_activations=True)
-plot_model(SpO2_model, sSpO2_path, show_shapes=True, show_layer_activations=True)
+plot_model(ECG_model, sECG_path, dpi=800, show_layer_activations=True)
+plot_model(SpO2_model, sSpO2_path, dpi=800, show_layer_activations=True)
