@@ -52,7 +52,7 @@ def block(inp, filters, down_sample=False):
     x = layers.BatchNormalization()(x)
     
     if down_sample:
-        shorcut = layers.Conv2D(filters=filters, kernel_size=(1, 1), strides=2, padding="same")(shorcut)
+        shorcut = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=2, padding="same")(shorcut)
         shorcut = layers.BatchNormalization()(shorcut)
     
     x = layers.Add()([x, shorcut])
@@ -60,8 +60,8 @@ def block(inp, filters, down_sample=False):
     return x
 
 def create_model():
-    # 2d + mfcc
-    inp = layers.Input(shape=(24, None, 3)) # the seccond size is sampling rate dimension
+    # 2d + mfcc + tempogram
+    inp = layers.Input(shape=(24, None, 4)) # the seccond size is sampling rate dimension
     
     x = layers.Conv2D(64, kernel_size=3)(inp)
     x = layers.BatchNormalization()(x)
@@ -69,12 +69,9 @@ def create_model():
     
     x = block(x, 64)
     x = block(x, 64)
-    x = block(x, 64)
     x = block(x, 128, True)
     x = block(x, 128)
-    x = block(x, 128)
     x = block(x, 256, True)
-    x = block(x, 256)
     x = block(x, 256)
     x = block(x, 512, True)
     x = block(x, 512)
@@ -102,7 +99,7 @@ batch_size = 16
 
 model = create_model()
 
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=16)
 print("Loading data...")
 X_total = np.vstack([np.load(path.join("gen_data", "f_ECG_normal.npy")),
                      np.load(path.join("gen_data", "f_ECG_apnea.npy"))
@@ -119,6 +116,8 @@ X_total, y_total = shuffle(X_total, y_total, random_state=27022009)
 scores = []
 if sys.argv[1] == "test" or sys.argv[1] == "report":
     for i, (train_index, test_index) in enumerate(kf.split(X_total)):
+        if i > 3:
+            break
         X = X_total[train_index]
         y = y_total[train_index]
         counts = Counter(y)

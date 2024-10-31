@@ -1,0 +1,40 @@
+Fold 1:
+=> Train set: Apnea cases [1]: 1286 - Normal cases [0]: 1747
+=> Test set: Apnea cases [1]: 180 - Normal cases [0]: 254
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9585253596305847
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.960829496383667
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9654377698898315
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9694700241088867
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9709677696228027
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9719662070274353
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9707044363021851
+Fold 2:
+=> Train set: Apnea cases [1]: 1287 - Normal cases [0]: 1746
+=> Test set: Apnea cases [1]: 179 - Normal cases [0]: 255
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9711981415748596
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9720942378044128
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9735022783279419
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9748638272285461
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9754224419593811
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9751861095428467
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9746543765068054
+Fold 3:
+=> Train set: Apnea cases [1]: 1288 - Normal cases [0]: 1745
+=> Test set: Apnea cases [1]: 178 - Normal cases [0]: 256
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.973271906375885
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9723502397537231
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9722146987915039
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9722222089767456
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9719864130020142
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.9717742204666138
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.971472442150116
+Fold 4:
+=> Train set: Apnea cases [1]: 1269 - Normal cases [0]: 1765
+=> Test set: Apnea cases [1]: 197 - Normal cases [0]: 236
+W_ECG = 0.0 - W_SpO2 = 1.0 => Accuracy (correct / total): 0.9714046120643616
+W_ECG = 0.2 - W_SpO2 = 0.8 => Accuracy (correct / total): 0.9715430736541748
+W_ECG = 0.4 - W_SpO2 = 0.6 => Accuracy (correct / total): 0.9716700315475464
+W_ECG = 0.5 - W_SpO2 = 0.5 => Accuracy (correct / total): 0.9715102314949036
+W_ECG = 0.6 - W_SpO2 = 0.4 => Accuracy (correct / total): 0.9703874588012695
+W_ECG = 0.8 - W_SpO2 = 0.2 => Accuracy (correct / total): 0.967383861541748
+W_ECG = 1.0 - W_SpO2 = 0.0 => Accuracy (correct / total): 0.9636064171791077

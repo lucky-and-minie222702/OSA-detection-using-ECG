@@ -43,21 +43,18 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 def create_model():
-    inp = layers.Input(shape=(None, 1))
+    inp = layers.Input(shape=(24, None, 4))
 
-    x = layers.Conv1D(filters=32, kernel_size=3, padding="same")(inp)
+    x = layers.Conv2D(filters=32, kernel_size=3, padding="same")(inp)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=64, kernel_size=3, padding="same")(x)
+    x = layers.Conv2D(filters=64, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=128, kernel_size=3, padding="same")(x)
+    x = layers.Conv2D(filters=128, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=256, kernel_size=3, padding="same")(x)
+    x = layers.Conv2D(filters=256, kernel_size=3, padding="same")(x)
     x = layers.Activation("relu")(x)
 
-    x = layers.GlobalMaxPooling1D()(x)
+    x = layers.GlobalMaxPooling2D()(x)
     if "compare" in sys.argv:
         x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
     x = layers.Flatten()(x)
@@ -75,14 +72,14 @@ def create_model():
 
 save_path = path.join("res", "model_SpO2.keras")
 epochs = 5
-batch_size = 16
+batch_size = 32
 
 model = create_model()
 
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=8)
 print("Loading data...")
-X_total = np.vstack([np.load(path.join("gen_data", "SpO2_normal.npy")),
-                     np.load(path.join("gen_data", "SpO2_apnea.npy"))
+X_total = np.vstack([np.load(path.join("gen_data", "f_SpO2_normal.npy")),
+                     np.load(path.join("gen_data", "f_SpO2_apnea.npy"))
                      ])
 y_total = np.array([[0] * (len(X_total) // 2) +
                     [1] * (len(X_total) // 2)
@@ -95,6 +92,8 @@ X_total, y_total = shuffle(X_total, y_total, random_state=27022009)
 scores = []
 if sys.argv[1] == "test" or sys.argv[1] == "report":
     for i, (train_index, test_index) in enumerate(kf.split(X_total)):
+        if i > 3:
+            break
         X = X_total[train_index]
         y = y_total[train_index]
         counts = Counter(y)

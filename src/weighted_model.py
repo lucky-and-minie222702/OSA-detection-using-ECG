@@ -44,7 +44,7 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=8)
 save_path = path.join("res", "model_weighted.keras")
 epochs = 5
 batch_size = 32
@@ -59,7 +59,7 @@ X_pair = np.load(path.join("gen_data", "rec_pair_data.npy"))
 X_pair = np.split(X_pair, 2, axis=2)
 
 X_ECG = X_pair[0].squeeze()
-X_ECG = to_mfcc(X_ECG)
+# X_ECG = feature_extract(X_ECG, verbose=False, contains_tempogram=True)
 X_SpO2 = X_pair[1].squeeze()
 X_pair = []
 
@@ -70,23 +70,23 @@ y_total = np.load(path.join("gen_data", "ann_pair_data.npy"))
 m = keras.metrics.BinaryAccuracy()
 
 if "pre_fit" in sys.argv:
-    list_prefit = [ x
-        for x in range(1, 36)
-            if not x in [1, 2, 3, 4, 21, 26, 27, 28]
-    ]
-    X_prefit, y_prefit = get_patients_ECG(list_prefit)
-    X_prefit = feature_extract(X_prefit)
+    X_prefit = np.load(path.join("gen_data", "rec_remain_ECG.npy"))
+    y_prefit = np.load(path.join("gen_data", "ann_remain_ECG.npy"))
     model_pre_fitted.fit(
         X_prefit, y_prefit,
         batch_size=batch_size,
         epochs=epochs,
-        verbose=False,
     )
     X_prefit = []
-    print("Model ECG has been pre-fitted!")
+    model_pre_fitted.save(path.join("res", "prefitted_model_ECG.keras"))
+    print("Model ECG has been pre-fitted and save!")
+else:
+    model_pre_fitted = load_model(path.join("res", "prefitted_model_ECG.keras"))
 
 if "test" in sys.argv:
     for i, (train_index, test_index) in enumerate(kf.split(X_ECG)):
+        if i > 3:
+            break
         X_e = X_ECG[train_index]
         X_s = X_SpO2[train_index]
         y = y_total[train_index]
@@ -111,11 +111,7 @@ if "test" in sys.argv:
             pred = pred_e * rate + pred_s * round(1 - rate, 1)
             m.update_state(y, pred)
             score = m.result()
-            score = round(score, 4)
             print(f"W_ECG = {rate} - W_SpO2 = {round(1 - rate, 1)} => Accuracy (correct / total): {score}")
 
         model_ECG.set_weights(model_pre_fitted.get_weights())
         reset_model(model_SpO2)
-
-if "v2" in sys.argv:
-    pass

@@ -5,7 +5,7 @@ from librosa.feature import *
 from scipy.signal import lfilter, savgol_filter
 import sys
 
-def feature_extract(X, verbose=False):
+def feature_extract(X, verbose=False, contains_tempogram=False):
     scaler = prep.MinMaxScaler()
     temp = []
     hl = 256
@@ -25,12 +25,15 @@ def feature_extract(X, verbose=False):
         mfccs3 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=3)
         delta1 = delta(mfccs3, order=1)
         mfccs3 = np.concatenate([mfccs3, delta1])
+        # tempogram
+        if contains_tempogram:
+            tempograms = tempogram(y=x, hop_length=hl, sr=sr, win_length=24)
         # final data
         data = np.stack([
             mfccs1, 
             mfccs2, 
-            mfccs3, 
-        ], axis=2)
+            mfccs3,
+        ] + [tempograms] if contains_tempogram else [], axis=2)
         temp.append(data)
         # Progress
         count += 1
@@ -41,11 +44,11 @@ def feature_extract(X, verbose=False):
                 loaded = loaded[:-1:] + ">"
             unloaded = " " * (50 - (percent//2))
             print(f" {percent:3d}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
-        else:
-            print(f"{count} / {total}", end="\r")
-        sys.stdout.flush()
+            sys.stdout.flush()
+    if verbose:
+        print()
+    
     temp = np.array(temp)
-    print()
     return temp
 
 def get_patients_SpO2(plist):

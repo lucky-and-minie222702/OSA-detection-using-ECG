@@ -1,0 +1,52 @@
+Loading data...
+Done!
+
+Total: Apnea cases [1]: 1466 - Normal cases [0]: 1466
+Fold 1:
+=> Train set: Apnea cases [1]: 1287 - Normal cases [0]: 1278
+=> Test set: Apnea cases [1]: 179 - Normal cases [0]: 188
+              precision    recall  f1-score   support
+
+      NO OSA       0.94      0.96      0.95       188
+         OSA       0.96      0.93      0.95       179
+
+    accuracy                           0.95       367
+   macro avg       0.95      0.95      0.95       367
+weighted avg       0.95      0.95      0.95       367
+
+Fold 2:
+=> Train set: Apnea cases [1]: 1273 - Normal cases [0]: 1292
+=> Test set: Apnea cases [1]: 193 - Normal cases [0]: 174
+              precision    recall  f1-score   support
+
+      NO OSA       0.96      0.92      0.94       174
+         OSA       0.93      0.96      0.95       193
+
+    accuracy                           0.94       367
+   macro avg       0.94      0.94      0.94       367
+weighted avg       0.94      0.94      0.94       367
+
+Fold 3:
+=> Train set: Apnea cases [1]: 1272 - Normal cases [0]: 1293
+=> Test set: Apnea cases [1]: 194 - Normal cases [0]: 173
+              precision    recall  f1-score   support
+
+      NO OSA       0.95      0.97      0.96       173
+         OSA       0.97      0.95      0.96       194
+
+    accuracy                           0.96       367
+   macro avg       0.96      0.96      0.96       367
+weighted avg       0.96      0.96      0.96       367
+
+Fold 4:
+=> Train set: Apnea cases [1]: 1272 - Normal cases [0]: 1293
+=> Test set: Apnea cases [1]: 194 - Normal cases [0]: 173
+              precision    recall  f1-score   support
+
+      NO OSA       0.95      0.97      0.96       173
+         OSA       0.97      0.96      0.96       194
+
+    accuracy                           0.96       367
+   macro avg       0.96      0.96      0.96       367
+weighted avg       0.96      0.96      0.96       367
+

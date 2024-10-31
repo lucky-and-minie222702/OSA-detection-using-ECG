@@ -17,4 +17,17 @@ Then
 Change to 3 layers of 3 type of discrete cosine transform
 => Better accuracy than temporgram
 Choosing 18
-Train time: 18 minutes
+Train time: 12.5 minutes
+
+30/10
+Change SpO2 -> 3 types of DCT (MFCC) just like ECG
+Change SpO2 from model 2 to 3
+Add 1 channel to ECG model beside 3DCT which is tempogram
+Training model 19 ECG
+train time: 17 minutes
+Choosing model 19 (better accuracy)
+Add tempogram to SpO2
+training model 4 SpO2
+train time: 1,5 minutes
+model 4 SpO2 => Slightly lower accuracy (same test) and more unstable on both class
+still using model 3 SpO2
