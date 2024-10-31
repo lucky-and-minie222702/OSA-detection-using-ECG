@@ -1,0 +1,4 @@
+Total params: 37,662,533 (143.67 MB)
+Trainable params: 12,550,977 (47.88 MB)
+Non-trainable params: 9,600 (37.50 KB)
+Optimizer params: 25,101,956 (95.76 MB)
