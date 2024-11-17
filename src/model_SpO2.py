@@ -28,6 +28,7 @@ import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
 from keras.preprocessing.sequence import pad_sequences
+from sklearn.metrics import confusion_matrix
 
 def reset_model(model):
     weights = []
@@ -55,8 +56,6 @@ def create_model():
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalMaxPooling2D()(x)
-    if "compare" in sys.argv:
-        x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
  
@@ -66,7 +65,7 @@ def create_model():
         loss="binary_crossentropy",
         metrics=["binary_accuracy"],
     )
-    if sys.argv[1] != "report":
+    if sys.argv[1] != "report" and not "std" in sys.argv and not "test" in sys.argv:
         model.summary()
     return model
 
@@ -134,9 +133,10 @@ elif sys.argv[1] == "std":
     print("Evaluating...")
     pred = model.predict(X_test)
     pred = [np.round(np.squeeze(x)) for x in pred]
-    print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]))
     model.evaluate(X_test, y_test)
-    
+    print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]))
+    cm = confusion_matrix(y_test, pred)
+    print(cm)
     if "build" in sys.argv:
         prompt = input("Enter \"save\" to save or anything else to discard: ")
         if prompt == "save":

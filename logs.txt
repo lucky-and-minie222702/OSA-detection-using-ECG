@@ -30,4 +30,4 @@ Add tempogram to SpO2
 training model 4 SpO2
 train time: 1,5 minutes
 model 4 SpO2 => Slightly lower accuracy (same test) and more unstable on both class
-still using model 3 SpO2
+still using model 4

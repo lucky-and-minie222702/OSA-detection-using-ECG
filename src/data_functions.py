@@ -26,14 +26,15 @@ def feature_extract(X, verbose=False, contains_tempogram=False):
         delta1 = delta(mfccs3, order=1)
         mfccs3 = np.concatenate([mfccs3, delta1])
         # tempogram
+        tempograms = []
         if contains_tempogram:
-            tempograms = tempogram(y=x, hop_length=hl, sr=sr, win_length=24)
+            tempograms = [tempogram(y=x, hop_length=hl, sr=sr, win_length=24)]
         # final data
         data = np.stack([
             mfccs1, 
             mfccs2, 
             mfccs3,
-        ] + [tempograms] if contains_tempogram else [], axis=2)
+        ] + tempograms, axis=2)
         temp.append(data)
         # Progress
         count += 1

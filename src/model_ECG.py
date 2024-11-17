@@ -27,7 +27,7 @@ import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
-import time
+from sklearn.metrics import confusion_matrix
 
 def reset_model(model):
     weights = []
@@ -77,9 +77,6 @@ def create_model():
     x = block(x, 512)
     
     x = layers.GlobalAvgPool2D()(x)
-    if "compare" in sys.argv:
-        x = layers.Bidirectional(layers.LSTM(units=3, return_sequences=True))(x)
-
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
 
@@ -89,7 +86,7 @@ def create_model():
         loss="binary_crossentropy",
         metrics=["binary_accuracy"],
     )
-    if sys.argv[1] != "report":
+    if sys.argv[1] != "report" and not "std" in sys.argv and not "test" in sys.argv:
         model.summary()
     return model
 
@@ -161,6 +158,8 @@ elif sys.argv[1] == "std":
     pred = model.predict(X_test)
     pred = [np.round(np.squeeze(x)) for x in pred]
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]))
+    cm = confusion_matrix(y_test, pred)
+    print(cm)
     model.evaluate(X_test, y_test)
     
     if "build" in sys.argv:
