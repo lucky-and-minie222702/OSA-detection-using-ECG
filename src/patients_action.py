@@ -34,10 +34,10 @@ for i in range(len(records)):
     
 print("** ECG ***")
 print(f"Total sleep minutes: {total_minutes[0]}")
-print(f"Total signal's length: {total_sig_len[0]}")
+print(f"Total signal's length: {total_sig_len[0]}\n")
 print("** SpO2 ***")
 print(f"Total sleep minutes: {total_minutes[1]}")
-print(f"Total signal's length: {total_sig_len[1]}")
+print(f"Total signal's length: {total_sig_len[1]}\n")
 
 if "percentage" in sys.argv:
     print(f"{"*"*10} ECG patients {"*"*10}\n")
@@ -127,58 +127,44 @@ if "merge" in sys.argv:
 
 
 if "save_features" in sys.argv:
-    if "ECG" in sys.argv:
-        print("Extracting ECG...")
-        X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
-        X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
-        print("Extracting normal patients...")
-        X_0 = feature_extract(X_0, verbose=True, contains_tempogram=True)
-        print("Extracting apnea patients...")
-        X_1 = feature_extract(X_1, verbose=True, contains_tempogram=True)
-        print("Exporting...")
-        np.save(path.join("gen_data", "f_ECG_normal"), X_0)
-        np.save(path.join("gen_data", "f_ECG_apnea"), X_1)
-        print("Done!")
-        
-    if "SpO2" in sys.argv:
-        print("Extracting SpO2...")
-        X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
-        X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
-        print("Extracting normal patients...")
-        X_0 = feature_extract(X_0, verbose=True, contains_tempogram=True)
-        print("Extracting apnea patients...")
-        X_1 = feature_extract(X_1, verbose=True, contains_tempogram=True)
-        print("Exporting...")
-        np.save(path.join("gen_data", "f_SpO2_normal"), X_0)
-        np.save(path.join("gen_data", "f_SpO2_apnea"), X_1)
-        print("Done!")
-    
-if "create_pair_data" in sys.argv:
-    print("Pairing data...")
-    X_ECG, y = get_patients_ECG(records_ECG)
-    X_SpO2, _ = get_patients_SpO2(range(1, 9))
-    if "save_features" in sys.argv:
-        print("Extracting features...")
-        X_ECG = feature_extract(X_ECG, verbose=True, contains_tempogram=True)
-        X_SpO2 = feature_extract(X_SpO2, verbose=True, contains_tempogram=True)
-        print("Done!")
-    X_pair = np.stack([
-        X_ECG,
-        X_SpO2,
-    ], axis=2)
-    X_pair, y = shuffle(X_pair, y, random_state=27022009)
-    np.save(path.join("gen_data", "rec_pair_data"), X_pair)
-    np.save(path.join("gen_data", "ann_pair_data"), y)
+    print("Extracting ECG...")
+    X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+    print("Extracting normal patients...")
+    X_0 = extract_features(X_0, contains_tempogram=True, verbose=True)
+    print("Extracting apnea patients...")
+    X_1 = extract_features(X_1, contains_tempogram=True, verbose=True)
+    print("Exporting...")
+    np.save(path.join("gen_data", "f_ECG_normal"), X_0)
+    np.save(path.join("gen_data", "f_ECG_apnea"), X_1)
     print("Done!")
     
-if "convert_remain_ECG" in sys.argv:
-    plist = [ x
-    for x in range(1, 36)
-        if not x in [1, 2, 3, 4, 21, 26, 27, 28]
-    ]
-    print("Extracting features...")
-    X, y = get_patients_ECG(plist)
-    X = feature_extract(X, verbose=True, contains_tempogram=True)
-    np.save(path.join("gen_data", "rec_remain_ECG"), X)
-    np.save(path.join("gen_data", "ann_remain_ECG"), y)
+if "save_stats" in sys.argv:
+    print("Calculating SpO2...")
+    X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
+    print("Extracting normal patients...")
+    X_0, keys = extract_stats(X_0, sampling_rate=100, verbose=True)
+    print("Extracting apnea patients...")
+    X_1, _ = extract_stats(X_1, sampling_rate=100, verbose=True)
+    print("Exporting...")
+    np.save(path.join("gen_data", "s_SpO2_normal"), X_0)
+    np.save(path.join("gen_data", "s_SpO2_apnea"), X_1)
+    
+    f = open(path.join("gen_data", "stats_keys.txt"), "w")
+    for k in keys:
+        f.write(k + "\n")
+    f.close()
+    
     print("Done!")
+    
+if "pair" in sys.argv:
+    print("Loading data...")
+    p_list = open(path.join("gen_data", "ECG-SpO2.txt"), "r").readlines()
+    p_list = list(map(lambda x: int(x), p_list))
+    X_ECG, _ = get_patients_ECG(p_list)
+    y, _ = get_patients_SpO2(range(1, 9))
+    y, _ = extract_stats(y, sampling_rate=100, save_scaler=True, verbose=True)
+    np.save(path.join("gen_data", "ECG-pair"), X_ECG)
+    np.save(path.join("gen_data", "y-pair"), y)
+    print("Done")

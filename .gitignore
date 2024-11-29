@@ -7,11 +7,5 @@ database
 report*
 compresseddata.zip
 res
-final
 *test*
-real_data
-augmented_data
 gen_data
-stat
-exported
-save_models

@@ -80,13 +80,18 @@ def create_model():
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation='sigmoid')(x)
 
-    model = Model(inputs=inp, outputs=x, name="NHCT")
-    model.compile(
-        optimizer="adam",
-        loss="binary_crossentropy",
-        metrics=["binary_accuracy"],
+    model = Model(
+        inputs = inp,
+        outputs = x,
+        name="ECG+SpO2"
     )
-    if sys.argv[1] != "report" and not "std" in sys.argv and not "test" in sys.argv:
+    
+    model.compile(
+        optimizer = "adam",
+        loss = "binary_crossentropy",
+        metrics = ["binary_accuracy"],
+    )
+    if "view" in sys.argv:
         model.summary()
     return model
 

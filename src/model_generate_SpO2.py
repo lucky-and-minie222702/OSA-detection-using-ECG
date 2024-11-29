@@ -26,6 +26,8 @@ import keras.regularizers as reg
 import joblib
 import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from data_functions import *
 
 def reset_model(model):
     weights = []
@@ -40,61 +42,63 @@ def reset_model(model):
         for w, init in zip(weights, initializers):
             w.assign(init(w.shape, dtype=w.dtype))
 
-def block(inp, filters, down_sample=False):
-    shorcut = inp
-    strides = [2, 1] if down_sample else [1, 1]
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[1], padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    
-    if down_sample:
-        shorcut = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=2, padding="same")(shorcut)
-        shorcut = layers.BatchNormalization()(shorcut)
-    
-    x = layers.Add()([x, shorcut])
-    x = layers.Activation("relu")(x)
-    return x
-
 def create_model():
-    # 2d + mfcc + tempogram
-    inp = layers.Input(shape=(24, None, 4)) # the seccond size is sampling rate dimension
-    
-    x = layers.Conv2D(64, kernel_size=3)(inp)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    
-    x = block(x, 64)
-    x = block(x, 64)
-    x = block(x, 128, True)
-    x = block(x, 128)
-    
-    x = layers.GlobalAvgPool2D()(x)
+    inp = layers.Input(shape=(None, 1))
+    x = layers.Conv1D(filters=32, kernel_size=3, activation="relu")(inp)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=64, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=128, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=256, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=512, kernel_size=3, activation="relu")(x)
+    x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(2, activation="relu")(x)
-
-    model = Model(inputs=inp, outputs=x, name="NHCT")
+    x = layers.Dense(1024, activation="relu")(x)
+    x = layers.Dense(16, activation="sigmoid")(x)
     
-    model.compile(
-        optimizer="adam",
-        loss="mean_absolute_error",
-        metrics=["mean_squared_error"],
+    model = Model(
+        inputs = inp,
+        outputs = x,
+        name = "generate_SpO2"
     )
     
-    # model.summary()
+    model.compile(
+        optimizer = "adam",
+        loss = keras.losses.Huber(),
+        metrics = ["mse", "mae"],
+    )
+    
+    model.summary()
     return model
 
 save_path = path.join("res", "model_generate_SpO2.keras")
 epochs = 5
 batch_size = 32
 
-X_total = np.vstack([np.load(path.join("gen_data", "f_ECG_normal.npy")),
-                     np.load(path.join("gen_data", "f_ECG_apnea.npy"))
-                     ])
-y_total = np.vstack([np.load(path.join("gen_data", "SpO2_normal.npy")),
-                     np.load(path.join("gen_data", "SpO2_apnea.npy"))
-                     ])
-y_total = np.array([
-    [np.mean(y), np.std(y), np.max(y), np.min(y)] for y in y_total
-])
+model = create_model()
+
+print("Loading data...")
+X = np.load(path.join("gen_data", "ECG-pair.npy"))
+y = np.load(path.join("gen_data", "y-pair.npy"))
+print("Done!")
+
+if "build" in sys.argv:
+    model.fit(
+        X, y,
+        batch_size = batch_size,
+        epochs = epochs,
+        validation_split = 0.2,
+    )
+    print("Exporting...")
+    model.save(save_path)
+    print("Done!")
+
+
+
+#clf = KerasClassifier(create_model(), 
+#    epochs=epochs,
+#    batch_size=batch_size,
+#    verbose=False,
+#)

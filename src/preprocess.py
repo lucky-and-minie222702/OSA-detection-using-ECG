@@ -18,10 +18,17 @@ records = f.read().splitlines()
 total_sig_len = 0 
 total_minutes = 0
 
+f = open(path.join("gen_data", "ECG-SpO2.txt"), "w")
+
+SpO2_records = ["a01r", "a02r", "a03r", "a04r", "b01r", "c01r", "c02r", "c03r"]
+raw_SpO2_records = list(map(lambda x: x[:-1:], SpO2_records))
 scaler = prep.MinMaxScaler()
 for i in range(len(records)):
     if records[i][0] == "x":
         break
+
+    if records[i] in raw_SpO2_records:
+        f.write(str(i+1) + " \n")
 
     rec = wfdb.rdsamp(path.join("database", records[i]))
     ann = wfdb.rdann(path.join("database", records[i]), extension="apn").symbol
@@ -42,8 +49,10 @@ for i in range(len(records)):
     np.save(path.join("numpy", f"patient_{i+1}"), rec)
     np.save(path.join("numpy", f"annotation_{i+1}"), ann)
     print(f"Converting patient {i+1} done, signal length: {len(rec)}, total minutes: {len(ann)}")
-    
-records = ["a01r", "a02r", "a03r", "a04r", "b01r", "c01r", "c02r", "c03r"]
+
+f.close()
+
+records = SpO2_records
 for i in range(len(records)):
     rec = wfdb.rdsamp(path.join("database", records[i]))
     ann = wfdb.rdann(path.join("database", records[i]), extension="apn").symbol

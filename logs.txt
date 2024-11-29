@@ -31,3 +31,6 @@ training model 4 SpO2
 train time: 1,5 minutes
 model 4 SpO2 => Slightly lower accuracy (same test) and more unstable on both class
 still using model 4
+
+29/11
+No using SpO2 anymore, only use theirs stats

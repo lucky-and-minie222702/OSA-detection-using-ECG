@@ -4,9 +4,71 @@ from os import path
 from librosa.feature import *
 from scipy.signal import lfilter, savgol_filter
 import sys
+import scipy.stats as stats
+from scipy.signal import find_peaks, hilbert, welch
+import pywt
+import joblib
 
-def feature_extract(X, verbose=False, contains_tempogram=False):
+def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False):
+    val = []
+    keys = []
+    count = 0
+    total = len(signals)
+    
+    for signal in signals:
+        features = {}
+        signal = signal.flatten()
+        features['mean'] = np.mean(signal)
+        features['median'] = np.median(signal)
+        features['std_dev'] = np.std(signal)
+        features['variance'] = np.var(signal)
+        # features['skewness'] = stats.skew(signal)
+        # features['kurtosis'] = stats.kurtosis(signal)
+        features['rms'] = np.sqrt(np.mean(signal**2))
+        features['max'] = np.max(signal)
+        features['min'] = np.min(signal)
+        features['range'] = features['max'] - features['min']
+        peaks, _ = find_peaks(signal)
+        features['num_peaks'] = len(peaks)
+        features['peak_mean'] = np.mean(signal[peaks]) if len(peaks) > 0 else 0
+        zero_crossings = np.where(np.diff(np.sign(signal - np.mean(signal))) != 0)[0]
+        features['zero_crossing_rate'] = len(zero_crossings) / len(signal)
+        freqs, psd = welch(signal, fs=sampling_rate)
+        features['psd_mean'] = np.mean(psd)
+        features['psd_max'] = np.max(psd)
+        features['dominant_frequency'] = freqs[np.argmax(psd)]
+        analytic_signal = hilbert(signal)
+        amplitude_envelope = np.abs(analytic_signal)
+        features['envelope_mean'] = np.mean(amplitude_envelope)
+        coeffs = pywt.wavedec(signal, 'haar', level=3)
+        features['wavelet_energy'] = sum(np.sum(c**2) for c in coeffs)
+        
+        val.append(list(features.values()))
+        keys = list(features.keys())
+
+        # Progress
+        count += 1
+        if verbose:
+            percent = int(count / total * 100)
+            loaded = "=" * (percent//2)
+            if loaded != "" and count < total:
+                loaded = loaded[:-1:] + ">"
+            unloaded = " " * (50 - (percent//2))
+            print(f" {percent:3d}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
+            sys.stdout.flush()
+    if verbose:
+        print()
+    
     scaler = prep.MinMaxScaler()
+    val = np.array(val)
+    val = scaler.fit_transform(val)
+    if save_scaler:
+        joblib.dump(scaler, path.join("gen_data", "SpO2.scaler"))
+    
+    return val , keys
+
+
+def extract_features(X: np.ndarray, contains_tempogram: bool =False, verbose:bool = False) -> np.ndarray:
     temp = []
     hl = 256
     sr = 100
@@ -52,8 +114,8 @@ def feature_extract(X, verbose=False, contains_tempogram=False):
     temp = np.array(temp)
     return temp
 
-def get_patients_SpO2(plist):
-    def get_patient(patientid):
+def get_patients_SpO2(plist: list) -> tuple:
+    def get_patient(patientid: int) -> tuple:
         rec = np.load(path.join("numpy", f"SpO2_patient_{patientid}.npy"))
         ann = np.load(path.join("numpy", f"SpO2_annotation_{patientid}.npy"))
         return rec, ann
@@ -70,8 +132,8 @@ def get_patients_SpO2(plist):
     X = np.array(np.split(X, siglen))
     return X, y
 
-def get_patients_ECG(plist):
-    def get_patient(patientid):
+def get_patients_ECG(plist: list) -> tuple:
+    def get_patient(patientid: int) -> tuple:
         rec = np.load(path.join("numpy", f"patient_{patientid}.npy"))
         ann = np.load(path.join("numpy", f"annotation_{patientid}.npy"))
         return rec, ann
