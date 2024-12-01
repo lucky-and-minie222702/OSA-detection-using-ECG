@@ -207,7 +207,7 @@ def create_model():
     return model
 
 save_path = path.join("res", "model.keras")
-epochs = 100
+epochs = 150 if "enhanced_training" in sys.argv else 100
 batch_size = 16
 
 print("Creating model architecture...")
@@ -261,7 +261,7 @@ if sys.argv[1] == "std":
     print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
     now = datetime.datetime.now()
     print("Start at:", now)
-    print("Estimated time:", convert_minutes(7*epochs), "\n")
+    print("Estimated time:", convert_minutes(7.5*epochs), "\n")
     id = str(now) + "_" + id
     
     val_split = 0.1
