@@ -111,6 +111,9 @@ if "build" in sys.argv:
     model.save(save_path)
     t = np.array(cb.logs)
     np.save(path.join("history", f"gSpO2_train_time"), t)
+    f = open(path.join("history", "gSpO2_metrics.txt"), "w")
+    print("Metrics names:", model.metrics_names, file=f)
+    f.close()
     for key, value in hist.history.items():
         data = np.array(value)
         save_path = path.join("history", f"SpO2_generate_{key}")
