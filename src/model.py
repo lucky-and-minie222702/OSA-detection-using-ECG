@@ -66,7 +66,7 @@ def show_params(model, name):
     print(" | Total params:", "{:,}".format(params).replace(",", " "))
     print(" | Size        :", convert_bytes(params * 4))
 
-def block(inp, filters, down_sample=False):
+def block(inp, filters: int, down_sample: bool = False):
     shorcut = inp
     strides = [2, 1] if down_sample else [1, 1]
     x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)

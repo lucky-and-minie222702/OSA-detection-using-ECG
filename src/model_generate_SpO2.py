@@ -42,20 +42,36 @@ def reset_model(model):
         for w, init in zip(weights, initializers):
             w.assign(init(w.shape, dtype=w.dtype))
 
+def block(inp, filters: int, down_sample: bool = False):
+    shorcut = inp
+    strides = [2, 1] if down_sample else [1, 1]
+    x = layers.Conv1D(filters=filters, kernel_size=3, strides=strides[0], padding="same")(inp)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+    x = layers.Conv1D(filters=filters, kernel_size=3, strides=strides[1], padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    
+    if down_sample:
+        shorcut = layers.Conv1D(filters=filters, kernel_size=3, strides=2, padding="same")(shorcut)
+        shorcut = layers.BatchNormalization()(shorcut)
+    
+    x = layers.Add()([x, shorcut])
+    x = layers.Activation("relu")(x)
+    return x
+
 def create_model():
     inp = layers.Input(shape=(None, 1))
-    x = layers.Conv1D(filters=32, kernel_size=3, activation="relu")(inp)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=64, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=128, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=256, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=512, kernel_size=3, activation="relu")(x)
-    x = layers.GlobalMaxPool1D()(x)
+    x = layers.Conv1D(64, kernel_size=3, padding="same")(inp)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+    x = block(x, 64)
+    x = block(x, 64)
+    x = block(x, 128, True)
+    x = block(x, 128)
+    x = block(x, 256, True)
+    x = block(x, 256)
+    x = layers.GlobalAvgPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(512, activation="relu")(x)
     x = layers.Dense(16)(x)
     
     model = Model(
@@ -74,7 +90,7 @@ def create_model():
     return model
 
 save_path = path.join("res", "model_generate_SpO2.keras")
-epochs = 15
+epochs = 50
 batch_size = 32
 
 model = create_model()
