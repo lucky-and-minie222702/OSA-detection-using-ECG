@@ -9,6 +9,7 @@ from scipy.signal import find_peaks, hilbert, welch
 import pywt
 import joblib
 from timeit import default_timer as timer
+import keras
 
 def extract_stats(signals, sampling_rate: int = 100, verbose: bool = False):
     val = []
