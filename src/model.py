@@ -250,8 +250,7 @@ if sys.argv[1] == "std":
     _space = " " * 3
     print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
     now = datetime.datetime.now()
-    print("Start at:", now)
-    print("Estimated time:", convert_minutes(7.5*epochs), "\n")
+    print("Start at:", now, "\n")
     id = str(now) + "_" + id
     
     val_split = 0.1

@@ -28,6 +28,7 @@ import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from data_functions import *
+import datetime
 
 def reset_model(model):
     weights = []
@@ -101,6 +102,8 @@ y = np.load(path.join("gen_data", "y-pair.npy"))
 print("Done!")
 
 if "build" in sys.argv:
+    now = datetime.datetime.now()
+    print("Start at:", now, "\n")
     hist = model.fit(
         X, y,
         batch_size = batch_size,
