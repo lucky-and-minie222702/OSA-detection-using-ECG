@@ -8,6 +8,7 @@ import scipy.stats as stats
 from scipy.signal import find_peaks, hilbert, welch
 import pywt
 import joblib
+from timeit import default_timer as timer
 
 def extract_stats(signals, sampling_rate: int = 100, verbose: bool = False):
     val = []
@@ -145,3 +146,15 @@ def get_patients_ECG(plist: list) -> tuple:
 
     X = np.array(np.split(X, siglen))
     return X, y
+
+class TimingCallback(keras.callbacks.Callback):
+    def __init__(self, logs={}):
+        self.logs=[]
+
+    def on_epoch_begin(self, epoch, logs={}):
+        self.starttime = timer()
+        
+    def on_epoch_end(self, epoch, logs={}):
+        self.logs.append(timer()-self.starttime)
+
+cb = TimingCallback()

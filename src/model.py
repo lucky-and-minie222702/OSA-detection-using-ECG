@@ -28,7 +28,6 @@ import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from data_functions import *
 from sklearn.metrics import confusion_matrix
-from timeit import default_timer as timer
 import datetime
 
 def reset_model(model):
@@ -82,15 +81,6 @@ def block(inp, filters: int, down_sample: bool = False):
     x = layers.Add()([x, shorcut])
     x = layers.Activation("relu")(x)
     return x
-
-class TimingCallback(keras.callbacks.Callback):
-    def __init__(self, logs={}):
-        self.logs=[]
-    def on_epoch_begin(self, epoch, logs={}):
-        self.starttime = timer()
-    def on_epoch_end(self, epoch, logs={}):
-        self.logs.append(timer()-self.starttime)
-cb = TimingCallback()
 
 def create_model_ECG():
     # 2d + mfcc + tempogram
@@ -284,10 +274,10 @@ if sys.argv[1] == "std":
     if "build" in sys.argv:
         hist = model.fit([X_ECG_train, X_SpO2_train], 
                          y_train, 
-                         epochs=epochs, 
-                         batch_size=batch_size*2, 
-                         validation_split=val_split, 
-                         callbacks=[cb])
+                         epochs = epochs, 
+                         batch_size = batch_size*2, 
+                         validation_split = val_split, 
+                         callbacks = [cb])
         t = np.array(cb.logs)
         np.save(path.join("history", f"{id}_train_time"), t)
     elif "test" in sys.argv:
