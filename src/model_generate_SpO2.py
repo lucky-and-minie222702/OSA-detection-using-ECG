@@ -33,7 +33,7 @@ def reset_model(model):
     weights = []
     initializers = []
     for layer in model.layers:
-        if isinstance(layer, (keras.layers.Dense, keras.layers.Conv1D, keras.layers.Conv2D, keras.layers.Conv3D)):
+        if isinstance(layer, (keras.layers.Dense, keras.layers.Conv1D, keras.layers.Conv1D, keras.layers.Conv3D)):
             weights += [layer.kernel, layer.bias]
             initializers += [layer.kernel_initializer, layer.bias_initializer]
         elif isinstance(layer, keras.layers.BatchNormalization):
@@ -55,8 +55,8 @@ def create_model():
     x = layers.Conv1D(filters=512, kernel_size=3, activation="relu")(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(1024, activation="relu")(x)
-    x = layers.Dense(16, activation="sigmoid")(x)
+    x = layers.Dense(512, activation="relu")(x)
+    x = layers.Dense(16)(x)
     
     model = Model(
         inputs = inp,
@@ -74,7 +74,7 @@ def create_model():
     return model
 
 save_path = path.join("res", "model_generate_SpO2.keras")
-epochs = 5
+epochs = 15
 batch_size = 32
 
 model = create_model()
@@ -85,14 +85,17 @@ y = np.load(path.join("gen_data", "y-pair.npy"))
 print("Done!")
 
 if "build" in sys.argv:
-    model.fit(
+    hist = model.fit(
         X, y,
         batch_size = batch_size,
         epochs = epochs,
-        validation_split = 0.2,
     )
     print("Exporting...")
     model.save(save_path)
+    for key, value in hist.history.items():
+        data = np.array(value)
+        save_path = path.join("history", f"SpO2_generate_{key}")
+        np.save(save_path, data)
     print("Done!")
 
 

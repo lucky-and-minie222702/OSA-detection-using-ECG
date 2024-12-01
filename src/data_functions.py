@@ -9,11 +9,12 @@ from scipy.signal import find_peaks, hilbert, welch
 import pywt
 import joblib
 
-def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False):
+def extract_stats(signals, sampling_rate: int = 100, verbose: bool = False):
     val = []
     keys = []
     count = 0
     total = len(signals)
+    print("Extracting statistics...")
     
     for signal in signals:
         features = {}
@@ -22,8 +23,6 @@ def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, 
         features['median'] = np.median(signal)
         features['std_dev'] = np.std(signal)
         features['variance'] = np.var(signal)
-        # features['skewness'] = stats.skew(signal)
-        # features['kurtosis'] = stats.kurtosis(signal)
         features['rms'] = np.sqrt(np.mean(signal**2))
         features['max'] = np.max(signal)
         features['min'] = np.min(signal)
@@ -58,22 +57,19 @@ def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, 
             sys.stdout.flush()
     if verbose:
         print()
-    
-    scaler = prep.MinMaxScaler()
+
     val = np.array(val)
-    val = scaler.fit_transform(val)
-    if save_scaler:
-        joblib.dump(scaler, path.join("gen_data", "SpO2.scaler"))
     
     return val , keys
 
 
-def extract_features(X: np.ndarray, contains_tempogram: bool =False, verbose:bool = False) -> np.ndarray:
+def extract_features(X: np.ndarray, sampling_rate: int =  100, contains_tempogram: bool = False, verbose:bool = False) -> np.ndarray:
     temp = []
     hl = 256
-    sr = 100
+    sr = sampling_rate
     total = len(X)
     count = 0
+    print("Extracting features...")
     for x in X:
         # mfcc dct 1
         mfccs1 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)

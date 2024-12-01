@@ -31,7 +31,17 @@ from data_functions import *
 
 save_path = path.join("res", "model_generate_SpO2.keras")
 model = load_model(save_path)
-X, y = get_patients_ECG([8])
-pred = model.predict(X[0].reshape(1, -1))
-print(pred)
-print(y[0])
+
+if "generate" in sys.argv:
+    X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+
+    print("Generating normal cases...")
+    Sp02_0 = model.predict(X_0)
+    print("Generating apnea cases...")
+    Sp02_1 = model.predict(X_1)
+
+    print("Exporting...")
+    np.save(path.join("gen_data", "gs_SpO2_normal"), Sp02_0)
+    np.save(path.join("gen_data", "gs_SpO2_apnea"), Sp02_1)
+    print("Done!")
