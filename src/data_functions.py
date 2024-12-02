@@ -8,10 +8,17 @@ import scipy.stats as stats
 from scipy.signal import find_peaks, hilbert, welch
 import pywt
 import joblib
-from timeit import default_timer as timer
-import keras
 
-def extract_stats(signals, sampling_rate: int = 100, verbose: bool = False):
+def show_process_bar(count: int, total: int):
+    percent = round(count / total * 100, 2)
+    loaded = "=" * int(percent)
+    if loaded != "" and count < total:
+        loaded = loaded[:-1:] + ">"
+    unloaded = " " * (100 - int(percent))
+    print(f" {str(percent):>5}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
+    sys.stdout.flush()
+
+def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False):
     val = []
     keys = []
     count = 0
@@ -50,17 +57,15 @@ def extract_stats(signals, sampling_rate: int = 100, verbose: bool = False):
         # Progress
         count += 1
         if verbose:
-            percent = int(count / total * 100)
-            loaded = "=" * (percent//2)
-            if loaded != "" and count < total:
-                loaded = loaded[:-1:] + ">"
-            unloaded = " " * (50 - (percent//2))
-            print(f" {percent:3d}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
-            sys.stdout.flush()
+            show_process_bar(count, total)
     if verbose:
         print()
 
     val = np.array(val)
+    scaler = prep.MinMaxScaler()
+    val = scaler.fit_transform(val)
+    if save_scaler:
+        joblib.dump(scaler, path.join("res", "SpO2_stats_scaler.scaler"))
     
     return val , keys
 
@@ -78,7 +83,7 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, contains_tempogra
         delta1 = delta(mfccs1, order=1)
         mfccs1 = np.concatenate([mfccs1, delta1])
         # mfcc dct 2
-        mfccs2 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)
+        mfccs2 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=2)
         delta1 = delta(mfccs2, order=1)
         mfccs2 = np.concatenate([mfccs2, delta1])
         # mfcc dct 3
@@ -99,13 +104,7 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, contains_tempogra
         # Progress
         count += 1
         if verbose:
-            percent = int(count / total * 100)
-            loaded = "=" * (percent//2)
-            if loaded != "" and count < total:
-                loaded = loaded[:-1:] + ">"
-            unloaded = " " * (50 - (percent//2))
-            print(f" {percent:3d}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
-            sys.stdout.flush()
+            show_process_bar(count, total)
     if verbose:
         print()
     
@@ -147,15 +146,3 @@ def get_patients_ECG(plist: list) -> tuple:
 
     X = np.array(np.split(X, siglen))
     return X, y
-
-class TimingCallback(keras.callbacks.Callback):
-    def __init__(self, logs={}):
-        self.logs=[]
-
-    def on_epoch_begin(self, epoch, logs={}):
-        self.starttime = timer()
-        
-    def on_epoch_end(self, epoch, logs={}):
-        self.logs.append(timer()-self.starttime)
-
-cb = TimingCallback()

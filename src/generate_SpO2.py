@@ -33,8 +33,8 @@ save_path = path.join("res", "model_generate_SpO2.keras")
 model = load_model(save_path)
 
 if "generate" in sys.argv:
-    X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
-    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+    X_0 = np.load(path.join("gen_data", "a_ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "a_ECG_apnea.npy"))
 
     print("Generating normal cases...")
     Sp02_0 = model.predict(X_0)

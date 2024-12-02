@@ -6,6 +6,7 @@ from sklearn.utils import shuffle
 from librosa.feature import mfcc, delta
 import sklearn.preprocessing as prep
 from data_functions import *
+import math
 
 f = open(path.join("database", "list"))
 records = f.read().splitlines()
@@ -39,27 +40,53 @@ print("** SpO2 ***")
 print(f"Total sleep minutes: {total_minutes[1]}")
 print(f"Total signal's length: {total_sig_len[1]}\n")
 
-if "percentage" in sys.argv:
+if sys.argv[1] == "percentage":
     print(f"{"*"*10} ECG patients {"*"*10}\n")
     for idx, ann in enumerate(ann_ECG):
         counter = Counter(ann)
         ann_len = len(ann)
-        print(f"{"-"*10} patient {idx+1:^4} {"-"*10}")
+        print(f"{"="*10} patient {idx+1:^4} {"="*10}")
         print(f"| Apnea: {counter[1]:>6} | Normal: {counter[0]:>6} |")
         print(f"| Apnea: {round(counter[1] / ann_len * 100, 2):>5}% | Normal: {round(counter[0] / ann_len * 100, 2):>5}% |")
+        print("=" * 34, "\n")
+        
     print()
     print(f"{"*"*10} SpO2 patients {"*"*10}\n")
-    for idx, ann in enumerate(ann_ECG):
+    for idx, ann in enumerate(ann_SpO2):
         counter = Counter(ann)
         ann_len = len(ann)
-        print(f"{"-"*10} patient {idx+1:^4} {"-"*10}")
+        print(f"{"="*10} patient {idx+1:^4} {"="*10}")
         print(f"| Apnea: {counter[1]:>6} | Normal: {counter[0]:>6} |")
         print(f"| Apnea: {round(counter[1] / ann_len * 100, 2):>5}% | Normal: {round(counter[0] / ann_len * 100, 2):>5}% |")
+        print("=" * 34, "\n")
+    print("Done!")
+    
+if sys.argv[1] == "plot":
+    print(f"ECG patients")
+    for idx, ann in enumerate(ann_ECG):
+        ann = np.array(ann)[:len(ann) - (len(ann) % 100):]
+        ann = np.array(np.split(ann, 100))
+        plot = np.round(np.mean(ann, axis=1))
+        _plt = []
+        _s = "".join(["X" if p == 1 else "-" for p in plot])
+        print(f"Patient {idx+1} :")
+        print(_s)
+        
+    print()
+    print(f"SpO2 patients")
+    for idx, ann in enumerate(ann_SpO2):
+        ann = np.array(ann)[:len(ann) - (len(ann) % 100):]
+        ann = np.array(np.split(ann, 100))
+        plot = np.round(np.mean(ann, axis=1))
+        _s = "".join(["X" if p == 1 else "-" for p in plot])
+        print(f"Patient {idx+1}:")
+        print(_s)
+
     print("Done!")
 
 stdev_SpO2 = [[], []]
 mean_SpO2 = [[], []]
-if "statistics_SpO2" in sys.argv:
+if sys.argv == "statistics_SpO2":
     X, y = get_patients_SpO2(range(1, 9))
     for i in range(len(y)):
         stdev_SpO2[y[i]].append(np.std(X[i], axis=0))
@@ -86,7 +113,7 @@ if "statistics_SpO2" in sys.argv:
 
     print("Done!")
     
-if "merge" in sys.argv:
+if sys.argv[1] == "merge":
     merged_X = [[], []]
     if "ECG" in sys.argv:
         print("Merging ECG...")
@@ -126,10 +153,11 @@ if "merge" in sys.argv:
         print("Done!")
 
 
-if "save_features" in sys.argv:
+if sys.argv[1] == "save_features":
+    _s = "a_" if "augmented" in sys.argv else ""
     print("Extracting ECG...")
-    X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
-    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+    X_0 = np.load(path.join("gen_data", f"{_s}ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
     print("Extracting normal patients...")
     X_0 = extract_features(X_0, sampling_rate=100, contains_tempogram=True, verbose=True)
     print("Extracting apnea patients...")
@@ -139,10 +167,11 @@ if "save_features" in sys.argv:
     np.save(path.join("gen_data", "f_ECG_apnea"), X_1)
     print("Done!")
     
-if "save_stats" in sys.argv:
+if sys.argv[1] == "save_stats":
+    _s = "a_" if "augmented" in sys.argv else ""
     print("Calculating SpO2...")
-    X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
-    X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
+    X_0 = np.load(path.join("gen_data", f"{_s}SpO2_normal.npy"))
+    X_1 = np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
     print("Extracting normal patients...")
     X_0, keys = extract_stats(X_0, sampling_rate=100, verbose=True)
     print("Extracting apnea patients...")
@@ -158,16 +187,51 @@ if "save_stats" in sys.argv:
     
     print("Done!")
     
-if "pair" in sys.argv:
+if sys.argv[1] == "pair":
     print("Loading data...")
     p_list = open(path.join("gen_data", "ECG-SpO2.txt"), "r").readlines()
     p_list = list(map(lambda x: int(x), p_list))
     X_ECG, _ = get_patients_ECG(p_list)
-    # print("Extracing ECG features...")
-    # X_ECG = extract_features(X_ECG, sampling_rate=100, contains_tempogram=True, verbose=True)
     y, _ = get_patients_SpO2(range(1, 9))
+    if "augment" in sys.argv:
+        print("Augmenting...")
+        X_ECG = np.vstack(
+            [X_ECG, np.flip(X_ECG, axis=1)]
+        ) 
+        y = np.vstack(
+            [y, np.flip(y)]
+        ) 
     print("Extracing SpO2 statistics...")
-    y, _ = extract_stats(y, sampling_rate=100, verbose=True)
+    y, _ = extract_stats(y, sampling_rate=100, save_scaler=True, verbose=True)
     np.save(path.join("gen_data", "ECG-pair"), X_ECG)
     np.save(path.join("gen_data", "y-pair"), y)
-    print("Done")
+    print("Done!")
+    
+if sys.argv[1] == "augment":
+    if "SpO2" in sys.argv:
+        print("Augmenting SpO2...")
+        X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
+        X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
+        a_X_0 = np.vstack(
+            [X_0, np.flip(X_0, axis=1)],
+        )
+        np.save(path.join("gen_data", "a_SpO2_normal.npy"), a_X_0)
+        a_X_1 = np.vstack(
+            [X_1, np.flip(X_1, axis=1)],
+        )
+        np.save(path.join("gen_data", "a_SpO2_apnea.npy"), a_X_1)
+        print("Done!")
+        
+    if "ECG" in sys.argv:
+        print("Augmenting ECG...")
+        X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
+        X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+        a_X_0 = np.vstack(
+            [X_0, np.flip(X_0, axis=1)],
+        )
+        np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
+        a_X_1 = np.vstack(
+            [X_1, np.flip(X_1, axis=1)],
+        )
+        np.save(path.join("gen_data", "a_ECG_apnea.npy"), a_X_1)
+        print("Done!")

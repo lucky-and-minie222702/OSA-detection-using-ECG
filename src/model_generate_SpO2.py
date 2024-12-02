@@ -28,6 +28,7 @@ import tensorflow.python.keras.backend as K
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from data_functions import *
+from model_functions import *
 import datetime
 
 def reset_model(model):
@@ -62,18 +63,18 @@ def block(inp, filters: int, down_sample: bool = False):
 
 def create_model():
     inp = layers.Input(shape=(None, 1))
-    x = layers.Conv1D(64, kernel_size=3, padding="same")(inp)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = block(x, 64)
-    x = block(x, 64)
-    x = block(x, 128, True)
-    x = block(x, 128)
-    x = block(x, 256, True)
-    x = block(x, 256)
-    x = layers.GlobalAvgPool1D()(x)
+    x = layers.Conv1D(32, kernel_size=3, activation="relu")(inp)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(64, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(128, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(256, kernel_size=3, activation="relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(512, kernel_size=3, activation="relu")(x)
+    x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(16)(x)
+    x = layers.Dense(16, activation="sigmoid")(x)
     
     model = Model(
         inputs = inp,
@@ -103,7 +104,7 @@ print("Done!")
 
 if "build" in sys.argv:
     now = datetime.datetime.now()
-    print("Start at:", now, "\n")
+    print("\nStart at:", now, "\n")
     hist = model.fit(
         X, y,
         batch_size = batch_size,
