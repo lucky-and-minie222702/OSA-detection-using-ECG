@@ -113,10 +113,10 @@ if "build" in sys.argv:
     )
     print("Exporting...")
     model.save(save_path)
-    t = np.array(cb.logs)
-    np.save(path.join("history", f"gSpO2_train_time"), t)
-    f = open(path.join("history", "gSpO2_metrics.txt"), "w")
+    t = sum(cb.logs)
+    f = open(path.join("history", "gSpO2_logs.txt"), "w")
     print("Metrics names:", model.metrics_names, file=f)
+    print(f"Total training time: {t} seconds")
     f.close()
     for key, value in hist.history.items():
         data = np.array(value)

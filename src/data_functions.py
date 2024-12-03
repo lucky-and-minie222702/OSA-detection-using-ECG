@@ -116,10 +116,10 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = Fa
     res_psd = []
     
     for signal in X:
-        _fft = fft(signal)
+        _fft = fft(signal).real.astype("float64")
         _freqs, _psd = welch(signal, fs=sampling_rate)
         res_fft.append(_fft)
-        res_psd.append((_freqs, _psd))
+        res_psd.append(np.array([_freqs, _psd]).T)
         
         count += 1
         if verbose:

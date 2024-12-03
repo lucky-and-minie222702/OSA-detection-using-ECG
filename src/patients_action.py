@@ -84,35 +84,6 @@ if sys.argv[1] == "plot":
 
     print("Done!")
 
-stdev_SpO2 = [[], []]
-mean_SpO2 = [[], []]
-if sys.argv == "statistics_SpO2":
-    X, y = get_patients_SpO2(range(1, 9))
-    for i in range(len(y)):
-        stdev_SpO2[y[i]].append(np.std(X[i], axis=0))
-        mean_SpO2[y[i]].append(np.mean(X[i], axis=0))
-
-    if "save_stat" in sys.argv:
-        np.save(path.join("stat", "mean_SpO2_normal"), np.array(mean_SpO2[0]))
-        np.save(path.join("stat", "mean_SpO2_apnea"), np.array(mean_SpO2[1]))
-        np.save(path.join("stat", "stdev_SpO2_normal"), np.array(stdev_SpO2[0]))
-        np.save(path.join("stat", "stdev_SpO2_apnea"), np.array(stdev_SpO2[1]))
-
-    mean_SpO2[0] = np.mean(mean_SpO2[0], axis=0)
-    mean_SpO2[1] = np.mean(mean_SpO2[1], axis=0)
-    print("*** Mean ***")
-    print("Normal:", mean_SpO2[0])
-    print("Apnea:", mean_SpO2[1])
-
-    stdev_SpO2[0] = np.mean(stdev_SpO2[0], axis=0)
-    stdev_SpO2[1] = np.mean(stdev_SpO2[1], axis=0)
-    print("*** Standard deviation ***")
-    print("Normal:", stdev_SpO2[0])
-    print("Apnea:", stdev_SpO2[1])
-    X, y = [], []
-
-    print("Done!")
-    
 if sys.argv[1] == "merge":
     merged_X = [[], []]
     if "ECG" in sys.argv:
