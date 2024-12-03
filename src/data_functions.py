@@ -1,3 +1,4 @@
+import signal
 import numpy as np
 import sklearn.preprocessing as prep
 from os import path
@@ -6,16 +7,17 @@ from scipy.signal import lfilter, savgol_filter
 import sys
 import scipy.stats as stats
 from scipy.signal import find_peaks, hilbert, welch
+from scipy.fft import fft, ifft
 import pywt
 import joblib
 
 def show_process_bar(count: int, total: int):
-    percent = round(count / total * 100, 2)
+    percent = round(count / total * 100, 1)
     loaded = "=" * int(percent)
     if loaded != "" and count < total:
         loaded = loaded[:-1:] + ">"
     unloaded = " " * (100 - int(percent))
-    print(f" {str(percent):>5}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
+    print(f" {str(percent):>4}% [{loaded}{unloaded}]", "Inputs:", count, "/", total, end="\r")
     sys.stdout.flush()
 
 def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False):
@@ -45,9 +47,6 @@ def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, 
         features['psd_mean'] = np.mean(psd)
         features['psd_max'] = np.max(psd)
         features['dominant_frequency'] = freqs[np.argmax(psd)]
-        analytic_signal = hilbert(signal)
-        amplitude_envelope = np.abs(analytic_signal)
-        features['envelope_mean'] = np.mean(amplitude_envelope)
         coeffs = pywt.wavedec(signal, 'haar', level=3)
         features['wavelet_energy'] = sum(np.sum(c**2) for c in coeffs)
         
@@ -68,48 +67,71 @@ def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, 
         joblib.dump(scaler, path.join("res", "SpO2_stats_scaler.scaler"))
     
     return val , keys
+class Legend:
+    def extract_features(X: np.ndarray, sampling_rate: int =  100, contains_tempogram: bool = False, verbose:bool = False) -> np.ndarray:
+        temp = []
+        hl = 256
+        sr = sampling_rate
+        total = len(X)
+        count = 0
+        print("Extracting features...")
+        for x in X:
+            # mfcc dct 1
+            mfccs1 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)
+            delta1 = delta(mfccs1, order=1)
+            mfccs1 = np.concatenate([mfccs1, delta1])
+            # mfcc dct 2
+            mfccs2 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=2)
+            delta1 = delta(mfccs2, order=1)
+            mfccs2 = np.concatenate([mfccs2, delta1])
+            # mfcc dct 3
+            mfccs3 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=3)
+            delta1 = delta(mfccs3, order=1)
+            mfccs3 = np.concatenate([mfccs3, delta1])
+            # tempogram
+            tempograms = []
+            if contains_tempogram:
+                tempograms = [tempogram(y=x, hop_length=hl, sr=sr, win_length=24)]
+            # final data
+            data = np.stack([
+                mfccs1, 
+                mfccs2, 
+                mfccs3,
+            ] + tempograms, axis=2)
+            temp.append(data)
+            # Progress
+            count += 1
+            if verbose:
+                show_process_bar(count, total)
+        if verbose:
+            print()
+        
+        temp = np.array(temp)
+        return temp
 
-
-def extract_features(X: np.ndarray, sampling_rate: int =  100, contains_tempogram: bool = False, verbose:bool = False) -> np.ndarray:
-    temp = []
-    hl = 256
-    sr = sampling_rate
+def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = False) -> tuple:
     total = len(X)
     count = 0
-    print("Extracting features...")
-    for x in X:
-        # mfcc dct 1
-        mfccs1 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=1)
-        delta1 = delta(mfccs1, order=1)
-        mfccs1 = np.concatenate([mfccs1, delta1])
-        # mfcc dct 2
-        mfccs2 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=2)
-        delta1 = delta(mfccs2, order=1)
-        mfccs2 = np.concatenate([mfccs2, delta1])
-        # mfcc dct 3
-        mfccs3 = mfcc(y=x, hop_length=hl, sr=sr, n_mfcc=12, dct_type=3)
-        delta1 = delta(mfccs3, order=1)
-        mfccs3 = np.concatenate([mfccs3, delta1])
-        # tempogram
-        tempograms = []
-        if contains_tempogram:
-            tempograms = [tempogram(y=x, hop_length=hl, sr=sr, win_length=24)]
-        # final data
-        data = np.stack([
-            mfccs1, 
-            mfccs2, 
-            mfccs3,
-        ] + tempograms, axis=2)
-        temp.append(data)
-        # Progress
+    res_fft = []
+    res_psd = []
+    
+    for signal in X:
+        _fft = fft(signal)
+        _freqs, _psd = welch(signal, fs=sampling_rate)
+        res_fft.append(_fft)
+        res_psd.append((_freqs, _psd))
+        
         count += 1
         if verbose:
             show_process_bar(count, total)
+
     if verbose:
         print()
-    
-    temp = np.array(temp)
-    return temp
+        
+    return (
+        np.array(res_fft),
+        np.array(res_psd)
+    )
 
 def get_patients_SpO2(plist: list) -> tuple:
     def get_patient(patientid: int) -> tuple:

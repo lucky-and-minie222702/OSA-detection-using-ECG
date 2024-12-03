@@ -159,12 +159,14 @@ if sys.argv[1] == "save_features":
     X_0 = np.load(path.join("gen_data", f"{_s}ECG_normal.npy"))
     X_1 = np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
     print("Extracting normal patients...")
-    X_0 = extract_features(X_0, sampling_rate=100, contains_tempogram=True, verbose=True)
+    X_0_fft, X_0_psd = extract_features(X_0, sampling_rate=100, verbose=True)
     print("Extracting apnea patients...")
-    X_1 = extract_features(X_1, sampling_rate=100, contains_tempogram=True, verbose=True)
+    X_1_fft, X_1_psd = extract_features(X_1, sampling_rate=100, verbose=True)
     print("Exporting...")
-    np.save(path.join("gen_data", "f_ECG_normal"), X_0)
-    np.save(path.join("gen_data", "f_ECG_apnea"), X_1)
+    np.save(path.join("gen_data", "fft_ECG_normal"), X_0_fft)
+    np.save(path.join("gen_data", "fft_ECG_apnea"), X_1_fft)
+    np.save(path.join("gen_data", "psd_ECG_normal"), X_0_psd)
+    np.save(path.join("gen_data", "psd_ECG_apnea"), X_1_psd)
     print("Done!")
     
 if sys.argv[1] == "save_stats":
@@ -212,26 +214,44 @@ if sys.argv[1] == "augment":
         print("Augmenting SpO2...")
         X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
         X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
+        
         a_X_0 = np.vstack(
             [X_0, np.flip(X_0, axis=1)],
         )
-        np.save(path.join("gen_data", "a_SpO2_normal.npy"), a_X_0)
         a_X_1 = np.vstack(
             [X_1, np.flip(X_1, axis=1)],
         )
+        
+        a_X_0 = np.vstack(
+            [X_0, X_0 + np.random.normal(0, 0.1, X_0.shape)],
+        )
+        a_X_1 = np.vstack(
+            [X_1, X_1 + np.random.normal(0, 0.1, X_1.shape)],
+        )
+        
         np.save(path.join("gen_data", "a_SpO2_apnea.npy"), a_X_1)
+        np.save(path.join("gen_data", "a_SpO2_normal.npy"), a_X_0)
         print("Done!")
         
     if "ECG" in sys.argv:
         print("Augmenting ECG...")
         X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
         X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
+        
         a_X_0 = np.vstack(
             [X_0, np.flip(X_0, axis=1)],
         )
-        np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
         a_X_1 = np.vstack(
             [X_1, np.flip(X_1, axis=1)],
         )
+        
+        a_X_0 = np.vstack(
+            [X_0, X_0 + np.random.normal(0, 0.0075, X_0.shape)],
+        )
+        a_X_1 = np.vstack(
+            [X_1, X_1 + np.random.normal(0, 0.0075, X_1.shape)],
+        )
+        
+        np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
         np.save(path.join("gen_data", "a_ECG_apnea.npy"), a_X_1)
         print("Done!")
