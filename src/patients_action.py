@@ -67,7 +67,6 @@ if sys.argv[1] == "plot":
         ann = np.array(ann)[:len(ann) - (len(ann) % 100):]
         ann = np.array(np.split(ann, 100))
         plot = np.round(np.mean(ann, axis=1))
-        _plt = []
         _s = "".join(["X" if p == 1 else "-" for p in plot])
         print(f"Patient {idx+1} :")
         print(_s)
