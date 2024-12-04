@@ -150,8 +150,7 @@ print("Done!")
 print(f"Total: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 
 indices = np.arange(len(y))
-for _ in range(5):
-    np.random.shuffle(indices)
+np.random.shuffle(indices)
 
 X_raw = X_raw[indices]
 X_fft = X_fft[indices]
