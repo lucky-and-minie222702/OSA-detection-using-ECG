@@ -101,7 +101,6 @@ if sys.argv[1] == "merge":
         np.save(path.join("gen_data", "ECG_apnea"), merged_X[1])
 
         print(f"Apnea: {len(merged_X[1])} - Normal: {len(merged_X[0])}")
-        X, y, merged_X = [], [], []
     
     merged_X = [[], []]
     if "SpO2" in sys.argv:
@@ -120,8 +119,7 @@ if sys.argv[1] == "merge":
         np.save(path.join("gen_data", "SpO2_apnea"), merged_X[1])
 
         print(f"Apnea: {len(merged_X[1])} - Normal: {len(merged_X[0])}")
-        X, y, merged_X = [], [], [], [], []
-        print("Done!")
+    print("Done!")
 
 
 if sys.argv[1] == "save_features":
