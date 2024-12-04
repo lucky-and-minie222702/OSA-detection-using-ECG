@@ -32,6 +32,15 @@ from timeit import default_timer as timer
 import keras
 from typing import List, Tuple
 
+# Check for available GPUs
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    print(f"GPUs detected: {len(gpus)}")
+    for gpu in gpus:
+        print(f"GPU: {gpu.name}")
+else:
+    print("No GPU detected. Using CPU.")
+
 class TimingCallback(keras.callbacks.Callback):
     def __init__(self, logs={}):
         self.logs=[]
