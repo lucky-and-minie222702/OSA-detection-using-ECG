@@ -206,14 +206,7 @@ if sys.argv[1] == "augment":
         print("Augmenting ECG...")
         X_0 = np.load(path.join("gen_data", "ECG_normal.npy"))
         X_1 = np.load(path.join("gen_data", "ECG_apnea.npy"))
-        
-        a_X_0 = np.vstack(
-            [X_0, np.flip(X_0, axis=1)],
-        )
-        a_X_1 = np.vstack(
-            [X_1, np.flip(X_1, axis=1)],
-        )
-        
+
         a_X_0 = np.vstack(
             [X_0, X_0 + np.random.normal(0, 0.0075, X_0.shape)],
         )
