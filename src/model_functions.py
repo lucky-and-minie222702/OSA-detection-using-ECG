@@ -30,6 +30,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from timeit import default_timer as timer
 import keras
+from typing import List, Tuple
 
 class TimingCallback(keras.callbacks.Callback):
     def __init__(self, logs={}):
@@ -43,7 +44,7 @@ class TimingCallback(keras.callbacks.Callback):
 
 cb = TimingCallback()
 
-def convert_bytes(byte_size):
+def convert_bytes(byte_size) -> str:
     units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
     size = byte_size
     unit_index = 0
@@ -52,7 +53,7 @@ def convert_bytes(byte_size):
         unit_index += 1
     return f"{size:.2f} {units[unit_index]}"
 
-def convert_minutes(total_minutes):
+def convert_minutes(total_minutes) -> str:
     total_seconds = total_minutes * 60
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
@@ -73,36 +74,164 @@ def get_last_layer_outputs(model: Model):
     return K.function([model.layers[0].input],
                       [model.layers[-2]])
 
-def block2D(inp, filters: int, down_sample: bool = False):
+def block(dimension: int, inp, filters: int, down_sample: bool = False):
+    if dimension == 1:
+        Conv = layers.Conv1D
+    elif dimension == 2:
+        Conv = layers.Conv2D
+    elif dimension == 3:
+        Conv = layers.Conv3D
+
     shorcut = inp
     strides = [2, 1] if down_sample else [1, 1]
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)
+    x = Conv(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-    x = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=strides[1], padding="same")(x)
+    x = Conv(filters=filters, kernel_size=(3, 3), strides=strides[1], padding="same")(x)
     x = layers.BatchNormalization()(x)
     
     if down_sample:
-        shorcut = layers.Conv2D(filters=filters, kernel_size=(3, 3), strides=2, padding="same")(shorcut)
+        shorcut = Conv(filters=filters, kernel_size=(3, 3), strides=2, padding="same")(shorcut)
         shorcut = layers.BatchNormalization()(shorcut)
     
     x = layers.Add()([x, shorcut])
     x = layers.Activation("relu")(x)
     return x
 
-def block1D(inp, filters: int, down_sample: bool = False):
-    shorcut = inp
-    strides = [2, 1] if down_sample else [1, 1]
-    x = layers.Conv1D(filters=filters, kernel_size=3, strides=strides[0], padding="same")(inp)
+
+def ResNet_like_model(
+        input_shape: tuple, 
+        structures: List[int], 
+        name: str, 
+        dimension: int = 1, 
+        only_features_map: bool = False, 
+        compile: bool = False, 
+        show_size: bool = False) -> Model:
+    if dimension == 1:
+        Conv = layers.Conv1D
+    elif dimension == 2:
+        Conv = layers.Conv2D
+    elif dimension == 3:
+        Conv = layers.Conv3D
+
+    if dimension == 1:
+        GPool = layers.GlobalAvgPool1D
+    elif dimension == 2:
+        GPool = layers.GlobalAvgPool2D
+    elif dimension == 3:
+        GPool = layers.GlobalAvgPool3D
+    
+    inp = layers.Input(shape=input_shape)
+    x = Conv(structures[0], kernel_size=3, padding="same")(inp)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-    x = layers.Conv1D(filters=filters, kernel_size=3, strides=strides[1], padding="same")(x)
+    
+    for idx, filters in enumerate(structures):
+        down_sample = False
+        if idx > 0 and filters[idx-1] < filters[idx]:
+            down_sample = True
+        x = block(
+            dimension = dimension, 
+            inp = x, 
+            filters = filters, 
+            down_sample = down_sample
+        )
+
+    x = GPool()(x)
+    x = layers.Flatten()(x)
+    if not only_features_map:
+        x = layers.Dense(units=1, activation="sigmoid")(x)
+
+    model = Model(
+        inputs = inp,
+        outputs = x,
+        name = name,
+    )
+    
+    if show_size:
+        show_params(model, name)
+
+    if compile:
+        model.compile(
+            optimizer = "adam",
+            loss = "binary_crossentropy",
+            metrics = ["binary_accuracy"],
+        )
+    
+    return model
+
+def CNN_model(
+        input_shape: tuple, 
+        structures: List[Tuple[int, int]], 
+        name: str, 
+        dimension: int = 1, 
+        only_features_map: bool = False, 
+        compile: bool = False, 
+        show_size: bool = False) -> Model:
+    if dimension == 1:
+        Conv = layers.Conv1D
+    elif dimension == 2:
+        Conv = layers.Conv2D
+    elif dimension == 3:
+        Conv = layers.Conv3D
+
+    if dimension == 1:
+        Pool = layers.MaxPool1D
+    elif dimension == 2:
+        Pool = layers.MaxPool2D
+    elif dimension == 3:
+        Pool = layers.MaxPool3D
+
+    if dimension == 1:
+        GPool = layers.GlobalMaxPool1D
+    elif dimension == 2:
+        GPool = layers.GlobalMaxPool2D
+    elif dimension == 3:
+        GPool = layers.GlobalMaxPool3D
+
+    inp = layers.Input(shape=input_shape)
+    x = Conv(
+        filters = structures[0][0], 
+        kernel_size = structures[0][1], 
+        padding = "same", 
+        activation = "relu",
+        kernel_regularizer = reg.L2())(inp)
     x = layers.BatchNormalization()(x)
+    x = Pool(pool_size=2)(x)
+    x = layers.Dropout(rate=0.2)(x)
     
-    if down_sample:
-        shorcut = layers.Conv1D(filters=filters, kernel_size=3, strides=2, padding="same")(shorcut)
-        shorcut = layers.BatchNormalization()(shorcut)
     
-    x = layers.Add()([x, shorcut])
-    x = layers.Activation("relu")(x)
-    return x
+    for filters, kernel_size in structures[1::]:
+        x = Conv(
+            filters = filters, 
+            kernel_size = kernel_size, 
+            padding = "same", 
+            activation = "relu",
+            kernel_regularizer = reg.L2())(x)
+        x = layers.BatchNormalization()(x)
+        x = Pool(pool_size=2)(x)
+        x = layers.Dropout(rate=0.2)(x)
+
+    x = GPool()(x)
+    x = layers.Flatten()(x)
+    if not only_features_map:
+        x = layers.Dense(1, activation="sigmoid")(x)
+
+    model = Model(
+        inputs = inp,
+        outputs = x,
+        name = name
+    )
+    
+    if compile:
+        model.compile(
+            optimizer = "adam",
+            loss = "binary_crossentropy",
+            metrics = ["binary_accuracy"],
+        )
+    
+    
+    if show_size:
+        show_params(model, name)
+
+    return model

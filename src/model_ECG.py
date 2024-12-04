@@ -46,85 +46,49 @@ def reset_model(model):
             w.assign(init(w.shape, dtype=w.dtype))
 
 def create_model_raw():
-    inp = layers.Input(shape=(None, 1))
-    
-    x = layers.Conv1D(32, kernel_size=3, activation="relu")(inp)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(64, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(128, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(256, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(512, kernel_size=3, activation="relu")(x)
-    x = layers.GlobalMaxPool1D()(x)
-    x = layers.Flatten()(x)
-    # x = layers.Dense(1, activation="sigmoid")(x)
-
-    model = Model(
-        inputs = inp,
-        outputs = x,
-        name="ECG_raw"
+    return CNN_model(
+        input_shape = (None, 1),
+        structures = [
+            (32, 13),
+            (64, 11),
+            (128, 7),
+            (256, 5),
+            (512, 3)
+        ],
+        name = "ECG_raw",
+        dimension = 1,
+        show_size = True
     )
-    
-    if "show_size" in sys.argv:
-        show_params(model, "ECG_raw")
-
-    return model
 
 def create_model_fft() -> Model:
-    inp = layers.Input(shape=(None, 1))
-    
-    x = layers.Conv1D(32, kernel_size=3, activation="relu")(inp)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(64, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(128, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(256, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(512, kernel_size=3, activation="relu")(x)
-    x = layers.GlobalMaxPool1D()(x)
-    x = layers.Flatten()(x)
-    # x = layers.Dense(1, activation="sigmoid")(x)
-
-    model = Model(
-        inputs = inp,
-        outputs = x,
-        name = "ECG_fft"
+    return CNN_model(
+        input_shape = (None, 1),
+        structures = [
+            (32, 7),
+            (64, 5),
+            (128, 5),
+            (256, 3),
+            (512, 3)
+        ],
+        name = "ECG_fft",
+        dimension = 1,
+        show_size = True
     )
-    
-    if "show_size" in sys.argv:
-        show_params(model, "ECG_fft")
-
-    return model
 
 def create_model_psd() -> Model:
-    inp = layers.Input(shape=(None, 2))
-    
-    x = layers.Conv1D(32, kernel_size=3, activation="relu")(inp)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(64, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(128, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(256, kernel_size=3, activation="relu")(x)
-    x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(512, kernel_size=3, activation="relu")(x)
-    x = layers.GlobalMaxPool1D()(x)
-    x = layers.Flatten()(x)
-    # x = layers.Dense(1, activation="sigmoid")(x)
-
-    model = Model(
-        inputs = inp,
-        outputs = x,
-        name = "ECG_psd"
+    return CNN_model(
+        input_shape = (None, 2),
+        structures = [
+            (32, 3),
+            (64, 3),
+            (128, 3),
+            (256, 5),
+            (512, 3)
+        ],
+        name = "ECG_psd",
+        dimension = 1,
+        show_size = True
     )
-    
-    if "show_size" in sys.argv:
-        show_params(model, "ECG_psd")
-
-    return model
 
 def create_model():
     raw_model = create_model_raw()
@@ -168,7 +132,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 16
+batch_size = 64
 
 print("Creating model architecture...")
 model = create_model()

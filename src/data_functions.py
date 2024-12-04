@@ -10,6 +10,7 @@ from scipy.signal import find_peaks, hilbert, welch
 from scipy.fft import fft, ifft
 import pywt
 import joblib
+from typing import Tuple, List
 
 def show_process_bar(count: int, total: int):
     percent = round(count / total * 100, 1)
@@ -109,7 +110,7 @@ class Legend:
         temp = np.array(temp)
         return temp
 
-def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = False) -> tuple:
+def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = False) -> Tuple[np.ndarray, np.ndarray]:
     total = len(X)
     count = 0
     res_fft = []
@@ -117,6 +118,7 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = Fa
     
     for signal in X:
         _fft = fft(signal).real.astype("float64")
+        _fft = np.abs(_fft)
         _freqs, _psd = welch(signal, fs=sampling_rate)
         res_fft.append(_fft)
         res_psd.append(np.array([_freqs, _psd]).T)
@@ -133,8 +135,8 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = Fa
         np.array(res_psd)
     )
 
-def get_patients_SpO2(plist: list) -> tuple:
-    def get_patient(patientid: int) -> tuple:
+def get_patients_SpO2(plist: List[int]) -> Tuple[np.ndarray, np.ndarray]:
+    def get_patient(patientid: int) -> Tuple[np.ndarray, np.ndarray]:
         rec = np.load(path.join("numpy", f"SpO2_patient_{patientid}.npy"))
         ann = np.load(path.join("numpy", f"SpO2_annotation_{patientid}.npy"))
         return rec, ann
@@ -151,8 +153,8 @@ def get_patients_SpO2(plist: list) -> tuple:
     X = np.array(np.split(X, siglen))
     return X, y
 
-def get_patients_ECG(plist: list) -> tuple:
-    def get_patient(patientid: int) -> tuple:
+def get_patients_ECG(plist: List[int]) -> Tuple[np.ndarray, np.ndarray]:
+    def get_patient(patientid: int) -> Tuple[np.ndarray, np.ndarray]:
         rec = np.load(path.join("numpy", f"patient_{patientid}.npy"))
         ann = np.load(path.join("numpy", f"annotation_{patientid}.npy"))
         return rec, ann
