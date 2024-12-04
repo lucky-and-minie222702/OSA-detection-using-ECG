@@ -153,6 +153,10 @@ indices = np.arange(len(y))
 for _ in range(5):
     np.random.shuffle(indices)
 
+X_raw = X_raw[indices]
+X_fft = X_fft[indices]
+X_psd = X_psd[indices]
+
 if "num_cases" in sys.argv:
     num_cases = sys.argv[sys.argv.index("num_cases")+1]
     if num_cases != "all":
