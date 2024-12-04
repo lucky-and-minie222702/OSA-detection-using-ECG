@@ -173,9 +173,10 @@ if num_cases != "all":
 print(f"=> Training on {'full dataset' if num_cases == 'all' else num_cases}")
 print(f"=> Training with {epochs} epochs")
 
-prompt = input("Continue? [y/N]: ")
-if prompt != "y":
-    exit()
+if not "skip_verify" in sys.argv:
+    prompt = input("Continue? [y/N]: ")
+    if prompt != "y":
+        exit()
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
