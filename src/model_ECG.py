@@ -143,7 +143,6 @@ is_data_augmented = "augmented" in sys.argv
 X_raw = np.vstack([np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_normal.npy")), np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_apnea.npy"))])
 X_fft = np.vstack([np.load(path.join("gen_data", "fft_ECG_normal.npy")), np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
 X_psd = np.vstack([np.load(path.join("gen_data", "psd_ECG_normal.npy")), np.load(path.join("gen_data", "psd_ECG_apnea.npy"))])
-
 y = np.array([[0] * (len(X_raw) // 2) + [1] * (len(X_raw) // 2)]).flatten()
 
 counts = Counter(y)
@@ -156,6 +155,7 @@ np.random.shuffle(indices)
 X_raw = X_raw[indices]
 X_fft = X_fft[indices]
 X_psd = X_psd[indices]
+y = y[indices]
 
 if "num_cases" in sys.argv:
     num_cases = sys.argv[sys.argv.index("num_cases")+1]
