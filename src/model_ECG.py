@@ -166,7 +166,7 @@ else:
 if num_cases != "all":
     indices = np.arange(num_cases)
 
-print(f"=> Training on {'full dataset' if num_cases == "all" else num_cases}")
+print(f"=> Training on {'full dataset' if num_cases == 'all' else num_cases}")
 print(f"=> Training with {epochs} epochs")
 
 prompt = input("Continue? [y/N]: ")
