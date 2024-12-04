@@ -45,13 +45,13 @@ if sys.argv[1] == "percentage":
     for idx, ann in enumerate(ann_ECG):
         counter = Counter(ann)
         ann_len = len(ann)
-        print(f"{"="*10} patient {idx+1:^4} {"="*10}")
+        print(f"{'='*10} patient {idx+1:^4} {'='*10}")
         print(f"| Apnea: {counter[1]:>6} | Normal: {counter[0]:>6} |")
         print(f"| Apnea: {round(counter[1] / ann_len * 100, 2):>5}% | Normal: {round(counter[0] / ann_len * 100, 2):>5}% |")
         print("=" * 34, "\n")
         
     print()
-    print(f"{"*"*10} SpO2 patients {"*"*10}\n")
+    print(f"{'*'*10} SpO2 patients {'*'*10}\n")
     for idx, ann in enumerate(ann_SpO2):
         counter = Counter(ann)
         ann_len = len(ann)
