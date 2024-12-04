@@ -44,4 +44,4 @@ if "generate" in sys.argv:
     print("Exporting...")
     np.save(path.join("gen_data", "gs_SpO2_normal"), Sp02_0)
     np.save(path.join("gen_data", "gs_SpO2_apnea"), Sp02_1)
-    print("Done!")
+    print("Done!")  

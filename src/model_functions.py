@@ -63,8 +63,8 @@ def convert_minutes(total_minutes) -> str:
 def show_params(model: Model, name: str):
     print(f"Model {name}:")
     params = model.count_params()
-    print(" | Total params:", "{:,}".format(params).replace(",", " "))
-    print(" | Size        :", convert_bytes(params * 4))
+    print(" | Total params :", "{:,}".format(params).replace(",", " "))
+    print(" | Size         :", convert_bytes(params * 4))
 
 def get_all_layer_outputs(model: Model):
     return K.function([model.layers[0].input],
