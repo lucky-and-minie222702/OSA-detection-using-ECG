@@ -103,6 +103,7 @@ if sys.argv[1] == "merge":
         print(f"Apnea: {len(merged_X[1])} - Normal: {len(merged_X[0])}")
         X, y, merged_X = [], [], []
     
+    merged_X = [[], []]
     if "SpO2" in sys.argv:
         print("Merging SpO2...")
         X, y = get_patients_SpO2((range(1, 9)))
