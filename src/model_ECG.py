@@ -139,7 +139,8 @@ model = create_model()
 
 print("Loading data...")
 
-X_raw = np.vstack([np.load(path.join("gen_data", "a_ECG_normal.npy")), np.load(path.join("gen_data", "a_ECG_apnea.npy"))])
+is_data_augmented = "augmented" in sys.argv
+X_raw = np.vstack([np.load(path.join("gen_data", "a_ECG_normal.npy")), np.load(path.join("gen_data", f"{'a_' if is_data_augmented else '' }ECG_apnea.npy"))])
 X_fft = np.vstack([np.load(path.join("gen_data", "fft_ECG_normal.npy")), np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
 X_psd = np.vstack([np.load(path.join("gen_data", "psd_ECG_normal.npy")), np.load(path.join("gen_data", "psd_ECG_apnea.npy"))])
 
