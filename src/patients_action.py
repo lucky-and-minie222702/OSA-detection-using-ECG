@@ -41,7 +41,7 @@ print(f"Total sleep minutes: {total_minutes[1]}")
 print(f"Total signal's length: {total_sig_len[1]}\n")
 
 if sys.argv[1] == "percentage":
-    print(f"{'*'*10} ECG patients {'*'s*10}\n")
+    print(f"{'*'*10} ECG patients {'*'*10}\n")
     for idx, ann in enumerate(ann_ECG):
         counter = Counter(ann)
         ann_len = len(ann)
