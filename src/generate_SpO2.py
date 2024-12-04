@@ -38,7 +38,7 @@ if "generate" in sys.argv:
 
     print("Generating normal cases...")
     Sp02_0 = model.predict(X_0)
-    print("Generating apnea cases...")
+    print("Generating apnea casePs...")
     Sp02_1 = model.predict(X_1)
 
     print("Exporting...")
