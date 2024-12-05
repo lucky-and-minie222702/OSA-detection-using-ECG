@@ -134,7 +134,7 @@ if not "skip_verify" in sys.argv:
 # callbacks
 cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(patience=3, restore_best_weights=True)
-cb_checkpoint = cbk.ModelCheckPoint(save_path, save_best_only=True)
+cb_checkpoint = cbk.ModelCheckpoint(save_path, save_best_only=True)
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
