@@ -67,12 +67,14 @@ def create_model():
         name="ECG_combined"
     )
     
+    print(model.metrics)
+    
     model.compile(
         optimizer = "adam",
         loss = "binary_crossentropy",
-        metrics = [
-                metrics.BinaryAccuracy(name = f"{t}_threshold",
-                                       threshold=t/10) for t in range(1, 10)
+            metrics = [
+                metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                                       threshold = t/10) for t in range(1, 10)
             ],
     )
 
