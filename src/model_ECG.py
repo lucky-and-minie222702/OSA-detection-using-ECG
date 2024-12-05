@@ -5,6 +5,8 @@ from data_functions import *
 import os
 if "disable_XLA" in sys.argv:
     os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=2'
+if "lazy_loading" in sys.argv:
+    os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 def reset_model(model):
     weights = []
