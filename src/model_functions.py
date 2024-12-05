@@ -111,7 +111,8 @@ def CNN_model(
         dimension: int = 1, 
         features: int = 512,
         only_features_map: bool = False, 
-        compile: bool = False, 
+        compile: bool = False,
+        decoder_structures: List[int] = [1024, 512, 256],
         show_size: bool = False) -> Tuple[Model, Any, Any] :
     if dimension == 1:
         Conv = layers.Conv1D
@@ -161,16 +162,14 @@ def CNN_model(
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
     
-    decoder = layers.Dense(1024, activation=layers.LeakyReLU(alpha=0.2))(encoder)
-    decoder = layers.Dense(512, activation=layers.LeakyReLU(alpha=0.2))(decoder)
-    decoder = layers.Dense(256, activation=layers.LeakyReLU(alpha=0.2))(decoder)
-    decoder = layers.Dense(128, activation=layers.LeakyReLU(alpha=0.2))(decoder)
-    decoder = layers.Dense(64, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+    decoder = layers.Dense(decoder_structures[0], activation=layers.LeakyReLU(alpha=0.2))(encoder)
+    for units in decoder_structures[1::]:
+        decoder = layers.Dense(units, activation=layers.LeakyReLU(alpha=0.2))(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
 
     model = Model(
         inputs = inp,
-        outputs = decoder,
+        outputs = encoder if only_features_map else decoder,
         name = name
     )
     
