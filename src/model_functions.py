@@ -100,7 +100,7 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False):
     strides = [2, 1] if down_sample else [1, 1]
     x = Conv(filters, (3, 3), strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation(layers.LeakyReLU(alpha=0.2))(x)
+    x = layers.Activation(layers.LeakyReLU(negative_slope=0.2))(x)
     x = Conv(filters, (3, 3), strides[1], padding="same")(x)
     x = layers.BatchNormalization()(x)
     
@@ -109,7 +109,7 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False):
         shorcut = layers.BatchNormalization()(shorcut)
     
     x = layers.Add()([x, shorcut])
-    x = layers.Activation(layers.LeakyReLU(alpha=0.2))(x)
+    x = layers.Activation(layers.LeakyReLU(negative_slope=0.2))(x)
     return x
 
 def CNN_model(
@@ -148,7 +148,7 @@ def CNN_model(
         filters = structures[0][0], 
         kernel_size = structures[0][1], 
         padding = "same", 
-        activation = layers.LeakyReLU(alpha=0.2),
+        activation = layers.LeakyReLU(negative_slope=0.2),
         kernel_regularizer = reg.L2())(inp)
     encoder = layers.BatchNormalization()(encoder)
     encoder = Pool(pool_size=2)(encoder)
@@ -160,7 +160,7 @@ def CNN_model(
             filters = filters, 
             kernel_size = kernel_size, 
             padding = "same", 
-            activation = layers.LeakyReLU(alpha=0.2),
+            activation = layers.LeakyReLU(negative_slope=0.2),
             kernel_regularizer = reg.L2())(encoder)
         encoder = layers.BatchNormalization()(encoder)
         encoder = Pool(pool_size=2)(encoder)
@@ -170,9 +170,9 @@ def CNN_model(
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
     
-    decoder = layers.Dense(decoder_structures[0], activation=layers.LeakyReLU(alpha=0.2))(encoder)
+    decoder = layers.Dense(decoder_structures[0], activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
     for units in decoder_structures[1::]:
-        decoder = layers.Dense(units, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+        decoder = layers.Dense(units, activation=layers.LeakyReLU(negative_slope=0.2))(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
 
     model = Model(
@@ -186,7 +186,7 @@ def CNN_model(
             optimizer = "adam",
             loss = "binary_crossentropy",
             metrics = [
-                metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                metrics.BinaryAccuracy(name = f"binary_threshold_0.{t}",
                                        threshold = t/10) for t in range(1, 10)
             ],
         )
