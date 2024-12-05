@@ -187,7 +187,7 @@ def CNN_model(
             loss = "binary_crossentropy",
             metrics = [
                 metrics.BinaryAccuracy(name = f"threshold_0.{t}",
-                                       threshold=t/10) for t in range(1, 10)
+                                       threshold = t/10) for t in range(1, 10)
             ],
         )
     
