@@ -1,9 +1,9 @@
 import os
 import sys
-# if "disable_XLA" in sys.argv:
-# os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=2'
-# if "lazy_loading" in sys.argv:
-# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+if "disable_XLA" in sys.argv:
+    os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=2'
+if "lazy_loading" in sys.argv:
+    os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 if "disable_GPU" in sys.argv:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -186,7 +186,7 @@ def CNN_model(
             optimizer = "adam",
             loss = "binary_crossentropy",
             metrics = [
-                metrics.BinaryAccuracy(name = f"{t}_threshold",
+                metrics.BinaryAccuracy(name = f"threshold_0.{t}",
                                        threshold=t/10) for t in range(1, 10)
             ],
         )
