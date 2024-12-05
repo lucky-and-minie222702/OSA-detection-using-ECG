@@ -1,4 +1,5 @@
 import os
+import sys
 # if "disable_XLA" in sys.argv:
 # os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=2'
 # if "lazy_loading" in sys.argv:
