@@ -128,14 +128,12 @@ if sys.argv[1] == "save_features":
     X_0 = np.load(path.join("gen_data", f"{_s}ECG_normal.npy"))
     X_1 = np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
     print("Extracting normal patients...")
-    X_0_fft, X_0_psd = extract_features(X_0, sampling_rate=100, verbose=True)
+    X_0_fft = extract_features(X_0, sampling_rate=100, verbose=True)
     print("Extracting apnea patients...")
-    X_1_fft, X_1_psd = extract_features(X_1, sampling_rate=100, verbose=True)
+    X_1_fft = extract_features(X_1, sampling_rate=100, verbose=True)
     print("Exporting...")
     np.save(path.join("gen_data", "fft_ECG_normal"), X_0_fft)
     np.save(path.join("gen_data", "fft_ECG_apnea"), X_1_fft)
-    np.save(path.join("gen_data", "psd_ECG_normal"), X_0_psd)
-    np.save(path.join("gen_data", "psd_ECG_apnea"), X_1_psd)
     print("Done!")
     
 if sys.argv[1] == "save_stats":

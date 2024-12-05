@@ -28,7 +28,8 @@ def create_model_raw():
         ],
         name = "ECG_raw",
         dimension = 1,
-        show_size = True
+        show_size = True,
+        only_features_map = True,
     )
 
 def create_model_fft() -> Model:
@@ -43,39 +44,23 @@ def create_model_fft() -> Model:
         ],
         name = "ECG_fft",
         dimension = 1,
-        show_size = True
-    )
-
-def create_model_psd() -> Model:
-    return CNN_model(
-        input_shape = (None, 2),
-        structures = [
-            (32, 3),
-            (64, 3),
-            (128, 3),
-            (256, 5),
-            (512, 3)
-        ],
-        name = "ECG_psd",
-        dimension = 1,
-        show_size = True
+        show_size = True,
+        only_features_map = True,
     )
 
 def create_model():
-    raw_model = create_model_raw()
-    fft_model = create_model_fft()
-    psd_model = create_model_psd()
+    raw_model, _, _ = create_model_raw()
+    fft_model, _, _ = create_model_fft()
     
     out = layers.concatenate([
         raw_model.output,
         fft_model.output,
-        psd_model.output,
     ])
     out = layers.Dense(1024, activation="relu")(out)
     out = layers.Dense(1, activation="relu")(out)
     
     model = Model(
-        inputs = [raw_model.input, fft_model.input, psd_model.input],
+        inputs = [raw_model.input, fft_model.input],
         outputs = out,
         name="ECG_combined"
     )
@@ -84,13 +69,9 @@ def create_model():
         optimizer = "adam",
         loss = "binary_crossentropy",
         metrics = [
-            "binary_accuracy",
-            metrics.TruePositives(),
-            metrics.TrueNegatives(),
-            metrics.FalsePositives(),
-            metrics.FalseNegatives(),
-            metrics.AUC(),
-        ],
+                metrics.BinaryAccuracy(name = f"{t}_threshold",
+                                       threshold=t/10) for t in range(1, 10)
+            ],
     )
 
     if "show_size" in sys.argv:
@@ -113,7 +94,6 @@ print("Loading data...")
 is_data_augmented = "augmented" in sys.argv
 X_raw = np.vstack([np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_normal.npy")), np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_apnea.npy"))])
 X_fft = np.vstack([np.load(path.join("gen_data", "fft_ECG_normal.npy")), np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
-X_psd = np.vstack([np.load(path.join("gen_data", "psd_ECG_normal.npy")), np.load(path.join("gen_data", "psd_ECG_apnea.npy"))])
 y = np.array([[0] * (len(X_raw) // 2) + [1] * (len(X_raw) // 2)]).flatten()
 
 counts = Counter(y)
@@ -123,9 +103,9 @@ print(f"Total: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
 indices = np.arange(len(y))
 np.random.shuffle(indices)
 
+
 X_raw = X_raw[indices]
 X_fft = X_fft[indices]
-X_psd = X_psd[indices]
 y = y[indices]
 
 if "num_cases" in sys.argv:
@@ -134,7 +114,6 @@ if "num_cases" in sys.argv:
         num_cases = int(num_cases)
         X_raw = X_raw[:num_cases:]
         X_fft = X_fft[:num_cases:]
-        X_psd = X_psd[:num_cases:]
         y = y[:num_cases:]
 else:
     num_cases = int(input("Please provide a valid number of cases for model to learn: "))
@@ -170,12 +149,10 @@ if sys.argv[1] == "std":
     y_train = y[train_indices]
     X_raw_train = X_raw[train_indices]
     X_fft_train = X_fft[train_indices]
-    X_psd_train = X_psd[train_indices]
     
     y_test = y[test_indices]
     X_raw_test = X_raw[test_indices]
     X_fft_test = X_fft[test_indices]
-    X_psd_test = X_psd[test_indices]
     
     count_train = Counter(y_train)
     count_test = Counter(y_test)
@@ -184,7 +161,7 @@ if sys.argv[1] == "std":
     print(f"=> Validation set: Apnea cases [1]: {int(count_train[1]*val_split)} - Normal cases [0]: {int(count_train[0]*val_split)}")
 
     if "build" in sys.argv:
-        hist = model.fit([X_raw_train, X_fft_train, X_psd_train], 
+        hist = model.fit([X_raw_train, X_fft_train], 
                          y_train, 
                          epochs = epochs, 
                          batch_size = batch_size, 
@@ -195,14 +172,14 @@ if sys.argv[1] == "std":
     elif "test" in sys.argv:
         model = load_model(save_path)
     print("Evaluating...")
-    pred = model.predict([X_raw_test, X_fft_test, X_psd_test])
+    pred = model.predict([X_raw_test, X_fft_test])
     pred = [np.round(np.squeeze(x)) for x in pred]
     f = open(path.join("history", f"{id}_result.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = list(confusion_matrix(y_test, pred))
     print("Confusion matrix:", cm, file=f)
     print("Metrics names:", model.metrics_names, file=f)
-    print("Loss and metrics ", model.evaluate([X_raw_test, X_fft_test, X_psd_test], y_test, verbose=False), file=f)
+    print("Loss and metrics ", model.evaluate([X_raw_test, X_fft_test], y_test, verbose=False), file=f)
     f.close()
     
     if "build" in sys.argv:

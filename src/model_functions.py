@@ -27,7 +27,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from timeit import default_timer as timer
 import keras
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 # Check for available GPUs
 gpus = tf.config.list_physical_devices('GPU')
@@ -90,90 +90,29 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False):
 
     shorcut = inp
     strides = [2, 1] if down_sample else [1, 1]
-    x = Conv(filters=filters, kernel_size=(3, 3), strides=strides[0], padding="same")(inp)
+    x = Conv(filters, (3, 3), strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = Conv(filters=filters, kernel_size=(3, 3), strides=strides[1], padding="same")(x)
+    x = layers.Activation(layers.LeakyReLU(alpha=0.2))(x)
+    x = Conv(filters, (3, 3), strides[1], padding="same")(x)
     x = layers.BatchNormalization()(x)
     
     if down_sample:
-        shorcut = Conv(filters=filters, kernel_size=(3, 3), strides=2, padding="same")(shorcut)
+        shorcut = Conv(filters, (3, 3), 2, padding="same")(shorcut)
         shorcut = layers.BatchNormalization()(shorcut)
     
     x = layers.Add()([x, shorcut])
-    x = layers.Activation("relu")(x)
+    x = layers.Activation(layers.LeakyReLU(alpha=0.2))(x)
     return x
-
-
-def ResNet_like_model(
-        input_shape: tuple, 
-        structures: List[int], 
-        name: str, 
-        dimension: int = 1, 
-        only_features_map: bool = False, 
-        compile: bool = False, 
-        show_size: bool = False) -> Model:
-    if dimension == 1:
-        Conv = layers.Conv1D
-    elif dimension == 2:
-        Conv = layers.Conv2D
-    elif dimension == 3:
-        Conv = layers.Conv3D
-
-    if dimension == 1:
-        GPool = layers.GlobalAvgPool1D
-    elif dimension == 2:
-        GPool = layers.GlobalAvgPool2D
-    elif dimension == 3:
-        GPool = layers.GlobalAvgPool3D
-    
-    inp = layers.Input(shape=input_shape)
-    x = Conv(structures[0], kernel_size=3, padding="same")(inp)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    
-    for idx, filters in enumerate(structures):
-        down_sample = False
-        if idx > 0 and filters[idx-1] < filters[idx]:
-            down_sample = True
-        x = block(
-            dimension = dimension, 
-            inp = x, 
-            filters = filters, 
-            down_sample = down_sample
-        )
-
-    x = GPool()(x)
-    x = layers.Flatten()(x)
-    if not only_features_map:
-        x = layers.Dense(units=1, activation="sigmoid")(x)
-
-    model = Model(
-        inputs = inp,
-        outputs = x,
-        name = name,
-    )
-    
-    if show_size:
-        show_params(model, name)
-
-    if compile:
-        model.compile(
-            optimizer = "adam",
-            loss = "binary_crossentropy",
-            metrics = ["binary_accuracy"],
-        )
-    
-    return model
 
 def CNN_model(
         input_shape: tuple, 
         structures: List[Tuple[int, int]], 
         name: str, 
         dimension: int = 1, 
+        features: int = 512,
         only_features_map: bool = False, 
         compile: bool = False, 
-        show_size: bool = False) -> Model:
+        show_size: bool = False) -> Tuple[Model, Any, Any] :
     if dimension == 1:
         Conv = layers.Conv1D
     elif dimension == 2:
@@ -196,36 +135,42 @@ def CNN_model(
         GPool = layers.GlobalMaxPool3D
 
     inp = layers.Input(shape=input_shape)
-    x = Conv(
+    encoder = Conv(
         filters = structures[0][0], 
         kernel_size = structures[0][1], 
         padding = "same", 
-        activation = "relu",
+        activation = layers.LeakyReLU(alpha=0.2),
         kernel_regularizer = reg.L2())(inp)
-    x = layers.BatchNormalization()(x)
-    x = Pool(pool_size=2)(x)
-    x = layers.Dropout(rate=0.2)(x)
+    encoder = layers.BatchNormalization()(encoder)
+    encoder = Pool(pool_size=2)(encoder)
+    encoder = layers.Dropout(rate=0.2)(encoder)
     
     
     for filters, kernel_size in structures[1::]:
-        x = Conv(
+        encoder = Conv(
             filters = filters, 
             kernel_size = kernel_size, 
             padding = "same", 
-            activation = "relu",
-            kernel_regularizer = reg.L2())(x)
-        x = layers.BatchNormalization()(x)
-        x = Pool(pool_size=2)(x)
-        x = layers.Dropout(rate=0.2)(x)
+            activation = layers.LeakyReLU(alpha=0.2),
+            kernel_regularizer = reg.L2())(encoder)
+        encoder = layers.BatchNormalization()(encoder)
+        encoder = Pool(pool_size=2)(encoder)
+        encoder = layers.Dropout(rate=0.2)(encoder)
 
-    x = GPool()(x)
-    x = layers.Flatten()(x)
-    if not only_features_map:
-        x = layers.Dense(1, activation="sigmoid")(x)
+    encoder = GPool()(encoder)
+    encoder = layers.Flatten()(encoder)
+    encoder = layers.Dense(features, activation="tanh")(encoder)
+    
+    decoder = layers.Dense(1024, activation=layers.LeakyReLU(alpha=0.2))(encoder)
+    decoder = layers.Dense(512, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+    decoder = layers.Dense(256, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+    decoder = layers.Dense(128, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+    decoder = layers.Dense(64, activation=layers.LeakyReLU(alpha=0.2))(decoder)
+    decoder = layers.Dense(1, activation="sigmoid")(decoder)
 
     model = Model(
         inputs = inp,
-        outputs = x,
+        outputs = decoder,
         name = name
     )
     
@@ -233,11 +178,13 @@ def CNN_model(
         model.compile(
             optimizer = "adam",
             loss = "binary_crossentropy",
-            metrics = ["binary_accuracy"],
+            metrics = [
+                metrics.BinaryAccuracy(name = f"{t}_threshold",
+                                       threshold=t/10) for t in range(1, 10)
+            ],
         )
-    
     
     if show_size:
         show_params(model, name)
 
-    return model
+    return model, encoder, decoder
