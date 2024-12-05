@@ -2,6 +2,9 @@ from data_functions import *
 import datetime
 from model_functions import *
 from data_functions import *
+import os
+if "disable_XLA" in sys.argv:
+    os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=2'
 
 def reset_model(model):
     weights = []
@@ -128,6 +131,11 @@ if not "skip_verify" in sys.argv:
     if prompt != "y":
         exit()
 
+# callbacks
+cb_timer = TimingCallback()
+cb_early_stopping = cbk.EarlyStopping(patience=3, restore_best_weights=True)
+cb_checkpoint = cbk.ModelCheckPoint(save_path, save_best_only=True)
+
 if sys.argv[1] == "std":
     if "build" in sys.argv:
         if not "id" in sys.argv:
@@ -166,8 +174,12 @@ if sys.argv[1] == "std":
                          epochs = epochs, 
                          batch_size = batch_size, 
                          validation_split = val_split, 
-                         callbacks = [cb])
-        t = sum(cb.logs)
+                         callbacks = [
+                            cb_timer,
+                            cb_early_stopping,
+                            cb_checkpoint,
+                         ])
+        t = sum(cb_timer.logs)
         print(f"Total training time: {t} seconds")
     elif "test" in sys.argv:
         model = load_model(save_path)

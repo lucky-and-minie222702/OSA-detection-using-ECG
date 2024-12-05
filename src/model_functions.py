@@ -28,6 +28,7 @@ from sklearn.metrics import confusion_matrix
 from timeit import default_timer as timer
 import keras
 from typing import List, Tuple, Any
+import keras.callbacks as cbk
 
 # Check for available GPUs
 gpus = tf.config.list_physical_devices('GPU')
@@ -47,8 +48,6 @@ class TimingCallback(keras.callbacks.Callback):
         
     def on_epoch_end(self, epoch, logs={}):
         self.logs.append(timer()-self.starttime)
-
-cb = TimingCallback()
 
 def convert_bytes(byte_size) -> str:
     units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
