@@ -28,7 +28,7 @@ def create_model():
             (512, 5, 0.3),
         ],
         decoder_structures = [
-            (1024, 0.5)
+            (1024, 0.5),
             (512, 0.4),
         ],
         name = "raw_SpO2",
