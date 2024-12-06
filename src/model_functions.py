@@ -176,7 +176,10 @@ def CNN_model(
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
     
-    decoder = layers.Dense(decoder_structures[0][1], activation=layers_activation)(encoder)
+    decoder = layers.Dense(decoder_structures[0][0])(encoder)
+    decoder = layers_activation(decoder)
+    decoder = layers.BatchNormalization()(decoder)
+    decoder = layers.Dropout(rate=decoder_structures[0][1])
     for units, dropout_rate in decoder_structures[1::]:
         decoder = layers.Dense(units)(decoder)
         decoder = layers.BatchNormalization()(decoder)
