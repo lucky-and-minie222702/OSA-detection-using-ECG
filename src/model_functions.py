@@ -182,7 +182,7 @@ def CNN_model(
         decoder = layers.Dense(units)(decoder)
         decoder = layers.BatchNormalization()(decoder)
         decoder = layers_activation(decoder)
-        decoder = layers.Dropout(rate=dropout_rate)
+        decoder = layers.Dropout(rate=dropout_rate)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
 
     model = Model(
