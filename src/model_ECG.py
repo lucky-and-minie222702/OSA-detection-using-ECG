@@ -33,7 +33,7 @@ def create_model_raw():
         only_features_map = True,
     )
 
-def create_model_fft() -> Model:
+def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
@@ -154,7 +154,7 @@ if sys.argv[1] == "std":
             id = input("Please provide an id for this section: ")
         else:
             id = sys.argv[sys.argv.index("id")+1]
-    
+    id += "_ECG"
     print()
     _s = f"| SECTION {id} |"
     _space = " " * 3
