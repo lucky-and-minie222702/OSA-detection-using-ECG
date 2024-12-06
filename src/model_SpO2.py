@@ -75,6 +75,7 @@ cb_early_stopping = cbk.EarlyStopping(
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
 )
+lr_scheduler = cbk.ReduceLROnPlateau()
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
@@ -107,6 +108,7 @@ if sys.argv[1] == "std":
                             cb_timer,
                             cb_early_stopping,
                             cb_checkpoint,
+                            lr_scheduler,
                          ])
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")

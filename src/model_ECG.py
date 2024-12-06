@@ -22,10 +22,11 @@ def create_model_raw():
         input_shape = (None, 1),
         structures = [
             (32, 5, 0.2),
-            (64, 5, 0.0),
+            (64, 5, 0.2),
             (128, 3, 0.0),
             (256, 3, 0.0),
         ],
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = True,
@@ -37,10 +38,11 @@ def create_model_fft():
         input_shape = (None, 1),
         structures = [
             (32, 5, 0.2),
-            (64, 5, 0.0),
+            (64, 5, 0.2),
             (128, 3, 0.0),
             (256, 3, 0.0),
         ],
+        features = 64,
         name = "ECG_fft",
         dimension = 1,
         show_size = True,
@@ -56,9 +58,9 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    out = layers.Dropout(rate=0.3)(encoder)
+    out = layers.Dropout(rate=0.4)(encoder)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
-    out = layers.Dropout(rate=0.2)(out)
+    out = layers.Dropout(rate=0.4)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -88,7 +90,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
+batch_size = 128
 
 print("Creating model architecture...")
 model, encoder = create_model()
@@ -124,6 +126,7 @@ cb_early_stopping = cbk.EarlyStopping(
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
 )
+lr_scheduler = cbk.ReduceLROnPlateau()
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
@@ -156,6 +159,7 @@ if sys.argv[1] == "std":
                             cb_timer,
                             cb_early_stopping,
                             cb_checkpoint,
+                            lr_scheduler,
                          ])
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
