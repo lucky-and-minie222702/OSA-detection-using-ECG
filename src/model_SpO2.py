@@ -21,12 +21,12 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 13, 0.0),
+            (32, 13, 0.1),
             (64, 7, 0.0),
             (128, 3, 0.0),
         ],
         decoder_structures = [
-            (128, 0.5),
+            (128, 0.2),
         ],
         name = "raw_SpO2",
         dimension = 1,

@@ -21,9 +21,9 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 11, 0.2),
-            (64, 7, 0.0),
-            (128, 5, 0.0),
+            (32, 5, 0.2),
+            (64, 5, 0.0),
+            (128, 3, 0.0),
             (256, 3, 0.0),
         ],
         name = "ECG_raw",
@@ -36,9 +36,9 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 7, 0.2),
+            (32, 5, 0.2),
             (64, 5, 0.0),
-            (128, 5, 0.0),
+            (128, 3, 0.0),
             (256, 3, 0.0),
         ],
         name = "ECG_fft",
@@ -56,9 +56,9 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    out = layers.Dropout(rate=0.5)(encoder)
+    out = layers.Dropout(rate=0.3)(encoder)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
-    out = layers.Dropout(rate=0.5)(out)
+    out = layers.Dropout(rate=0.2)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
