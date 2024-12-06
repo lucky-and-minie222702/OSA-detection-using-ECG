@@ -115,13 +115,18 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False):
 
 def CNN_model(
         input_shape: tuple, 
-        structures: List[Tuple[int, int]], 
+        structures: List[Tuple[int, int, float]], 
         name: str, 
+        layers_activation = layers.LeakyReLU(negative_slope=0.2),
         dimension: int = 1, 
         features: int = 512,
         only_features_map: bool = False, 
         compile: bool = False,
-        decoder_structures: List[int] = [1024, 512, 256],
+        decoder_structures: List[int] = [
+            (1024, 0.5), 
+            (512, 0.4), 
+            (256, 0.3),
+        ],
         show_size: bool = False) -> Tuple[Model, Any, Any] :
     if dimension == 1:
         Conv = layers.Conv1D
@@ -145,35 +150,38 @@ def CNN_model(
         GPool = layers.GlobalMaxPool3D
 
     inp = layers.Input(shape=input_shape)
-    encoder = Conv(                                                                                                                                                                                             
+    encoder = Conv(
         filters = structures[0][0], 
         kernel_size = structures[0][1], 
         padding = "same", 
-        activation = layers.LeakyReLU(negative_slope=0.2),
+        activation = layers_activation,
         kernel_regularizer = reg.L2())(inp)
     encoder = layers.BatchNormalization()(encoder)
     encoder = Pool(pool_size=2)(encoder)
-    encoder = layers.Dropout(rate=0.1)(encoder)
+    encoder = layers.Dropout(rate=structures[0][2])(encoder)
     
     
-    for filters, kernel_size in structures[1::]:
+    for filters, kernel_size, dropout_rate in structures[1::]:
         encoder = Conv(
             filters = filters, 
             kernel_size = kernel_size, 
             padding = "same", 
-            activation = layers.LeakyReLU(negative_slope=0.2),
             kernel_regularizer = reg.L2())(encoder)
         encoder = layers.BatchNormalization()(encoder)
+        encoder = layers_activation(encoder)
         encoder = Pool(pool_size=2)(encoder)
-        encoder = layers.Dropout(rate=0.1)(encoder)
+        encoder = layers.Dropout(rate=dropout_rate)(encoder)
 
     encoder = GPool()(encoder)
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
     
-    decoder = layers.Dense(decoder_structures[0], activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    for units in decoder_structures[1::]:
-        decoder = layers.Dense(units, activation=layers.LeakyReLU(negative_slope=0.2))(decoder)
+    decoder = layers.Dense(decoder_structures[0], activation=layers_activation)(encoder)
+    for units, dropout_rate in decoder_structures[1::]:
+        decoder = layers.Dense(units)(decoder)
+        decoder = layers.BatchNormalization()(decoder)
+        decoder = layers_activation(decoder)
+        decoder = layers.Dropout(rate=dropout_rate)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
 
     model = Model(

@@ -21,11 +21,11 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 13),
-            (64, 11),
-            (128, 7),
-            (256, 5),
-            (512, 3)
+            (32, 13, 0.1),
+            (64, 11, 0.1),
+            (128, 7, 0.2),
+            (256, 5, 0.2),
+            (512, 3, 0.3)
         ],
         name = "ECG_raw",
         dimension = 1,
@@ -37,11 +37,11 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 7),
-            (64, 5),
-            (128, 5),
-            (256, 3),
-            (512, 3)
+            (32, 7, 0.1),
+            (64, 5, 0.1),
+            (128, 5, 0.2),
+            (256, 3, 0.2),
+            (512, 3, 0.3)
         ],
         name = "ECG_fft",
         dimension = 1,

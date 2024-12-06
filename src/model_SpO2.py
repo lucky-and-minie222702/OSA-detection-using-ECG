@@ -21,15 +21,15 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 15),
-            (64, 13),
-            (128, 11),
-            (256, 7),
-            (512, 5),
+            (32, 15, 0.1),
+            (64, 13, 0.1),
+            (128, 11, 0.2),
+            (256, 7, 0.2),
+            (512, 5, 0.3),
         ],
         decoder_structures = [
-            1024,
-            512,
+            (1024, 0.5)
+            (512, 0.4),
         ],
         name = "raw_SpO2",
         dimension = 1,
@@ -38,6 +38,7 @@ def create_model():
     )[0]
 
 save_path = path.join("res", "model_SpO2.keras")
+analyzer_path = path.join("res", "analyzer_SpO2.keras")
 
 if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
@@ -46,7 +47,7 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model = create_model()
+model, analyzer, _ = create_model()
 
 print("Loading data...")
 
@@ -112,6 +113,7 @@ if sys.argv[1] == "std":
                          ])
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
+        analyzer.save(analyzer_path)
     elif "test" in sys.argv:
         model = load_model(save_path)
     print("Evaluating...")
