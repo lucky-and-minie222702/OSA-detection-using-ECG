@@ -35,7 +35,7 @@ def create_model():
         dimension = 1,
         show_size = True,
         compile = True
-    )[0]
+    )
 
 save_path = path.join("res", "model_SpO2.keras")
 analyzer_path = path.join("res", "analyzer_SpO2.keras")

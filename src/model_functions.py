@@ -204,4 +204,4 @@ def CNN_model(
     if show_size:
         show_params(model, name)
 
-    return model, encoder, decoder
+    return (model, encoder, decoder)
