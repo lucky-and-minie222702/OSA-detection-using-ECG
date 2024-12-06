@@ -68,8 +68,6 @@ def create_model():
         name="ECG_combined"
     )
     
-    print(model.metrics)
-    
     model.compile(
         optimizer = "adam",
         loss = "binary_crossentropy",
