@@ -58,7 +58,7 @@ class TimingCallback(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.logs.append(timer()-self.starttime)
 
-def convert_bytes(byte_size) -> str:
+def convert_bytes(byte_size: int) -> str:
     units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
     size = byte_size
     unit_index = 0
@@ -67,8 +67,7 @@ def convert_bytes(byte_size) -> str:
         unit_index += 1
     return f"{size:.2f} {units[unit_index]}"
 
-def convert_minutes(total_minutes) -> str:
-    total_seconds = total_minutes * 60
+def convert_seconds(total_seconds: float) -> str:
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
@@ -152,7 +151,7 @@ def CNN_model(
         kernel_regularizer = reg.L2())(inp)
     encoder = layers.BatchNormalization()(encoder)
     encoder = Pool(pool_size=2)(encoder)
-    encoder = layers.Dropout(rate=0.2)(encoder)
+    encoder = layers.Dropout(rate=0.1)(encoder)
     
     
     for filters, kernel_size in structures[1::]:
@@ -164,7 +163,7 @@ def CNN_model(
             kernel_regularizer = reg.L2())(encoder)
         encoder = layers.BatchNormalization()(encoder)
         encoder = Pool(pool_size=2)(encoder)
-        encoder = layers.Dropout(rate=0.2)(encoder)
+        encoder = layers.Dropout(rate=0.1)(encoder)
 
     encoder = GPool()(encoder)
     encoder = layers.Flatten()(encoder)

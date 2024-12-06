@@ -4,7 +4,6 @@ from model_functions import *
 from data_functions import *
 import os
 
-
 def reset_model(model):
     weights = []
     initializers = []
@@ -54,12 +53,14 @@ def create_model():
     raw_model, _, _ = create_model_raw()
     fft_model, _, _ = create_model_fft()
     
-    out = layers.concatenate([
+    analyzer = layers.concatenate([
         raw_model.output,
         fft_model.output,
     ])
-    out = layers.Dense(1024, activation="relu")(out)
-    out = layers.Dense(1, activation="relu")(out)
+    analyzer = layers.Dense(1024, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
+    out = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
+    out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
+    out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
         inputs = [raw_model.input, fft_model.input],
@@ -81,9 +82,11 @@ def create_model():
     if "show_size" in sys.argv:
         show_params(model, "ECG_combined")
 
-    return model
+    return model, analyzer
 
 save_path = path.join("res", "model_ECG.keras")
+analyzer_path = path.join("res", "analyzer_ECG.keras")
+
 if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
@@ -91,13 +94,17 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model = create_model()
+model, analyzer = create_model()
 
 print("Loading data...")
 
 is_data_augmented = "augmented" in sys.argv
-X_raw = np.vstack([np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_normal.npy")), np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_apnea.npy"))])
-X_fft = np.vstack([np.load(path.join("gen_data", "fft_ECG_normal.npy")), np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
+X_raw = np.vstack([
+    np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_normal.npy")), 
+    np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}ECG_apnea.npy"))])
+X_fft = np.vstack([
+    np.load(path.join("gen_data", "fft_ECG_normal.npy")), 
+    np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
 y = np.array([[0] * (len(X_raw) // 2) + [1] * (len(X_raw) // 2)]).flatten()
 
 counts = Counter(y)
@@ -134,8 +141,14 @@ if not "skip_verify" in sys.argv:
 
 # callbacks
 cb_timer = TimingCallback()
-cb_early_stopping = cbk.EarlyStopping(patience=3, restore_best_weights=True)
-cb_checkpoint = cbk.ModelCheckpoint(save_path, save_best_only=True)
+cb_early_stopping = cbk.EarlyStopping(
+    patience = 5, 
+    restore_best_weights = True,
+    start_from_epoch = 150,
+)
+cb_checkpoint = cbk.ModelCheckpoint(
+    save_path, save_best_only=True
+)
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
@@ -150,7 +163,6 @@ if sys.argv[1] == "std":
     print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
     now = datetime.datetime.now()
     print("Start at:", now, "\n")
-    id = str(now) + "_" + id
     
     val_split = 0.1
     train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=22022009)
@@ -181,28 +193,28 @@ if sys.argv[1] == "std":
                             cb_checkpoint,
                          ])
         t = sum(cb_timer.logs)
-        print(f"Total training time: {t} seconds")
+        print(f"Total training time: {convert_seconds(t)}")
+        analyzer.save(analyzer_path)
     elif "test" in sys.argv:
         model = load_model(save_path)
     print("Evaluating...")
-    pred = model.predict([X_raw_test, X_fft_test])
+    pred = model.predict([X_raw_test, X_fft_test], verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
     f = open(path.join("history", f"{id}_result.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
-    cm = list(confusion_matrix(y_test, pred))
+    cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:", cm, file=f)
-    print("Metrics names:", model.metrics_names, file=f)
-    print("Loss and metrics ", model.evaluate([X_raw_test, X_fft_test], y_test, verbose=False), file=f)
-    f.close()
+    names = ["loss"]
+    names += [ f"threshold_0.{t}" for t in range(1, 10) ]
+    results = model.evaluate([X_raw_test, X_fft_test], y_test, verbose=False)
+    print("\nLoss and metrics", file=f)
+    for idx in range(11):
+        print(names[idx], ":", results[idx], file=f)
+    f.close() 
     
     if "build" in sys.argv:
-        prompt = input("Enter \"save\" to save or anything else to discard: ")
-        if prompt == "save":
-            model.save(save_path)
-            for key, value in hist.history.items():
-                data = np.array(value)
-                save_path = path.join("history", f"{id}_SpO2_generate_{key}")
-                np.save(save_path, data)
-            print("Saving done!")
-        else:
-            print("Discard!")
+        for key, value in hist.history.items():
+            data = np.array(value)
+            his_path = path.join("history", f"{id}_{key}_ECG")
+            np.save(his_path, data)
+        print("Saving history done!")
