@@ -51,12 +51,12 @@ def create_model():
     raw_model, _, _ = create_model_raw()
     fft_model, _, _ = create_model_fft()
     
-    analyzer = layers.concatenate([
+    encoder = layers.concatenate([
         raw_model.output,
         fft_model.output,
     ])
-    analyzer = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
-    out = layers.Dropout(rate=0.5)(analyzer)
+    encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    out = layers.Dropout(rate=0.5)(encoder)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
     out = layers.Dropout(rate=0.5)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
@@ -79,7 +79,7 @@ def create_model():
     if "show_size" in sys.argv:
         show_params(model, "ECG_combined")
 
-    return model, analyzer
+    return model, encoder
 
 save_path = path.join("res", "model_ECG.keras")
 analyzer_path = path.join("res", "analyzer_ECG.keras")
@@ -91,7 +91,7 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model, encoder, _ = create_model()
+model, encoder = create_model()
 analyzer = Model(inputs=model.input, outputs=encoder)
 
 print("Loading data...")
