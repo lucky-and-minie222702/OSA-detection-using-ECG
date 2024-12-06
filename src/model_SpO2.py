@@ -21,13 +21,15 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 11),
-            (64, 7),
-            (128, 5),
-            (256, 3),
+            (32, 15),
+            (64, 13),
+            (128, 11),
+            (256, 7),
+            (512, 5),
         ],
         decoder_structures = [
-            256
+            1024,
+            512,
         ],
         name = "raw_SpO2",
         dimension = 1,
@@ -69,7 +71,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 50,
+    start_from_epoch = 75,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
