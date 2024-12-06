@@ -122,7 +122,7 @@ def CNN_model(
         features: int = 512,
         only_features_map: bool = False, 
         compile: bool = False,
-        decoder_structures: List[int] = [
+        decoder_structures: List[Tuple[int, float]] = [
             (1024, 0.5), 
             (512, 0.4), 
             (256, 0.3),
@@ -176,7 +176,7 @@ def CNN_model(
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
     
-    decoder = layers.Dense(decoder_structures[0], activation=layers_activation)(encoder)
+    decoder = layers.Dense(decoder_structures[0][1], activation=layers_activation)(encoder)
     for units, dropout_rate in decoder_structures[1::]:
         decoder = layers.Dense(units)(decoder)
         decoder = layers.BatchNormalization()(decoder)
