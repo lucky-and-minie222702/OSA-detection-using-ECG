@@ -150,6 +150,7 @@ def CNN_model(
         GPool = layers.GlobalMaxPool3D
 
     inp = layers.Input(shape=input_shape)
+    
     encoder = Conv(
         filters = structures[0][0], 
         kernel_size = structures[0][1], 
@@ -159,8 +160,6 @@ def CNN_model(
     encoder = layers.BatchNormalization()(encoder)
     encoder = Pool(pool_size=2)(encoder)
     encoder = layers.Dropout(rate=structures[0][2])(encoder)
-    
-    
     for filters, kernel_size, dropout_rate in structures[1::]:
         encoder = Conv(
             filters = filters, 
@@ -171,7 +170,6 @@ def CNN_model(
         encoder = layers_activation(encoder)
         encoder = Pool(pool_size=2)(encoder)
         encoder = layers.Dropout(rate=dropout_rate)(encoder)
-
     encoder = GPool()(encoder)
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(features, activation="tanh")(encoder)
@@ -179,7 +177,7 @@ def CNN_model(
     decoder = layers.Dense(decoder_structures[0][0])(encoder)
     decoder = layers_activation(decoder)
     decoder = layers.BatchNormalization()(decoder)
-    decoder = layers.Dropout(rate=decoder_structures[0][1])
+    decoder = layers.Dropout(rate=decoder_structures[0][1])(decoder)
     for units, dropout_rate in decoder_structures[1::]:
         decoder = layers.Dense(units)(decoder)
         decoder = layers.BatchNormalization()(decoder)
