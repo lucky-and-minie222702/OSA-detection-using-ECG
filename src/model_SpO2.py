@@ -21,15 +21,12 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 15, 0.1),
-            (64, 13, 0.1),
-            (128, 11, 0.2),
-            (256, 7, 0.2),
-            (512, 5, 0.3),
+            (32, 13, 0.0),
+            (64, 7, 0.0),
+            (128, 3, 0.0),
         ],
         decoder_structures = [
-            (1024, 0.5),
-            (512, 0.4),
+            (128, 0.5),
         ],
         name = "raw_SpO2",
         dimension = 1,
@@ -47,7 +44,8 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model, analyzer, _ = create_model()
+model, encoder, _ = create_model()
+analyzer = Model(inputs=model.input, outputs=encoder)
 
 print("Loading data...")
 
@@ -126,7 +124,7 @@ if sys.argv[1] == "std":
     names += [ f"threshold_0.{t}" for t in range(1, 10) ]
     results = model.evaluate(X_test, y_test, verbose=False)
     print("\nLoss and metrics", file=f)
-    for idx in range(11):
+    for idx in range(10):
         print(names[idx], ":", results[idx], file=f)
     f.close() 
     

@@ -127,7 +127,9 @@ def CNN_model(
             (512, 0.4), 
             (256, 0.3),
         ],
-        show_size: bool = False) -> Tuple[Model, Any, Any] :
+        show_size: bool = False,
+        use_batch_norm_in_Conv: bool = True,
+        use_batch_norm_in_FC: bool = False,) -> Tuple[Model, Any, Any] :
     if dimension == 1:
         Conv = layers.Conv1D
     elif dimension == 2:
@@ -157,7 +159,8 @@ def CNN_model(
         padding = "same", 
         activation = layers_activation,
         kernel_regularizer = reg.L2())(inp)
-    encoder = layers.BatchNormalization()(encoder)
+    if use_batch_norm_in_Conv:
+        encoder = layers.BatchNormalization()(encoder)
     encoder = Pool(pool_size=2)(encoder)
     encoder = layers.Dropout(rate=structures[0][2])(encoder)
     for filters, kernel_size, dropout_rate in structures[1::]:
@@ -166,7 +169,8 @@ def CNN_model(
             kernel_size = kernel_size, 
             padding = "same", 
             kernel_regularizer = reg.L2())(encoder)
-        encoder = layers.BatchNormalization()(encoder)
+        if use_batch_norm_in_Conv:
+            encoder = layers.BatchNormalization()(encoder)
         encoder = layers_activation(encoder)
         encoder = Pool(pool_size=2)(encoder)
         encoder = layers.Dropout(rate=dropout_rate)(encoder)
@@ -176,11 +180,13 @@ def CNN_model(
     
     decoder = layers.Dense(decoder_structures[0][0])(encoder)
     decoder = layers_activation(decoder)
-    decoder = layers.BatchNormalization()(decoder)
+    if use_batch_norm_in_FC:
+        decoder = layers.BatchNormalization()(decoder)
     decoder = layers.Dropout(rate=decoder_structures[0][1])(decoder)
     for units, dropout_rate in decoder_structures[1::]:
         decoder = layers.Dense(units)(decoder)
-        decoder = layers.BatchNormalization()(decoder)
+        if use_batch_norm_in_FC:
+            decoder = layers.BatchNormalization()(decoder)
         decoder = layers_activation(decoder)
         decoder = layers.Dropout(rate=dropout_rate)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)

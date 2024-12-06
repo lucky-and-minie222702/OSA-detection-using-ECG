@@ -21,11 +21,10 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 13, 0.1),
-            (64, 11, 0.1),
-            (128, 7, 0.2),
-            (256, 5, 0.2),
-            (512, 3, 0.3)
+            (32, 11, 0.2),
+            (64, 7, 0.0),
+            (128, 5, 0.0),
+            (256, 3, 0.0),
         ],
         name = "ECG_raw",
         dimension = 1,
@@ -37,11 +36,10 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 7, 0.1),
-            (64, 5, 0.1),
-            (128, 5, 0.2),
-            (256, 3, 0.2),
-            (512, 3, 0.3)
+            (32, 7, 0.2),
+            (64, 5, 0.0),
+            (128, 5, 0.0),
+            (256, 3, 0.0),
         ],
         name = "ECG_fft",
         dimension = 1,
@@ -57,9 +55,10 @@ def create_model():
         raw_model.output,
         fft_model.output,
     ])
-    analyzer = layers.Dense(1024, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
-    out = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
+    analyzer = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(analyzer)
+    out = layers.Dropout(rate=0.5)(analyzer)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
+    out = layers.Dropout(rate=0.5)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -92,7 +91,8 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model, analyzer = create_model()
+model, encoder, _ = create_model()
+analyzer = Model(inputs=model.input, outputs=encoder)
 
 print("Loading data...")
 
@@ -173,7 +173,7 @@ if sys.argv[1] == "std":
     names += [ f"threshold_0.{t}" for t in range(1, 10) ]
     results = model.evaluate([X_raw_test, X_fft_test], y_test, verbose=False)
     print("\nLoss and metrics", file=f)
-    for idx in range(11):
+    for idx in range(10):
         print(names[idx], ":", results[idx], file=f)
     f.close() 
     
