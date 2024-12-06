@@ -131,7 +131,6 @@ if sys.argv[1] == "std":
             id = input("Please provide an id for this section: ")
         else:
             id = sys.argv[sys.argv.index("id")+1]
-    id += "_ECG"
     print()
     _s = f"| SECTION {id} |"
     _space = " " * 3
