@@ -6,6 +6,8 @@ if "lazy_loading" in sys.argv:
     os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 if "disable_GPU" in sys.argv:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+if "no_logs" in sys.argv:
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import keras

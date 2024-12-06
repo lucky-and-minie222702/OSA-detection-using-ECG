@@ -7,6 +7,7 @@ from librosa.feature import mfcc, delta
 import sklearn.preprocessing as prep
 from data_functions import *
 import math
+from sklearn.model_selection import train_test_split
 
 f = open(path.join("database", "list"))
 records = f.read().splitlines()
@@ -214,4 +215,43 @@ if sys.argv[1] == "augment":
         
         np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
         np.save(path.join("gen_data", "a_ECG_apnea.npy"), a_X_1)
+        print("Done!")
+        
+if sys.argv[1] == "split_dataset":
+    _s = "a_" if "augmented" in sys.argv else ""
+    if "ECG" in sys.argv:
+        print("Splitting ECG...")
+        X_raw = np.vstack([
+            np.load(path.join("gen_data", f"{_s}ECG_normal.npy")), 
+            np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))])
+        X_fft = np.vstack([
+            np.load(path.join("gen_data", "fft_ECG_normal.npy")), 
+            np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
+        y = np.array([[0] * (len(X_raw) // 2) + [1] * (len(X_raw) // 2)]).flatten()
+        indices = np.arange(len(y))
+        np.random.shuffle(indices)
+        train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=22022009)
+        np.save(path.join("gen_data", "ECG_raw_X_train"), X_raw[train_indices])
+        np.save(path.join("gen_data", "ECG_fft_X_train"), X_fft[train_indices])
+        np.save(path.join("gen_data", "ECG_y_train"), y[train_indices])
+        
+        np.save(path.join("gen_data", "ECG_raw_X_test"), X_raw[test_indices])
+        np.save(path.join("gen_data", "ECG_fft_X_test"), X_fft[test_indices])
+        np.save(path.join("gen_data", "ECG_y_test"), y[test_indices])
+        print("Done!")
+        
+    if "SpO2" in sys.argv:
+        print("Splitting SpO2...")
+        X = np.vstack([
+            np.load(path.join("gen_data", f"{_s}SpO2_normal.npy")), 
+            np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
+        ])
+        y = np.array([[0] * (len(X) // 2) + [1] * (len(X) // 2)]).flatten()
+        indices = np.arange(len(y))
+        np.random.shuffle(indices)
+        train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=22022009)
+        np.save(path.join("gen_data", "SpO2_X_train"), X[train_indices])
+        np.save(path.join("gen_data", "SpO2_y_train"), y[train_indices])
+        np.save(path.join("gen_data", "SpO2_X_test"), X[test_indices])
+        np.save(path.join("gen_data", "SpO2_y_test"), y[test_indices])
         print("Done!")

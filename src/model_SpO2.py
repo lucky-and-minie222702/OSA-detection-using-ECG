@@ -48,35 +48,15 @@ model = create_model()
 
 print("Loading data...")
 
-is_data_augmented = "augmented" in sys.argv
-X_raw = np.vstack([
-    np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}SpO2_normal.npy")), 
-    np.load(path.join("gen_data", f"{'a_' if is_data_augmented else ''}SpO2_apnea.npy"))])
-y = np.array([[0] * (len(X_raw) // 2) + [1] * (len(X_raw) // 2)]).flatten()
+X_train = np.load(path.join("gen_data", "SpO2_X_train.npy"))
+y_train = np.load(path.join("gen_data", "SpO2_y_train.npy"))
 
-counts = Counter(y)
+X_test = np.load(path.join("gen_data", "SpO2_X_test.npy"))
+y_test = np.load(path.join("gen_data", "SpO2_y_test.npy"))
+
+counts = Counter(list(y_train) + list(y_test))
 print("Done!")
 print(f"Total: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-
-indices = np.arange(len(y))
-np.random.shuffle(indices)
-
-
-X_raw = X_raw[indices]
-y = y[indices]
-
-if "num_cases" in sys.argv:
-    num_cases = sys.argv[sys.argv.index("num_cases")+1]
-    if num_cases != "all":
-        num_cases = int(num_cases)
-        X_raw = X_raw[:num_cases:]
-        y = y[:num_cases:]
-else:
-    num_cases = int(input("Please provide a valid number of cases for model to learn: "))
-if num_cases != "all":
-    indices = np.arange(num_cases)
-
-print(f"=> Training on {'full dataset' if num_cases == 'all' else num_cases}")
 print(f"=> Training with {epochs} epochs")
 
 if not "skip_verify" in sys.argv:
@@ -109,14 +89,7 @@ if sys.argv[1] == "std":
     now = datetime.datetime.now()
     print("Start at:", now, "\n")
     
-    val_split = 0.1
-    train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=22022009)
-    
-    y_train = y[train_indices]
-    X_raw_train = X_raw[train_indices]
-    
-    y_test = y[test_indices]
-    X_raw_test = X_raw[test_indices]
+    val_split = 0.2
     
     count_train = Counter(y_train)
     count_test = Counter(y_test)
@@ -125,7 +98,7 @@ if sys.argv[1] == "std":
     print(f"=> Validation set: Apnea cases [1]: {int(count_train[1]*val_split)} - Normal cases [0]: {int(count_train[0]*val_split)}")
 
     if "build" in sys.argv:
-        hist = model.fit(X_raw_train, 
+        hist = model.fit(X_train, 
                          y_train, 
                          epochs = epochs, 
                          batch_size = batch_size, 
@@ -140,7 +113,7 @@ if sys.argv[1] == "std":
     elif "test" in sys.argv:
         model = load_model(save_path)
     print("Evaluating...")
-    pred = model.predict(X_raw_test, verbose=False)
+    pred = model.predict(X_test, verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
     f = open(path.join("history", f"{id}_result.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
@@ -148,7 +121,7 @@ if sys.argv[1] == "std":
     print("Confusion matrix:", cm, file=f)
     names = ["loss"]
     names += [ f"threshold_0.{t}" for t in range(1, 10) ]
-    results = model.evaluate(X_raw_test, y_test, verbose=False)
+    results = model.evaluate(X_test, y_test, verbose=False)
     print("\nLoss and metrics", file=f)
     for idx in range(11):
         print(names[idx], ":", results[idx], file=f)
