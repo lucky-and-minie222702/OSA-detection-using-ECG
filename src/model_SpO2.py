@@ -206,7 +206,8 @@ if sys.argv[1] == "k_fold":
                   verbose = False,
                   callbacks = [
                       cb_timer,
-                      lr_scheduler
+                      lr_scheduler,
+                      cb_early_stopping
                   ],
                   validation_data=(X_test, y_test))
         
