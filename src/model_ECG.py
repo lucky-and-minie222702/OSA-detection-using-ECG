@@ -4,19 +4,6 @@ from model_functions import *
 from data_functions import *
 import os
 
-def reset_model(model):
-    weights = []
-    initializers = []
-    for layer in model.layers:
-        if isinstance(layer, (keras.layers.Dense, keras.layers.Conv1D, keras.layers.Conv2D, keras.layers.Conv3D)):
-            weights += [layer.kernel, layer.bias]
-            initializers += [layer.kernel_initializer, layer.bias_initializer]
-        elif isinstance(layer, keras.layers.BatchNormalization):
-            weights += [layer.gamma, layer.beta, layer.moving_mean, layer.moving_variance]
-            initializers += [layer.gamma_initializer, layer.beta_initializer, layer.moving_mean_initializer, layer.moving_variance_initializer]
-        for w, init in zip(weights, initializers):
-            w.assign(init(w.shape, dtype=w.dtype))
-
 def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),

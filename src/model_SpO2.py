@@ -4,19 +4,6 @@ from model_functions import *
 from data_functions import *
 import os
 
-def reset_model(model):
-    weights = []
-    initializers = []
-    for layer in model.layers:
-        if isinstance(layer, (keras.layers.Dense, keras.layers.Conv1D, keras.layers.Conv2D, keras.layers.Conv3D)):
-            weights += [layer.kernel, layer.bias]
-            initializers += [layer.kernel_initializer, layer.bias_initializer]
-        elif isinstance(layer, keras.layers.BatchNormalization):
-            weights += [layer.gamma, layer.beta, layer.moving_mean, layer.moving_variance]
-            initializers += [layer.gamma_initializer, layer.beta_initializer, layer.moving_mean_initializer, layer.moving_variance_initializer]
-        for w, init in zip(weights, initializers):
-            w.assign(init(w.shape, dtype=w.dtype))
-
 def create_model():
     return CNN_model(
         input_shape = (None, 1),
@@ -30,8 +17,8 @@ def create_model():
         decoder_structures = [
             (1024, 0.05),
             (512, 0.0),
+            (256, 0.0),
         ],
-        use_batch_norm_in_FC = False,
         features = 256,
         name = "raw_SpO2",
         dimension = 1,
@@ -51,6 +38,7 @@ batch_size = 64
 print("Creating model architecture...")
 model, encoder, _ = create_model()
 analyzer = Model(inputs=model.input, outputs=encoder)
+original = model.weights
 
 print("Loading data...")
 
@@ -161,17 +149,6 @@ if sys.argv[1] == "k_fold":
         folds = int(sys.argv[sys.argv.index("folds")+1])
     kf = KFold(n_splits=folds)
     
-    if not "id" in sys.argv:
-        id = input("Please provide an id for this section: ")
-    else:
-        id = sys.argv[sys.argv.index("id")+1]
-    print()
-    _s = f"| SECTION {id} |"
-    _space = " " * 3
-    print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
-    now = datetime.datetime.now()
-    print("Start at:", now, "\n")
-    
     idx = 0
     scores = []
     
@@ -183,7 +160,7 @@ if sys.argv[1] == "k_fold":
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         
-        reset_model(model)
+        model.set_weights(original)
         model.fit(X_train, 
                   y_train, 
                   epochs = epochs, 
