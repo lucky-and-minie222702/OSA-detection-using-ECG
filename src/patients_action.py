@@ -191,10 +191,10 @@ if sys.argv[1] == "augment":
         )
         
         a_X_0 = np.vstack(
-            [X_0, X_0 + np.random.normal(0, 0.1, X_0.shape)],
+            [X_0, X_0 + np.random.normal(0, 0.01, X_0.shape)],
         )
         a_X_1 = np.vstack(
-            [X_1, X_1 + np.random.normal(0, 0.1, X_1.shape)],
+            [X_1, X_1 + np.random.normal(0, 0.02, X_1.shape)],
         )
         
         np.save(path.join("gen_data", "a_SpO2_apnea.npy"), a_X_1)
