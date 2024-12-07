@@ -42,24 +42,26 @@ def create_model(name: str):
         raw_model.output,
         fft_model.output,
     ])
-
-    encoder = layers.Dropout(rate=0.2)(encoder)
-    encoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
-    encoder = layers.BatchNormalization()(encoder)
-    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
-    encoder = layers.MaxPool1D(pool_size=4)(encoder)
-    encoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
-    encoder = layers.BatchNormalization()(encoder)
-    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
-    encoder = layers.GlobalMaxPool1D()(encoder)
-    encoder = layers.Flatten()(encoder)
-    encoder = layers.Dense(128, activation="relu")(encoder)
-    encoder = layers.Dropout(rate=0.1)(encoder)
-    encoder = layers.Dense(1, activation="sigmoid")(encoder)
+    encoder = layers.Dense(256, activation="tanh")(encoder)
+    encoder = layers.Reshape((16, 16))(encoder)
+    
+    decoder = layers.Dropout(rate=0.1)(encoder)
+    decoder = layers.Conv2D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.BatchNormalization()(decoder)
+    decoder = layers.LeakyRelu(negative_slope=0.2)(decoder)
+    decoder = layers.MaxPool2D(pool_size=2)(decoder)
+    decoder = layers.Conv2D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.BatchNormalization()(decoder)
+    decoder = layers.LeakyRelu(negative_slope=0.2)(decoder)
+    decoder = layers.GlobalMaxPool2D()(decoder)
+    decoder = layers.Flatten()(decoder)
+    decoder = layers.Dense(128, activation="relu")(decoder)
+    decoder = layers.Dropout(rate=0.1)(decoder)
+    decoder = layers.Dense(1, activation="sigmoid")(decoder)
     
     model = Model(
         inputs = [raw_model.input, fft_model.input],
-        outputs = encoder,
+        outputs = decoder,
         name = name 
     )
     
