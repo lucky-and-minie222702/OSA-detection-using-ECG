@@ -8,15 +8,15 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 5, 0.1),
+            (32, 5, 0.2),
             (64, 5, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
             (512, 3, 0.0),
         ],
         decoder_structures = [
-            (256, 0.1),
-            (128, 0.0),
+            (1024, 0.2),
+            (512, 0.0),
         ],
         features = 512,
         name = "raw_SpO2",
@@ -68,7 +68,7 @@ cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
 )
 lr_scheduler = cbk.ReduceLROnPlateau(
-    factor = 0.5,
+    factor = 0.75,
     min_lr = 0.0001,
 )
 
@@ -158,13 +158,13 @@ if sys.argv[1] == "k_fold":
     for train_index, test_index in kf.split(X):
         cb_timer = TimingCallback()
         lr_scheduler = cbk.ReduceLROnPlateau(
-            factor = 0.5,
+            factor = 0.75,
             min_lr = 0.0001,
         )
         cb_early_stopping = cbk.EarlyStopping(
-            patience = 3, 
+            patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 30,
+            start_from_epoch = 40,
         )
         idx += 1
         print(f"FOlD {idx}:")
