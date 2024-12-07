@@ -21,14 +21,15 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 13, 0.1),
-            (64, 7, 0.0),
-            (128, 3, 0.0),
+            (32, 7, 0.1),
+            (64, 5, 0.0),
+            (128, 5, 0.0),
             (256, 3, 0.0),
+            (512, 3, 0.0),
         ],
         decoder_structures = [
+            (512, 0.1),
             (256, 0.1),
-            (128, 0.1),
         ],
         features = 256,
         name = "raw_SpO2",
@@ -127,7 +128,7 @@ if sys.argv[1] == "std":
     f = open(path.join("history", f"{id}_result_SpO2.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
-    print("Confusion matrix:", cm, file=f)
+    print("Confusion matrix:\n", cm, file=f)
     names = ["loss"]
     names += [ f"threshold_0.{t}" for t in range(1, 10) ]
     results = model.evaluate(X_test, y_test, verbose=False)
@@ -139,6 +140,6 @@ if sys.argv[1] == "std":
     if "build" in sys.argv:
         for key, value in hist.history.items():
             data = np.array(value)
-            his_path = path.join("history", f"{id}_{key}_ECG")
+            his_path = path.join("history", f"{id}_{key}_SpO2")
             np.save(his_path, data)
         print("Saving history done!")

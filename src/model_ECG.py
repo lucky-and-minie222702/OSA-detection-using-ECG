@@ -177,7 +177,7 @@ if sys.argv[1] == "std":
     f = open(path.join("history", f"{id}_result_ECG.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
-    print("Confusion matrix:", cm, file=f)
+    print("Confusion matrix:\n", cm, file=f)
     names = ["loss"]
     names += [ f"threshold_0.{t}" for t in range(1, 10) ]
     results = model.evaluate([X_raw_test, X_fft_test], y_test, verbose=False)
