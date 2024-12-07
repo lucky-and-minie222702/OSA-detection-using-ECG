@@ -150,6 +150,8 @@ if sys.argv[1] == "k_fold":
     idx = 0
     scores = []
     
+    f = open(path.join("history", f"{id}_k_fold_SpO2.txt"), "w")
+    
     for train_index, test_index in kf.split(X):
         cb_timer = TimingCallback()
         lr_scheduler = cbk.ReduceLROnPlateau(
@@ -158,6 +160,7 @@ if sys.argv[1] == "k_fold":
         )
         idx += 1
         print(f"FOlD {idx}:")
+        print(f"FOlD {idx}:", file=f)
         
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -180,10 +183,15 @@ if sys.argv[1] == "k_fold":
         scores.append(score)
         for threshold in range(1, 10):
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}", file=f)
         
         print()
     
     scores = np.mean(np.array(scores), axis=0)
     print("AVERAGE SCORE")
+    print("AVERAGE SCORE", file=f)
     for threshold in range(1, 10):
         print(f"Threshold 0.{threshold}: {scores[threshold-1]}")
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}", file=f)
+        
+    f.close()
