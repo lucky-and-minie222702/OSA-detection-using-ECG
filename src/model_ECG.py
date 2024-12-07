@@ -8,11 +8,11 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0),
-            (64, 3, 0.0),
-            (128, 3, 0.0),
+            (64, 3, 0.0, 4),
+            (128, 3, 0.0, 4),
+            (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -23,11 +23,11 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0),
-            (64, 3, 0.0),
-            (128, 3, 0.0),
+            (64, 3, 0.0, 4),
+            (128, 3, 0.0, 4),
+            (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -42,6 +42,7 @@ def create_model(name: str):
         raw_model.output,
         fft_model.output,
     ])
+    encoder = layers.Dropout(rate=0.2)(encoder)
     encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
     encoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
     encoder = layers.Conv1D(filters=32, kernel_size=3)(encoder)

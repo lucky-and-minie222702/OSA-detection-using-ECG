@@ -159,7 +159,7 @@ def CNN_model(
         inp = custom_input
     
     encoder = layers.Normalization()(inp)
-    for filters, kernel_size, dropout_rate in structures:
+    for filters, kernel_size, dropout_rate, pool_size in structures:
         encoder = Conv(
             filters = filters, 
             kernel_size = kernel_size, 
@@ -168,7 +168,7 @@ def CNN_model(
         if use_batch_norm_in_Conv:
             encoder = layers.BatchNormalization()(encoder)
         encoder = layers_activation(encoder)
-        encoder = Pool(pool_size=2)(encoder)
+        encoder = Pool(pool_size=pool_size)(encoder)
         encoder = layers.Dropout(rate=dropout_rate)(encoder)
     encoder = GPool()(encoder)
     encoder = layers.Flatten()(encoder)
