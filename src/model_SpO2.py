@@ -24,9 +24,11 @@ def create_model():
             (32, 13, 0.1),
             (64, 7, 0.0),
             (128, 3, 0.0),
+            (256, 3, 0.0),
         ],
         decoder_structures = [
-            (128, 0.2),
+            (256, 0.1),
+            (128, 0.1),
         ],
         name = "raw_SpO2",
         dimension = 1,
@@ -118,7 +120,7 @@ if sys.argv[1] == "std":
     print("Evaluating...")
     pred = model.predict(X_test, verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
-    f = open(path.join("history", f"{id}_result.txt"), "w")
+    f = open(path.join("history", f"{id}_result_SpO2.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:", cm, file=f)

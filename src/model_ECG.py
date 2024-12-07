@@ -21,12 +21,13 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 5, 0.2),
-            (64, 5, 0.2),
+            (32, 3, 0.0),
+            (64, 3, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
+            (512, 3, 0.0),
         ],
-        features = 128,
+        features = 256,
         name = "ECG_raw",
         dimension = 1,
         show_size = True,
@@ -37,12 +38,13 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 5, 0.2),
-            (64, 5, 0.2),
+            (32, 3, 0.0),
+            (64, 3, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
+            (256, 3, 0.0),
         ],
-        features = 64,
+        features = 256,
         name = "ECG_fft",
         dimension = 1,
         show_size = True,
@@ -58,9 +60,9 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    out = layers.Dropout(rate=0.4)(encoder)
+    out = layers.Dropout(rate=0.1)(encoder)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
-    out = layers.Dropout(rate=0.4)(out)
+    out = layers.Dropout(rate=0.1)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -169,7 +171,7 @@ if sys.argv[1] == "std":
     print("Evaluating...")
     pred = model.predict([X_raw_test, X_fft_test], verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
-    f = open(path.join("history", f"{id}_result.txt"), "w")
+    f = open(path.join("history", f"{id}_result_ECG.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:", cm, file=f)
