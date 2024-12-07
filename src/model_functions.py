@@ -172,7 +172,7 @@ def CNN_model(
         encoder = layers.Dropout(rate=dropout_rate)(encoder)
     encoder = GPool()(encoder)
     encoder = layers.Flatten()(encoder)
-    encoder = layers.Dense(features, activation="tanh")(encoder)
+    encoder = layers.Dense(features, activation="tanh" if only_features_map else layers_activation)(encoder)
     
     decoder = layers.Dense(decoder_structures[0][0])(encoder)
     decoder = layers_activation(decoder)

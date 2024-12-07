@@ -15,7 +15,7 @@ def create_model():
             (512, 3, 0.0),
         ],
         decoder_structures = [
-            (256, 0.5),
+            (256, 0.4),
             (128, 0.4),
         ],
         features = 512,
@@ -62,7 +62,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 100,
+    start_from_epoch = 40,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
