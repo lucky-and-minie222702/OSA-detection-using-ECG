@@ -18,7 +18,7 @@ def create_model(name: str):
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     out = layers.Dense(256, activation="relu")(x)
-    out = layers.Dropout(rate=0.1)(out)
+    out = layers.Dropout(rate=0.3)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -171,7 +171,7 @@ if sys.argv[1] == "k_fold":
     
     f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
     
-    for train_index, test_index in kf.split(X):
+    for train_index, test_index in kf.split(y):
         cb_timer = TimingCallback()
         lr_scheduler = cbk.ReduceLROnPlateau(
             factor = 0.5,

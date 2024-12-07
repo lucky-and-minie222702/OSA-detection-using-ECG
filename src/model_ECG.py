@@ -8,13 +8,11 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0),
             (64, 3, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
-            (512, 3, 0.0),
         ],
-        features = 512,
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -25,13 +23,11 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0),
             (64, 3, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
-            (512, 3, 0.0),
         ],
-        features = 512,
+        features = 128,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -46,8 +42,17 @@ def create_model():
         raw_model.output,
         fft_model.output,
     ])
-    encoder = layers.Dense(1024, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    encoder = layers.Dense(128, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    encoder = layers.Dense(1, activation="sigmoid")(encoder)
     
+    model.compile(
+        optimizer = "adam",
+        loss = "binary_crossentropy",
+        metrics = [
+            metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                                    threshold = t/10) for t in range(1, 10)
+        ],
+    )
 
     if "show_size" in sys.argv:
         show_params(model, "ECG_combined")
@@ -66,6 +71,7 @@ batch_size = 128
 print("Creating model architecture...")
 model, encoder = create_model()
 analyzer = Model(inputs=model.input, outputs=encoder)
+original = model.weights
 
 print("Loading data...")
 
@@ -92,7 +98,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 150,
+    start_from_epoch = 100,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only = True
@@ -161,3 +167,89 @@ if sys.argv[1] == "std":
             his_path = path.join("history", f"{name}_{key}_ECG")
             np.save(his_path, data)
         print("Saving history done!")
+        
+if sys.argv[1] == "k_fold":
+    X_raw = np.vstack([
+        X_raw_train,
+        X_raw_test
+    ])
+    X_fft = np.vstack([
+        X_fft_train,
+        X_fft_test
+    ])
+    y = np.hstack([
+        y_train,
+        y_test
+    ])
+    
+    X_raw, X_fft, y = shuffle(X_raw, X_fft, y, random_state=22022009)
+    
+    if not "folds" in sys.argv:
+        folds = int(input("Please provide an valid number of folds for this section: "))
+    else:
+        folds = int(sys.argv[sys.argv.index("folds")+1])
+    kf = KFold(n_splits=folds)
+    
+    idx = 0
+    scores = []
+    
+    f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
+    
+    for train_index, test_index in kf.split(y):
+        cb_timer = TimingCallback()
+        lr_scheduler = cbk.ReduceLROnPlateau(
+            factor = 0.5,
+            min_lr = 0.0001,
+        )
+        cb_early_stopping = cbk.EarlyStopping(
+            patience = 5, 
+            restore_best_weights = True,
+            start_from_epoch = 40,
+        )
+        idx += 1
+        print(f"FOlD {idx}:")
+        print(f"FOlD {idx}:", file=f)
+        
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        counts_train = Counter(list(y_train.flatten()))
+        counts_test = Counter(list(y_test.flatten()))
+        print(counts_train)
+        print(counts_test)
+        print(counts_train, file=f)
+        print(counts_test, file=f)
+        
+        model.set_weights(original)
+        model.fit(X_train, 
+                  y_train, 
+                  epochs = epochs, 
+                  batch_size = batch_size,
+                  verbose = False,
+                  callbacks = [
+                      cb_timer,
+                      lr_scheduler,
+                      cb_early_stopping
+                  ],
+                  validation_data=(X_test, y_test))
+        
+        t = sum(cb_timer.logs)
+        print(f"Total training time: {convert_seconds(t)}")
+        print(f"Total epochs: {len(cb_timer.logs)}")
+
+        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
+        scores.append(score)
+        for threshold in range(1, 10):
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}", file=f)
+        
+        print()
+    
+    scores = np.mean(np.array(scores), axis=0)
+    print("AVERAGE SCORE")
+    print("AVERAGE SCORE", file=f)
+    for threshold in range(1, 10):
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}")
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}", file=f)
+        
+    f.close()
