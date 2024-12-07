@@ -171,10 +171,12 @@ if sys.argv[1] == "k_fold":
     now = datetime.datetime.now()
     print("Start at:", now, "\n")
     
-    idx = 1
+    idx = 0
     scores = []
     
     for train_index, test_index in kf.split(X):
+        cb_timer = TimingCallback()
+        idx += 1
         print(f"FOlD {idx}:")
         
         X_train, X_test = X[train_index], X[test_index]
@@ -188,8 +190,10 @@ if sys.argv[1] == "k_fold":
                   verbose = False,
                   callbacks = [cb_timer])
         
-        
-        score = model.evaluate(X_test, y_test, batch_size=batch_size)[1::]
+        t = sum(cb_timer.logs)
+        print(f"Total training time: {convert_seconds(t)}")
+
+        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")
