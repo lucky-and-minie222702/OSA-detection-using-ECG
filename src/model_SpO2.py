@@ -19,7 +19,7 @@ def create_model():
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.2)(x)
-    x = layers.GlobalMaxPool1D(pool_size=2)(x)
+    x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(1, activation="sigmoid")(x)
     
