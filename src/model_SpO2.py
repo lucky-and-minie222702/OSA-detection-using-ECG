@@ -183,8 +183,8 @@ if sys.argv[1] == "k_fold":
             start_from_epoch = 40,
         )
         idx += 1
-        print(f"FOlD {idx}:")
-        print(f"FOlD {idx}:", file=f)
+        print(f"FOLD {idx}:")
+        print(f"FOLD {idx}:", file=f)
         
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]

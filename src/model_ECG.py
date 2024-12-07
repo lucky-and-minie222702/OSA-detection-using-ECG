@@ -43,6 +43,11 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(128, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    encoder = layers.Conv1D(filters=16, kernel_size=3)(encoder)
+    encoder = layers.BatchNormalization()(encoder)
+    encoder = layers.LeakyReLU(negative_slope=0.2)(encoder)
+    encoder = layers.MaxPool1D(pool_size=2)(encoder)
+    encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(1, activation="sigmoid")(encoder)
     
     model.compile(
@@ -207,8 +212,8 @@ if sys.argv[1] == "k_fold":
             start_from_epoch = 40,
         )
         idx += 1
-        print(f"FOlD {idx}:")
-        print(f"FOlD {idx}:", file=f)
+        print(f"FOLD {idx}:")
+        print(f"FOLD {idx}:", file=f)
         
         X_raw_train, X_raw_test = X_raw[train_index], X_raw[test_index]
         X_fft_train, X_fft_test = X_fft[train_index], X_fft[test_index]
