@@ -5,7 +5,7 @@ from model_functions import *
 from data_functions import *
 import os
 
-def create_model():
+def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
     x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(x)
@@ -52,7 +52,7 @@ else:
 batch_size = 32
 
 print("Creating model architecture...")
-model, encoder = create_model()
+model, encoder = create_model("raw_SpO2")
 analyzer = Model(inputs=model.input, outputs=encoder)
 original = model.weights
 
