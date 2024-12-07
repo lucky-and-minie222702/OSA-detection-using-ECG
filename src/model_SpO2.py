@@ -50,7 +50,7 @@ else:
 batch_size = 32
 
 print("Creating model architecture...")
-model, encoder = create_model("raw_SpO2")
+model, encoder = create_model("SpO2_raw")
 analyzer = Model(inputs=model.input, outputs=encoder)
 original = model.weights
 

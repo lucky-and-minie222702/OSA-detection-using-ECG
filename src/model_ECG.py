@@ -34,7 +34,7 @@ def create_model_fft():
         only_features_map = True,
     )
 
-def create_model():
+def create_model(name: str):
     raw_model, _, _ = create_model_raw()
     fft_model, _, _ = create_model_fft()
     
@@ -43,13 +43,19 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(128, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    encoder = layers.Reshape(encoder.shape[1::])(encoder)
+    encoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
     encoder = layers.Conv1D(filters=16, kernel_size=3)(encoder)
     encoder = layers.BatchNormalization()(encoder)
     encoder = layers.LeakyReLU(negative_slope=0.2)(encoder)
     encoder = layers.MaxPool1D(pool_size=2)(encoder)
     encoder = layers.Flatten()(encoder)
     encoder = layers.Dense(1, activation="sigmoid")(encoder)
+    
+    model = Model(
+        inputs = [raw_model.input, fft_model.input],
+        outputs = encoder,
+        name = name 
+    )
     
     model.compile(
         optimizer = "adam",
@@ -75,7 +81,7 @@ else:
 batch_size = 64
 
 print("Creating model architecture...")
-model, encoder = create_model()
+model, encoder = create_model("ECG_combined")
 analyzer = Model(inputs=model.input, outputs=encoder)
 original = model.weights
 
