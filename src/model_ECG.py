@@ -9,9 +9,8 @@ def create_model_raw():
         input_shape = (None, 1),
         structures = [
             (64, 3, 0.0, 2),
-            (128, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -23,9 +22,8 @@ def create_model_fft():
         input_shape = (None, 1),
         structures = [
             (64, 3, 0.0, 2),
-            (128, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 128,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -44,7 +42,7 @@ def create_model(name: str):
     
     decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
-    decoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
@@ -173,7 +171,7 @@ if sys.argv[1] == "std":
     print("\nLoss and metrics", file=f)
     for idx in range(10):
         print(names[idx], ":", results[idx], file=f)
-    f.close() 
+    f.close()
     
     if "build" in sys.argv:
         for key, value in hist.history.items():
