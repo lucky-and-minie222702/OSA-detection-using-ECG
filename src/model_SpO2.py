@@ -1,3 +1,4 @@
+from sympy import false
 from data_functions import *
 import datetime
 from model_functions import *
@@ -13,8 +14,8 @@ def create_model():
             (128, 3, 0.0),
         ],
         decoder_structures = [
-            (256, 0.3),
-            (128, 0.1),
+            (256, 0.2),
+            (128, 0.0),
         ],
         features = 128,
         name = "raw_SpO2",
