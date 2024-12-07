@@ -8,17 +8,17 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
-    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     out = layers.Dense(128, activation="relu")(x)
-    out = layers.Dropout(rate=0.5)(out)
+    out = layers.Dropout(rate=0.2)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
