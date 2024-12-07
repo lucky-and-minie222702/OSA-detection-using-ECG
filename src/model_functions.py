@@ -130,7 +130,8 @@ def CNN_model(
         ],
         show_size: bool = False,
         use_batch_norm_in_Conv: bool = True,
-        use_batch_norm_in_FC: bool = False,) -> Tuple[Model, Any, Any] :
+        use_batch_norm_in_FC: bool = False,
+        custom_input = None) -> Tuple[Model, Any, Any] :
     if dimension == 1:
         Conv = layers.Conv1D
     elif dimension == 2:
@@ -152,7 +153,10 @@ def CNN_model(
     elif dimension == 3:
         GPool = layers.GlobalMaxPool3D
 
-    inp = layers.Input(shape=input_shape)
+    if custom_input is None:
+        inp = layers.Input(shape=input_shape)
+    else:
+        inp = custom_input
     
     encoder = Conv(
         filters = structures[0][0], 

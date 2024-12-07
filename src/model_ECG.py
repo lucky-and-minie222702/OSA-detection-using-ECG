@@ -47,26 +47,7 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(1024, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    out = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(out)
-    out = layers.Dropout(rate=0.1)(encoder)
-    out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
-    out = layers.Dropout(rate=0.1)(out)
-    out = layers.Dense(1, activation="sigmoid")(out)
     
-    model = Model(
-        inputs = [raw_model.input, fft_model.input],
-        outputs = out,
-        name="ECG_combined"
-    )
-    
-    model.compile(
-        optimizer = "adam",
-        loss = "binary_crossentropy",
-            metrics = [
-                metrics.BinaryAccuracy(name = f"threshold_0.{t}",
-                                       threshold = t/10) for t in range(1, 10)
-            ],
-    )
 
     if "show_size" in sys.argv:
         show_params(model, "ECG_combined")

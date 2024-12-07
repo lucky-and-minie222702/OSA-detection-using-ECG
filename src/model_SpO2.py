@@ -8,16 +8,14 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 5, 0.05),
+            (32, 5, 0.01),
             (64, 5, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
-            (512, 3, 0.0),
         ],
         decoder_structures = [
-            (1024, 0.05),
-            (512, 0.0),
-            (256, 0.0),
+            (256, 0.001),
+            (128, 0.0),
         ],
         features = 256,
         name = "raw_SpO2",
