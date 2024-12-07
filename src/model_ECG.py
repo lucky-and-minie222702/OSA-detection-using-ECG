@@ -42,7 +42,7 @@ def create_model_fft():
             (64, 3, 0.0),
             (128, 3, 0.0),
             (256, 3, 0.0),
-            (256, 3, 0.0),
+            (512, 3, 0.0),
         ],
         features = 256,
         name = "ECG_fft",
@@ -126,9 +126,12 @@ cb_early_stopping = cbk.EarlyStopping(
     start_from_epoch = 150,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
-    save_path, save_best_only=True
+    save_path, save_best_only = True
 )
-lr_scheduler = cbk.ReduceLROnPlateau()
+lr_scheduler = cbk.ReduceLROnPlateau(
+    factor = 0.5,
+    min_lr = 0.0001,
+)
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:

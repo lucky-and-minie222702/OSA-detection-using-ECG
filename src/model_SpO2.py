@@ -30,6 +30,7 @@ def create_model():
             (256, 0.1),
             (128, 0.1),
         ],
+        features = 256,
         name = "raw_SpO2",
         dimension = 1,
         show_size = True,
@@ -77,7 +78,10 @@ cb_early_stopping = cbk.EarlyStopping(
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
 )
-lr_scheduler = cbk.ReduceLROnPlateau()
+lr_scheduler = cbk.ReduceLROnPlateau(
+    factor = 0.5,
+    min_lr = 0.0001,
+)
 
 if sys.argv[1] == "std":
     if "build" in sys.argv:
