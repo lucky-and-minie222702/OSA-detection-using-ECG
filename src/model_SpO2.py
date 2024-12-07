@@ -152,6 +152,10 @@ if sys.argv[1] == "k_fold":
     
     for train_index, test_index in kf.split(X):
         cb_timer = TimingCallback()
+        lr_scheduler = cbk.ReduceLROnPlateau(
+            factor = 0.5,
+            min_lr = 0.0001,
+        )
         idx += 1
         print(f"FOlD {idx}:")
         
@@ -164,7 +168,10 @@ if sys.argv[1] == "k_fold":
                   epochs = epochs, 
                   batch_size = batch_size,
                   verbose = False,
-                  callbacks = [cb_timer])
+                  callbacks = [
+                      cb_timer,
+                      lr_scheduler
+                  ])
         
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
