@@ -8,11 +8,11 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 4),
-            (128, 3, 0.0, 4),
-            (256, 3, 0.0, 2),
+            (32, 3, 0.0, 2),
+            (64, 3, 0.0, 2),
+            (128, 3, 0.0, 2),
         ],
-        features = 512,
+        features = 256,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -23,11 +23,11 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 4),
-            (128, 3, 0.0, 4),
-            (256, 3, 0.0, 2),
+            (32, 3, 0.0, 2),
+            (64, 3, 0.0, 2),
+            (128, 3, 0.0, 2),
         ],
-        features = 512,
+        features = 256,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -42,14 +42,19 @@ def create_model(name: str):
         raw_model.output,
         fft_model.output,
     ])
+
     encoder = layers.Dropout(rate=0.2)(encoder)
-    encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
-    encoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
-    encoder = layers.Conv1D(filters=32, kernel_size=3)(encoder)
+    encoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
     encoder = layers.BatchNormalization()(encoder)
-    encoder = layers.LeakyReLU(negative_slope=0.2)(encoder)
-    encoder = layers.MaxPool1D(pool_size=2)(encoder)
+    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
+    encoder = layers.MaxPool1D(pool_size=4)(encoder)
+    encoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
+    encoder = layers.BatchNormalization()(encoder)
+    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
+    encoder = layers.GlobalMaxPool1D()(encoder)
     encoder = layers.Flatten()(encoder)
+    encoder = layers.Dense(128, activation="relu")(encoder)
+    encoder = layers.Dropout(rate=0.1)(encoder)
     encoder = layers.Dense(1, activation="sigmoid")(encoder)
     
     model = Model(
