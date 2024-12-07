@@ -21,7 +21,12 @@ def create_model():
     x = layers.LeakyReLU(negative_slope=0.2)(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(1, activation="sigmoid")(x)
+    out = layers.Dense(1, activation="sigmoid")(x)
+    
+    model = Model(
+        inputs = inp,
+        outputs = out,
+    )
     
     model.compile(
         optimizer = "adam",
@@ -34,6 +39,8 @@ def create_model():
 
     if "show_size" in sys.argv:
         show_params(model, name)
+        
+    return model, x
 
 save_path = path.join("res", "model_SpO2.keras")
 analyzer_path = path.join("res", "analyzer_SpO2.keras")
@@ -45,7 +52,7 @@ else:
 batch_size = 32
 
 print("Creating model architecture...")
-model, encoder, _ = create_model()
+model, encoder = create_model()
 analyzer = Model(inputs=model.input, outputs=encoder)
 original = model.weights
 
