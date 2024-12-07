@@ -66,7 +66,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 128
+batch_size = 64
 
 print("Creating model architecture...")
 model, encoder = create_model()
@@ -210,7 +210,8 @@ if sys.argv[1] == "k_fold":
         print(f"FOlD {idx}:")
         print(f"FOlD {idx}:", file=f)
         
-        X_train, X_test = X[train_index], X[test_index]
+        X_raw_train, X_raw_test = X_raw[train_index], X_raw[test_index]
+        X_fft_train, X_fft_test = X_fft[train_index], X_fft[test_index]
         y_train, y_test = y[train_index], y[test_index]
         
         counts_train = Counter(list(y_train.flatten()))
@@ -221,7 +222,7 @@ if sys.argv[1] == "k_fold":
         print(counts_test, file=f)
         
         model.set_weights(original)
-        model.fit(X_train, 
+        model.fit([X_raw_train, X_fft_train], 
                   y_train, 
                   epochs = epochs, 
                   batch_size = batch_size,
@@ -231,13 +232,13 @@ if sys.argv[1] == "k_fold":
                       lr_scheduler,
                       cb_early_stopping
                   ],
-                  validation_data=(X_test, y_test))
+                  validation_data=([X_raw_test, X_fft_test], y_test))
         
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
 
-        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
+        score = model.evaluate([X_raw_test, X_fft_test], y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")
