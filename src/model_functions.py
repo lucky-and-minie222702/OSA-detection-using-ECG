@@ -158,7 +158,7 @@ def CNN_model(
     else:
         inp = custom_input
     
-    encoder = layers.BatchNormalization()(inp)
+    encoder = layers.Normalization()(inp)
     for filters, kernel_size, dropout_rate in structures:
         encoder = Conv(
             filters = filters, 
