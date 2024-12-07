@@ -7,7 +7,7 @@ import os
 
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
-    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(inp)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     x = layers.MaxPool1D(pool_size=4)(x)
