@@ -15,7 +15,7 @@ def create_model():
             (512, 3, 0.0),
         ],
         decoder_structures = [
-            (256, 0.2),
+            (256, 0.1),
             (128, 0.0),
         ],
         features = 512,
@@ -32,7 +32,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 32
+batch_size = 16
 
 print("Creating model architecture...")
 model, encoder, _ = create_model()
