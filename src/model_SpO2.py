@@ -195,3 +195,8 @@ if sys.argv[1] == "k_fold":
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")
         
         print()
+    
+    scores = np.mean(np.array(scores), axis=0)
+    print("AVERAGE SCORE")
+    for threshold in range(1, 10):
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}")
