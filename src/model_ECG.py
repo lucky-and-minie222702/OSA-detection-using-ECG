@@ -228,10 +228,10 @@ if sys.argv[1] == "k_fold":
         
         counts_train = Counter(list(y_train.flatten()))
         counts_test = Counter(list(y_test.flatten()))
-        print(counts_train)
-        print(counts_test)
-        print(counts_train, file=f)
-        print(counts_test, file=f)
+        print(f"Train set: Apnea cases [1]: {counts_train[1]} - Normal cases [0]: {counts_train[0]}")
+        print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}")
+        print(f"Train set: Apnea cases [1]: {counts_train[1]} - Normal cases [0]: {counts_train[0]}", file=f)
+        print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
         
         model.set_weights(original)
         model.fit([X_raw_train, X_fft_train], 
