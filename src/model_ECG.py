@@ -43,17 +43,17 @@ def create_model(name: str):
         fft_model.output,
     ])
 
-    encoder = layers.Dropout(rate=0.2)(encoder)
-    encoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
-    encoder = layers.BatchNormalization()(encoder)
-    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
-    encoder = layers.MaxPool1D(pool_size=4)(encoder)
-    encoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
-    encoder = layers.BatchNormalization()(encoder)
-    encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
-    encoder = layers.GlobalMaxPool1D()(encoder)
-    encoder = layers.Flatten()(encoder)
-    encoder = layers.Dense(128, activation="relu")(encoder)
+    # encoder = layers.Dropout(rate=0.2)(encoder)
+    # encoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
+    # encoder = layers.BatchNormalization()(encoder)
+    # encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
+    # encoder = layers.MaxPool1D(pool_size=4)(encoder)
+    # encoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(encoder)
+    # encoder = layers.BatchNormalization()(encoder)
+    # encoder = layers.LeakyRelu(negative_slope=0.2)(encoder)
+    # encoder = layers.GlobalMaxPool1D()(encoder)
+    # encoder = layers.Flatten()(encoder)
+    encoder = layers.Dense(256, activation="relu")(encoder)
     encoder = layers.Dropout(rate=0.1)(encoder)
     encoder = layers.Dense(1, activation="sigmoid")(encoder)
     
@@ -116,7 +116,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 150,
+    start_from_epoch = 100,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only = True
@@ -222,7 +222,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 150,
+            start_from_epoch = 100,
         )
         idx += 1
         print(f"FOLD {idx}:")
