@@ -28,9 +28,10 @@ def create_model():
             (512, 3, 0.0),
         ],
         decoder_structures = [
-            (512, 0.02),
-            (256, 0.0),
+            (1024, 0.05),
+            (512, 0.0),
         ],
+        use_batch_norm_in_FC = False,
         features = 256,
         name = "raw_SpO2",
         dimension = 1,
