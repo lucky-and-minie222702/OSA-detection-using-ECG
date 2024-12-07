@@ -43,6 +43,7 @@ def create_model():
         fft_model.output,
     ])
     encoder = layers.Dense(128, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    encoder = layers.Reshape((encoder.shape, 1))(encoder)
     encoder = layers.Conv1D(filters=16, kernel_size=3)(encoder)
     encoder = layers.BatchNormalization()(encoder)
     encoder = layers.LeakyReLU(negative_slope=0.2)(encoder)
