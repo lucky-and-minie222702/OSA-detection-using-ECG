@@ -43,7 +43,7 @@ def create_model(name: str):
         fft_model.output,
     ])
     encoder = layers.Dense(256, activation="tanh")(encoder)
-    encoder = layers.Reshape((16, 16))(encoder)
+    encoder = layers.Reshape((16, 16, 1))(encoder)
     
     decoder = layers.Dropout(rate=0.1)(encoder)
     decoder = layers.Conv2D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
