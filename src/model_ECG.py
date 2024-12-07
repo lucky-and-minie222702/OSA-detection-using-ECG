@@ -12,7 +12,7 @@ def create_model_raw():
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -27,7 +27,7 @@ def create_model_fft():
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 128,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -46,14 +46,10 @@ def create_model(name: str):
     encoder = layers.Reshape((16, 16, 1))(encoder)
     
     decoder = layers.Dropout(rate=0.1)(encoder)
-    decoder = layers.Conv2D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv2D(filters=64, kernel_size=(3, 3), kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
-    decoder = layers.MaxPool2D(pool_size=2)(decoder)
-    decoder = layers.Conv2D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
-    decoder = layers.BatchNormalization()(decoder)
-    decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
-    decoder = layers.GlobalMaxPool2D()(decoder)
+    decoder = layers.MaxPool2D(pool_size=(2, 2))(decoder)
     decoder = layers.Flatten()(decoder)
     decoder = layers.Dense(128, activation="relu")(decoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
