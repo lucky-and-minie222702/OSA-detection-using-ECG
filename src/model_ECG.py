@@ -205,7 +205,7 @@ if sys.argv[1] == "k_fold":
     idx = 0
     scores = []
     
-    f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
+    f = open(path.join("history", f"{name}_k_fold_ECG.txt"), "w")
     
     for train_index, test_index in kf.split(y):
         cb_timer = TimingCallback()
