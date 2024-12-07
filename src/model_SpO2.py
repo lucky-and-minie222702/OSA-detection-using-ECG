@@ -168,6 +168,13 @@ if sys.argv[1] == "k_fold":
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         
+        counts_train = Counter(list(y_train.flatten()))
+        counts_test = Counter(list(y_test.flatten()))
+        print(counts_train)
+        print(counts_test)
+        print(counts_train, file=f)
+        print(counts_test, file=f)
+        
         model.set_weights(original)
         model.fit(X_train, 
                   y_train, 
