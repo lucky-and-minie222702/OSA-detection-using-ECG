@@ -102,14 +102,14 @@ lr_scheduler = cbk.ReduceLROnPlateau(
     min_lr = 0.0001,
 )
 
+if not "id" in sys.argv:
+    name = input("Please provide an id for this section: ")
+else:
+    name = sys.argv[sys.argv.index("id")+1]
+
 if sys.argv[1] == "std":
-    if "build" in sys.argv:
-        if not "id" in sys.argv:
-            id = input("Please provide an id for this section: ")
-        else:
-            id = sys.argv[sys.argv.index("id")+1]
     print()
-    _s = f"| SECTION {id} |"
+    _s = f"| SECTION {name} |"
     _space = " " * 3
     print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
     now = datetime.datetime.now()
@@ -143,7 +143,7 @@ if sys.argv[1] == "std":
     print("Evaluating...")
     pred = model.predict([X_raw_test, X_fft_test], verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
-    f = open(path.join("history", f"{id}_result_ECG.txt"), "w")
+    f = open(path.join("history", f"{name}_result_ECG.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:\n", cm, file=f)
@@ -158,6 +158,6 @@ if sys.argv[1] == "std":
     if "build" in sys.argv:
         for key, value in hist.history.items():
             data = np.array(value)
-            his_path = path.join("history", f"{id}_{key}_ECG")
+            his_path = path.join("history", f"{name}_{key}_ECG")
             np.save(his_path, data)
         print("Saving history done!")

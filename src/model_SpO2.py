@@ -32,7 +32,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
+batch_size = 32
 
 print("Creating model architecture...")
 model, encoder, _ = create_model()
@@ -72,14 +72,14 @@ lr_scheduler = cbk.ReduceLROnPlateau(
     min_lr = 0.0001,
 )
 
+if not "id" in sys.argv:
+    name = input("Please provide an id for this section: ")
+else:
+    name = sys.argv[sys.argv.index("id")+1]
+
 if sys.argv[1] == "std":
-    if "build" in sys.argv:
-        if not "id" in sys.argv:
-            id = input("Please provide an id for this section: ")
-        else:
-            id = sys.argv[sys.argv.index("id")+1]
     print()
-    _s = f"| SECTION {id} |"
+    _s = f"| SECTION {name} |"
     _space = " " * 3
     print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
     now = datetime.datetime.now()
@@ -113,7 +113,7 @@ if sys.argv[1] == "std":
     print("Evaluating...")
     pred = model.predict(X_test, verbose=False)
     pred = [np.round(np.squeeze(x)) for x in pred]
-    f = open(path.join("history", f"{id}_result_SpO2.txt"), "w")
+    f = open(path.join("history", f"{name}_result_SpO2.txt"), "w")
     print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
     cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:\n", cm, file=f)
@@ -128,7 +128,7 @@ if sys.argv[1] == "std":
     if "build" in sys.argv:
         for key, value in hist.history.items():
             data = np.array(value)
-            his_path = path.join("history", f"{id}_{key}_SpO2")
+            his_path = path.join("history", f"{name}_{key}_SpO2")
             np.save(his_path, data)
         print("Saving history done!")
         
@@ -153,13 +153,18 @@ if sys.argv[1] == "k_fold":
     idx = 0
     scores = []
     
-    f = open(path.join("history", f"{id}_k_fold_SpO2.txt"), "w")
+    f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
     
     for train_index, test_index in kf.split(X):
         cb_timer = TimingCallback()
         lr_scheduler = cbk.ReduceLROnPlateau(
             factor = 0.5,
             min_lr = 0.0001,
+        )
+        cb_early_stopping = cbk.EarlyStopping(
+            patience = 3, 
+            restore_best_weights = True,
+            start_from_epoch = 30,
         )
         idx += 1
         print(f"FOlD {idx}:")
