@@ -17,7 +17,6 @@ def create_model(name: str):
     x = layers.Activation("relu")(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    out = layers.Dense(64, activation="relu")(x)
     out = layers.Dropout(rate=0.1)(out)
     out = layers.Dense(1, activation="sigmoid")(out)
     
@@ -77,7 +76,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 30,
+    start_from_epoch = 40,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -180,7 +179,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 30,
+            start_from_epoch = 40,
         )
         idx += 1
         print(f"FOLD {idx}:")
