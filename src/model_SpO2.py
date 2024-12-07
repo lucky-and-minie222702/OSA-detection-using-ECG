@@ -104,7 +104,8 @@ if sys.argv[1] == "std":
                             cb_early_stopping,
                             cb_checkpoint,
                             lr_scheduler,
-                         ])
+                         ],
+                         validation_data=(X_test, y_test))
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
         analyzer.save(analyzer_path)
