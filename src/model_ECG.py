@@ -12,7 +12,7 @@ def create_model_raw():
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
-        features = 128,
+        features = 60,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -27,7 +27,7 @@ def create_model_fft():
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
-        features = 128,
+        features = 60,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -42,16 +42,16 @@ def create_model(name: str):
         raw_model.output,
         fft_model.output,
     ])
-    encoder = layers.Dense(256, activation="tanh")(encoder)
+    encoder = layers.Dense(60, activation="tanh")(encoder)
     
     decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
-    decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
     decoder = layers.Flatten()(decoder)
-    decoder = layers.Dense(128, activation="relu")(decoder)
+    decoder = layers.Dense(64, activation="relu")(decoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
     
