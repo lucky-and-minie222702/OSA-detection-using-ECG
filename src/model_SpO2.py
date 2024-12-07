@@ -142,6 +142,8 @@ if sys.argv[1] == "k_fold":
         y_test
     ])
     
+    X, y = shuffle(X, y, random_state=22022009)
+    
     if not "folds" in sys.argv:
         folds = int(input("Please provide an valid number of folds for this section: "))
     else:
