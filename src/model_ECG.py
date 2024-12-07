@@ -17,7 +17,7 @@ def create_model_raw():
         features = 512,
         name = "ECG_raw",
         dimension = 1,
-        show_size = True,
+        show_size = "show_size" in sys.argv,
         only_features_map = True,
     )
 
@@ -34,7 +34,7 @@ def create_model_fft():
         features = 512,
         name = "ECG_fft",
         dimension = 1,
-        show_size = True,
+        show_size = "show_size" in sys.argv,
         only_features_map = True,
     )
 

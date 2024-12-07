@@ -6,22 +6,34 @@ from data_functions import *
 import os
 
 def create_model():
-    return CNN_model(
-        input_shape = (None, 1),
-        structures = [
-            (32, 5, 0.1),
-            (64, 5, 0.0),
-            (128, 3, 0.0),
+    inp = layers.Input(shape=(None, 1))
+    x = layers.Normalization()(inp)
+    x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.2)(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.2)(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.2)(x)
+    x = layers.GlobalMaxPool1D(pool_size=2)(x)
+    x = layers.Flatten()(x)
+    x = layers.Dense(1, activation="sigmoid")(x)
+    
+    model.compile(
+        optimizer = "adam",
+        loss = "binary_crossentropy",
+        metrics = [
+            metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                                    threshold = t/10) for t in range(1, 10)
         ],
-        decoder_structures = [
-            (64, 0.0),
-        ],
-        features = 128,
-        name = "raw_SpO2",
-        dimension = 1,
-        show_size = True,
-        compile = True
     )
+
+    if "show_size" in sys.argv:
+        show_params(model, name)
 
 save_path = path.join("res", "model_SpO2.keras")
 analyzer_path = path.join("res", "analyzer_SpO2.keras")
@@ -60,7 +72,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 50,
+    start_from_epoch = 40,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -105,6 +117,7 @@ if sys.argv[1] == "std":
                          ])
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
+        print(f"Total epochs: {len(cb_timer.logs)}")
         analyzer.save(analyzer_path)
     elif "test" in sys.argv:
         model = load_model(save_path)
@@ -162,7 +175,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 50,
+            start_from_epoch = 40,
         )
         idx += 1
         print(f"FOlD {idx}:")
@@ -192,6 +205,7 @@ if sys.argv[1] == "k_fold":
         
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
+        print(f"Total epochs: {len(cb_timer.logs)}")
 
         score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
