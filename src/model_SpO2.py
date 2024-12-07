@@ -21,15 +21,15 @@ def create_model():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 7, 0.1),
+            (32, 7, 0.05),
             (64, 5, 0.0),
             (128, 5, 0.0),
             (256, 3, 0.0),
             (512, 3, 0.0),
         ],
         decoder_structures = [
-            (512, 0.1),
-            (256, 0.1),
+            (512, 0.05),
+            (256, 0.0),
         ],
         features = 256,
         name = "raw_SpO2",
@@ -74,7 +74,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 75,
+    start_from_epoch = 100,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -143,3 +143,55 @@ if sys.argv[1] == "std":
             his_path = path.join("history", f"{id}_{key}_SpO2")
             np.save(his_path, data)
         print("Saving history done!")
+        
+if sys.argv[1] == "k_fold":
+    X = np.vstack([
+        X_train,
+        X_test
+    ])
+    y = np.hstack([
+        y_train,
+        y_test
+    ])
+    
+    if not "folds" in sys.argv:
+        folds = int(input("Please provide an valid number of folds for this section: "))
+    else:
+        folds = int(sys.argv[sys.argv.index("folds")+1])
+    kf = KFold(n_splits=folds)
+    
+    if not "id" in sys.argv:
+        id = input("Please provide an id for this section: ")
+    else:
+        id = sys.argv[sys.argv.index("id")+1]
+    print()
+    _s = f"| SECTION {id} |"
+    _space = " " * 3
+    print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
+    now = datetime.datetime.now()
+    print("Start at:", now, "\n")
+    
+    idx = 1
+    scores = []
+    
+    for train_index, test_index in kf.split(X):
+        print(f"FOlD {idx}:")
+        
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        reset_model(model)
+        model.fit(X_train, 
+                  y_train, 
+                  epochs = epochs, 
+                  batch_size = batch_size,
+                  verbose = False,
+                  callbacks = [cb_timer])
+        
+        
+        score = model.evaluate(X_test, y_test, batch_size=batch_size)[1::]
+        scores.append(score)
+        for threshold in range(1, 10):
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+        
+        print()

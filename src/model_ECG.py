@@ -27,7 +27,7 @@ def create_model_raw():
             (256, 3, 0.0),
             (512, 3, 0.0),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_raw",
         dimension = 1,
         show_size = True,
@@ -44,7 +44,7 @@ def create_model_fft():
             (256, 3, 0.0),
             (512, 3, 0.0),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_fft",
         dimension = 1,
         show_size = True,
@@ -59,7 +59,8 @@ def create_model():
         raw_model.output,
         fft_model.output,
     ])
-    encoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    encoder = layers.Dense(1024, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    out = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(out)
     out = layers.Dropout(rate=0.1)(encoder)
     out = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.2))(out)
     out = layers.Dropout(rate=0.1)(out)
