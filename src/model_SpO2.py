@@ -212,7 +212,8 @@ if sys.argv[1] == "k_fold":
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
-
+        print(f"Total epochs: {len(cb_timer.logs)}", file=f)
+        
         score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):

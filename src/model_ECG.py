@@ -8,9 +8,9 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
+            (128, 3, 0.0, 2),
         ],
-        features = 64,
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -21,9 +21,9 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
+            (128, 3, 0.0, 2),
         ],
-        features = 64,
+        features = 128,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -249,7 +249,8 @@ if sys.argv[1] == "k_fold":
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
-
+        print(f"Total epochs: {len(cb_timer.logs)}", file=f)
+        
         score = model.evaluate([X_raw_test, X_fft_test], y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):
