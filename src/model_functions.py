@@ -53,7 +53,7 @@ else:
 
 class EpochProgressCallback(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
-        print(f"Epoch {epoch + 1} completed.", end="\r")
+        print(f"Epoch {epoch + 1} completed!", end="\r")
 
 class TimingCallback(keras.callbacks.Callback):
     def __init__(self, logs={}):
