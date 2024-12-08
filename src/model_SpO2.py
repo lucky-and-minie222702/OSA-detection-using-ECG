@@ -8,6 +8,9 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
+    x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
@@ -77,7 +80,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 80,
+    start_from_epoch = 50,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -158,7 +161,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 80,
+            start_from_epoch = 50,
         )
         idx += 1
         print(f"FOLD {idx}:")
