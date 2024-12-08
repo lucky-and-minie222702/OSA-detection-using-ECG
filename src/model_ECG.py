@@ -186,7 +186,7 @@ if sys.argv[1] == "k_fold":
         folds = int(input("Please provide an valid number of folds for this section: "))
     else:
         folds = int(sys.argv[sys.argv.index("folds")+1])
-    kf = KFold(n_splits=folds)
+    kf = KFold(n_splits=folds, shuffle=True)
     
     idx = 0
     scores = []

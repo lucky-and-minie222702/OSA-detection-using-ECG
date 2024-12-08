@@ -19,7 +19,7 @@ def create_model(name: str):
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-    x = layers.GlobalMaxPool1D()(x)
+    x = layers.GlobalAvgPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(512, activation="tanh")(x)
     out = layers.Dropout(rate=0.05)(x)
@@ -140,13 +140,13 @@ if sys.argv[1] == "k_fold":
         y_test
     ])
     
-    X, y = shuffle(X, y, random_state=22022009)
+    X, y = shuffle(X, y, random_state=22270209)
     
     if not "folds" in sys.argv:
         folds = int(input("Please provide an valid number of folds for this section: "))
     else:
         folds = int(sys.argv[sys.argv.index("folds")+1])
-    kf = KFold(n_splits=folds)
+    kf = KFold(n_splits=folds, shuffle=True)
     
     idx = 0
     scores = []
