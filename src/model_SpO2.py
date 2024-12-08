@@ -8,7 +8,7 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
-    x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same", activation="tanh")(x)
+    x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same", activation="tanh")(x)
     # x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
