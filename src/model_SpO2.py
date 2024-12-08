@@ -11,10 +11,12 @@ def create_model(name: str):
     x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
+    x = layers.Dropout(rate=0.05)(x)
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-    x = layers.MaxPool1D(pool_size=4)(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
@@ -68,7 +70,7 @@ y_test = np.load(path.join("gen_data", "SpO2_y_test.npy"))
 counts = Counter(list(y_train) + list(y_test))
 print("Done!")
 print(f"Total: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-print(f"=> Training with {epochs} epochs")
+print(f"Training with {epochs} epochs limit!")
 
 if not "skip_verify" in sys.argv:
     prompt = input("Continue? [y/N]: ")
@@ -105,8 +107,8 @@ if sys.argv[1] == "std":
     
     count_train = Counter(y_train)
     count_test = Counter(y_test)
-    print(f"=> Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
-    print(f"=> Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
+    print(f"Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
+    print(f"Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
     hist = model.fit(X_train, 
                         y_train, 

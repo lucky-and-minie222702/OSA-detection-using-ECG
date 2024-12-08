@@ -105,7 +105,7 @@ y_test = np.load(path.join("gen_data", "ECG_y_test.npy"))
 counts = Counter(list(y_train) + list(y_test))
 print("Done!")
 print(f"Total: Apnea cases [1]: {counts[1]} - Normal cases [0]: {counts[0]}")
-print(f"=> Training with {epochs} epochs")
+print(f"Training with {epochs} epochs limit!")
 
 if not "skip_verify" in sys.argv:
     prompt = input("Continue? [y/N]: ")
@@ -142,8 +142,8 @@ if sys.argv[1] == "std":
     
     count_train = Counter(y_train)
     count_test = Counter(y_test)
-    print(f"=> Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
-    print(f"=> Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
+    print(f"Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
+    print(f"Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
     hist = model.fit([X_raw_train, X_fft_train], 
                         y_train, 
