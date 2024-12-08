@@ -10,15 +10,15 @@ def create_model(name: str):
     x = layers.Normalization()(inp)
     x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = layers.Activation("tanh")(x)
     # x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = layers.Activation("tanh")(x)
     # x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = layers.Activation("tanh")(x)
     x = layers.GlobalAvgPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(512, activation="tanh")(x)
@@ -51,7 +51,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
+batch_size = 32
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
