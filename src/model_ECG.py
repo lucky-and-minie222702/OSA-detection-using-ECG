@@ -8,9 +8,9 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
+            (256, 3, 0.0, 2),
         ],
         features = 256,
         name = "ECG_raw",
@@ -23,9 +23,9 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
+            (256, 3, 0.0, 2),
         ],
         features = 256,
         name = "ECG_fft",
@@ -53,8 +53,9 @@ def create_model(name: str):
     # decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     # decoder = layers.MaxPool1D(pool_size=2)(decoder)
     # decoder = layers.Flatten()(decoder)
-    decoder = layers.Dense(256, activation="tanh")(encoder)
-    decoder = layers.Dropout(rate=0.05)(decoder)
+    decoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    decoder = layers.Dense(256, activation="tanh")(decoder)
+    decoder = layers.Dropout(rate=0.1)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
     
     model = Model(
@@ -84,7 +85,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 256
+batch_size = 128
 
 print("Creating model architecture...")
 model, encoder = create_model("ECG_combined")
