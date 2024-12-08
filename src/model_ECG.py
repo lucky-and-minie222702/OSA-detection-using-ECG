@@ -8,10 +8,10 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (128, 3, 0.0, 2),
-            (256, 3, 0.0, 2),
+            (32, 3, 0.0, 2),
+            (64, 3, 0.0, 2),
         ],
-        features = 512,
+        features = 128,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -22,10 +22,10 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (128, 3, 0.0, 2),
-            (256, 3, 0.0, 2),
+            (32, 3, 0.0, 2),
+            (64, 3, 0.0, 2),
         ],
-        features = 512,
+        features = 128,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -42,11 +42,11 @@ def create_model(name: str):
     ])
 
     decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
-    decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
-    decoder = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
