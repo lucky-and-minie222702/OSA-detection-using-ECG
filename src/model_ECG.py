@@ -8,6 +8,7 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
+            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
@@ -22,6 +23,7 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
+            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
