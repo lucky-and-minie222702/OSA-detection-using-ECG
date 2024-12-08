@@ -53,7 +53,7 @@ def create_model(name: str):
     # decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     # decoder = layers.MaxPool1D(pool_size=2)(decoder)
     # decoder = layers.Flatten()(decoder)
-    decoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.2))(encoder)
+    decoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.5))(encoder)
     decoder = layers.Dense(256, activation="tanh")(decoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
