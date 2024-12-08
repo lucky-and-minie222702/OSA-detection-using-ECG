@@ -18,7 +18,7 @@ def create_model(name: str):
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(512, activation="tanh")(x)
-    out = layers.Dropout(rate=0.1)(x)
+    out = layers.Dropout(rate=0.05)(x)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
