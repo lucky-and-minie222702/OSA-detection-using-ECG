@@ -8,7 +8,6 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
@@ -23,7 +22,6 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (32, 3, 0.0, 2),
             (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
         ],
@@ -84,7 +82,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 2048
+batch_size = 256
 
 print("Creating model architecture...")
 model, encoder = create_model("ECG_combined")
