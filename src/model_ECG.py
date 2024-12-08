@@ -42,7 +42,7 @@ def create_model(name: str):
     ])
 
     decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
-    decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
