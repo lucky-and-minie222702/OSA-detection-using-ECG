@@ -8,11 +8,11 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
+            (64, 5, 0.0, 2),
             (128, 3, 0.0, 2),
             (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -23,11 +23,11 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
+            (64, 5, 0.0, 2),
             (128, 3, 0.0, 2),
             (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -180,7 +180,7 @@ if sys.argv[1] == "k_fold":
         y_test
     ])
     
-    X_raw, X_fft, y = shuffle(X_raw, X_fft, y, random_state=27022009)
+    X_raw, X_fft, y = shuffle(X_raw, X_fft, y, random_state=22270209)
     
     if not "folds" in sys.argv:
         folds = int(input("Please provide an valid number of folds for this section: "))

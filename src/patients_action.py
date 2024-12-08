@@ -160,22 +160,6 @@ if sys.argv[1] == "save_stats":
 if sys.argv[1] == "pair":
     print("Loading data...")
     p_list = open(path.join("gen_data", "ECG-SpO2.txt"), "r").readlines()
-    p_list = list(map(lambda x: int(x), p_list))
-    X_ECG, _ = get_patients_ECG(p_list)
-    y, _ = get_patients_SpO2(range(1, 9))
-    if "augment" in sys.argv:
-        print("Augmenting...")
-        X_ECG = np.vstack(
-            [X_ECG, np.flip(X_ECG, axis=1)]
-        ) 
-        y = np.vstack(
-            [y, np.flip(y)]
-        ) 
-    print("Extracing SpO2 statistics...")
-    y, _ = extract_stats(y, sampling_rate=100, save_scaler=True, verbose=True)
-    np.save(path.join("gen_data", "ECG-pair"), X_ECG)
-    np.save(path.join("gen_data", "y-pair"), y)
-    print("Done!")
     
 if sys.argv[1] == "augment":
     if "SpO2" in sys.argv:
