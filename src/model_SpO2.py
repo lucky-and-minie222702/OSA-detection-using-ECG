@@ -12,7 +12,6 @@ def create_model(name: str):
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     x = layers.MaxPool1D(pool_size=2)(x)
-    x = layers.Dropout(rate=0.05)(x)
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
@@ -22,7 +21,7 @@ def create_model(name: str):
     x = layers.Activation("relu")(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(512, activation="tanh")(x)
+    x = layers.Dense(256, activation="tanh")(x)
     out = layers.Dropout(rate=0.05)(x)
     out = layers.Dense(1, activation="sigmoid")(out)
     
