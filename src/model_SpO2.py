@@ -100,53 +100,31 @@ if sys.argv[1] == "std":
     now = datetime.datetime.now()
     print("Start at:", now, "\n")
     
-    val_split = 0.2
-    
     count_train = Counter(y_train)
     count_test = Counter(y_test)
     print(f"=> Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
-    print(f"=> Test set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
-    print(f"=> Validation set: Apnea cases [1]: {int(count_train[1]*val_split)} - Normal cases [0]: {int(count_train[0]*val_split)}")
+    print(f"=> Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
-    if "build" in sys.argv:
-        hist = model.fit(X_train, 
-                         y_train, 
-                         epochs = epochs, 
-                         batch_size = batch_size, 
-                         validation_split = val_split, 
-                         callbacks = [
-                            cb_timer,
-                            cb_early_stopping,
-                            cb_checkpoint,
-                            lr_scheduler,
-                         ])
-        t = sum(cb_timer.logs)
-        print(f"Total training time: {convert_seconds(t)}")
-        print(f"Total epochs: {len(cb_timer.logs)}")
-        analyzer.save(analyzer_path)
-    elif "test" in sys.argv:
-        model = load_model(save_path)
-    print("Evaluating...")
-    pred = model.predict(X_test, verbose=False)
-    pred = [np.round(np.squeeze(x)) for x in pred]
-    f = open(path.join("history", f"{name}_result_SpO2.txt"), "w")
-    print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
-    cm = confusion_matrix(y_test, pred)
-    print("Confusion matrix:\n", cm, file=f)
-    names = ["loss"]
-    names += [ f"threshold_0.{t}" for t in range(1, 10) ]
-    results = model.evaluate(X_test, y_test, verbose=False)
-    print("\nLoss and metrics", file=f)
-    for idx in range(10):
-        print(names[idx], ":", results[idx], file=f)
-    f.close() 
-    
-    if "build" in sys.argv:
-        for key, value in hist.history.items():
-            data = np.array(value)
-            his_path = path.join("history", f"{name}_{key}_SpO2")
-            np.save(his_path, data)
-        print("Saving history done!")
+    hist = model.fit(X_train, 
+                        y_train, 
+                        epochs = epochs, 
+                        batch_size = batch_size, 
+                        validation_data = (X_test, y_test), 
+                        callbacks = [
+                        cb_timer,
+                        cb_early_stopping,
+                        cb_checkpoint,
+                        lr_scheduler,
+                        ])
+    t = sum(cb_timer.logs)
+    print(f"Total training time: {convert_seconds(t)}")
+    print(f"Total epochs: {len(cb_timer.logs)}")
+    analyzer.save(analyzer_path)
+    for key, value in hist.history.items():
+        data = np.array(value)
+        his_path = path.join("history", f"{name}_{key}_SpO2")
+        np.save(his_path, data)
+    print("Saving history done!")
         
 if sys.argv[1] == "k_fold":
     X = np.vstack([
@@ -213,6 +191,12 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         print(f"Total epochs: {len(cb_timer.logs)}", file=f)
+        
+        pred = model.predict(X_test, verbose=False)
+        pred = [np.round(np.squeeze(x)) for x in pred]
+        print(classification_report(y_test, pred, target_names=["NO OSA", "OSA"]), file=f)
+        cm = confusion_matrix(y_test, pred)
+        print("Confusion matrix:\n", cm, file=f)
         
         score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
