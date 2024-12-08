@@ -111,10 +111,10 @@ if sys.argv[1] == "std":
                         batch_size = batch_size, 
                         validation_data = (X_test, y_test), 
                         callbacks = [
-                        cb_timer,
-                        cb_early_stopping,
-                        cb_checkpoint,
-                        lr_scheduler,
+                            cb_timer,
+                            cb_early_stopping,
+                            cb_checkpoint,
+                            lr_scheduler,
                         ])
     t = sum(cb_timer.logs)
     print(f"Total training time: {convert_seconds(t)}")

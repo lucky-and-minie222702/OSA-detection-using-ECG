@@ -11,7 +11,7 @@ def create_model_raw():
             (64, 3, 0.0, 4),
             (128, 3, 0.0, 4),
         ],
-        features = 128,
+        features = 256,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -25,7 +25,7 @@ def create_model_fft():
             (64, 3, 0.0, 4),
             (128, 3, 0.0, 4),
         ],
-        features = 128,
+        features = 256,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -42,7 +42,11 @@ def create_model(name: str):
     ])
 
     decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
-    decoder = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
+    decoder = layers.BatchNormalization()(decoder)
+    decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
+    decoder = layers.MaxPool1D(pool_size=2)(decoder)
+    decoder = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
     decoder = layers.BatchNormalization()(decoder)
     decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
     decoder = layers.MaxPool1D(pool_size=2)(decoder)
@@ -144,10 +148,10 @@ if sys.argv[1] == "std":
                         batch_size = batch_size, 
                         validation_data = ([X_raw_test, X_fft_test], y_test), 
                         callbacks = [
-                        cb_timer,
-                        cb_early_stopping,
-                        cb_checkpoint,
-                        lr_scheduler,
+                            cb_timer,
+                            cb_early_stopping,
+                            cb_checkpoint,
+                            lr_scheduler,
                         ])
     t = sum(cb_timer.logs)
     print(f"Total training time: {convert_seconds(t)}")
