@@ -82,7 +82,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 128
+batch_size = 256
 
 print("Creating model architecture...")
 model, encoder = create_model("ECG_combined")
