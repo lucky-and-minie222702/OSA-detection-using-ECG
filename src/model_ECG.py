@@ -114,7 +114,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 100,
+    start_from_epoch = 80,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only = True
@@ -199,7 +199,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 100,
+            start_from_epoch = 80,
         )
         idx += 1
         print(f"FOLD {idx}:")
