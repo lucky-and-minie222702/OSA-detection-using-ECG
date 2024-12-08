@@ -183,7 +183,8 @@ if sys.argv[1] == "k_fold":
                   callbacks = [
                       cb_timer,
                       lr_scheduler,
-                      cb_early_stopping
+                      cb_early_stopping,
+                      EpochProgressCallback()
                   ],
                   validation_data=(X_test, y_test))
         

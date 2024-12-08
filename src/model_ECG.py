@@ -8,10 +8,10 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
+            (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_raw",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -22,10 +22,10 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
+            (256, 3, 0.0, 2),
         ],
-        features = 256,
+        features = 512,
         name = "ECG_fft",
         dimension = 1,
         show_size = "show_size" in sys.argv,
@@ -114,7 +114,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 5, 
     restore_best_weights = True,
-    start_from_epoch = 80,
+    start_from_epoch = 150,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only = True
@@ -177,7 +177,7 @@ if sys.argv[1] == "k_fold":
         y_test
     ])
     
-    X_raw, X_fft, y = shuffle(X_raw, X_fft, y, random_state=22022009)
+    X_raw, X_fft, y = shuffle(X_raw, X_fft, y, random_state=27022009)
     
     if not "folds" in sys.argv:
         folds = int(input("Please provide an valid number of folds for this section: "))
@@ -199,7 +199,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 5, 
             restore_best_weights = True,
-            start_from_epoch = 80,
+            start_from_epoch = 150,
         )
         idx += 1
         print(f"FOLD {idx}:")
@@ -225,7 +225,8 @@ if sys.argv[1] == "k_fold":
                   callbacks = [
                       cb_timer,
                       lr_scheduler,
-                      cb_early_stopping
+                      cb_early_stopping,
+                      EpochProgressCallback(),
                   ],
                   validation_data=([X_raw_test, X_fft_test], y_test))
         

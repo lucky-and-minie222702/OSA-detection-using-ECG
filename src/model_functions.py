@@ -51,6 +51,10 @@ if gpus:
 else:
     print("No GPU detected. Using CPU.")
 
+class EpochProgressCallback(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        print(f"\rEpoch {epoch + 1} completed.", end="")
+
 class TimingCallback(keras.callbacks.Callback):
     def __init__(self, logs={}):
         self.logs=[]
