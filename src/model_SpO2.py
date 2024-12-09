@@ -10,6 +10,7 @@ def create_model(name: str):
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
+    x = layers.MaxPool1D(pool_size=4)(x)
     x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
@@ -97,9 +98,9 @@ print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
 now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
-times = 3
-start_rate = 0.25
-remember_factor = 0.75
+times = 5
+start_rate = 0.2
+remember_factor = 0.8
 
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
