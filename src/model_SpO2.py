@@ -52,7 +52,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 64
-es_ep = 30
+es_ep = 40
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
@@ -104,9 +104,9 @@ print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
 now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
-times = 3
-start_rate = 0.2
-remember_factor = 0.8
+times = 4
+start_rate = 0.5
+remember_factor = 0.5
 
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
