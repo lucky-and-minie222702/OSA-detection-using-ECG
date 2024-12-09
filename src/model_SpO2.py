@@ -7,7 +7,7 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
-    x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
+    x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("tanh")(x)
     x = layers.MaxPool1D(pool_size=2)(x)
@@ -16,7 +16,7 @@ def create_model(name: str):
     x = layers.LeakyReLU(negative_slope=0.3)(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(512)(x)
+    x = layers.Dense(256)(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
     out = layers.Dense(1, activation="sigmoid")(x)
@@ -48,7 +48,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 64
-es_ep = 50
+es_ep = 40
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
