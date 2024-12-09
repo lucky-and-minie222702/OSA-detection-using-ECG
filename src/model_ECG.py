@@ -132,13 +132,14 @@ if not "id" in sys.argv:
 else:
     name = sys.argv[sys.argv.index("id")+1]
 
+print()
+_s = f"| SECTION {name} |"
+_space = " " * 3
+print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
+now = datetime.datetime.now()
+print("Start at:", now, "\n")
+
 if sys.argv[1] == "std":
-    print()
-    _s = f"| SECTION {name} |"
-    _space = " " * 3
-    print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
-    now = datetime.datetime.now()
-    print("Start at:", now, "\n")
     
     count_train = Counter(y_train)
     count_test = Counter(y_test)

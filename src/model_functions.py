@@ -41,6 +41,7 @@ from timeit import default_timer as timer
 import keras
 from typing import List, Tuple, Any
 import keras.callbacks as cbk
+import math
 
 # Check for available GPUs
 gpus = tf.config.list_physical_devices('GPU')
@@ -211,3 +212,13 @@ def CNN_model(
         show_params(model, name)
 
     return (model, encoder, decoder)
+
+def forget(model, forget_rate: float):
+    weights = model.get_weights()
+
+    for i in range(len(weights)):
+        if len(weights[i].shape) > 1: # ignore biases
+            mask = np.random.rand(*weights[i].shape) > forget_rate # Set rate% to zero randomly
+            weights[i] = weights[i] * mask
+
+    model.set_weights(weights)

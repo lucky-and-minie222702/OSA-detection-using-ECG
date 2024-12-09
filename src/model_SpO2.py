@@ -1,4 +1,3 @@
-from sympy import false
 from data_functions import *
 import datetime
 from model_functions import *
@@ -91,20 +90,25 @@ if not "id" in sys.argv:
 else:
     name = sys.argv[sys.argv.index("id")+1]
 
+print()
+_s = f"| SECTION {name} |"
+_space = " " * 3
+print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
+now = datetime.datetime.now()
+print("Start at:", now, "\n")
+
+times = 5
+start_rate = 0.5
+remember_factor = 0.2
+
 if sys.argv[1] == "std":
-    print()
-    _s = f"| SECTION {name} |"
-    _space = " " * 3
-    print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
-    now = datetime.datetime.now()
-    print("Start at:", now, "\n")
-    
     count_train = Counter(y_train)
     count_test = Counter(y_test)
     print(f"Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
     print(f"Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
-    hist = model.fit(X_train, 
+    hist = model.fit(
+                        X_train, 
                         y_train, 
                         epochs = epochs, 
                         batch_size = batch_size, 
@@ -147,18 +151,10 @@ if sys.argv[1] == "k_fold":
     scores = []
     
     f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
+    rate = start_rate
     
     for train_index, test_index in kf.split(y):
         cb_timer = TimingCallback()
-        lr_scheduler = cbk.ReduceLROnPlateau(
-            factor = 0.5,
-            min_lr = 0.0001,
-        )
-        cb_early_stopping = cbk.EarlyStopping(
-            patience = 3, 
-            restore_best_weights = True,
-            start_from_epoch = 50,
-        )
         idx += 1
         print(f"FOLD {idx}:")
         print(f"FOLD {idx}:", file=f)
@@ -174,18 +170,32 @@ if sys.argv[1] == "k_fold":
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
         
         model.set_weights(original)
-        model.fit(X_train, 
-                  y_train, 
-                  epochs = epochs, 
-                  batch_size = batch_size,
-                  verbose = False,
-                  callbacks = [
-                      cb_timer,
-                      lr_scheduler,
-                      cb_early_stopping,
-                      EpochProgressCallback()
-                  ],
-                  validation_data=(X_test, y_test))
+        for t in range(times):
+            lr_scheduler = cbk.ReduceLROnPlateau(
+                factor = 0.5,
+                min_lr = 0.0001,
+            )
+            cb_early_stopping = cbk.EarlyStopping(
+                patience = 3, 
+                restore_best_weights = True,
+                start_from_epoch = 50,
+            )
+            model.fit(
+                        X_train, 
+                        y_train, 
+                        epochs = epochs, 
+                        batch_size = batch_size,
+                        verbose = False,
+                        callbacks = [
+                            cb_timer,
+                            lr_scheduler,
+                            cb_early_stopping,
+                            EpochProgressCallback()
+                        ],
+                        validation_data=(X_test, y_test))
+            if t != times - 1:
+                forget(model, rate)
+            rate *= remember_factor
         
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")

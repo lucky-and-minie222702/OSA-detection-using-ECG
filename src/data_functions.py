@@ -130,7 +130,7 @@ def extract_features(X: np.ndarray, sampling_rate: int =  100, verbose:bool = Fa
     if verbose:
         print()
         
-    return np.array(res_fft),
+    return np.array(res_fft)
 
 def get_patients_SpO2(plist: List[int]) -> Tuple[np.ndarray, np.ndarray]:
     def get_patient(patientid: int) -> Tuple[np.ndarray, np.ndarray]:
