@@ -123,7 +123,7 @@ def CNN_model(
         input_shape: tuple, 
         structures: List[Tuple[int, int, float]], 
         name: str, 
-        layers_activation = layers.LeakyReLU(negative_slope=0.2),
+        layers_activation = layers.LeakyReLU(negative_slope=0.3),
         dimension: int = 1, 
         features: int = 512,
         only_features_map: bool = False, 

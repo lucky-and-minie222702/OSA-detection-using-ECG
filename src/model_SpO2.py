@@ -9,14 +9,14 @@ def create_model(name: str):
     x = layers.Normalization()(inp)
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
     x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(512, activation="relu")(x)
+    x = layers.Dense(512, activation="tanh")(x)
     out = layers.Dense(1, activation="sigmoid")(x)
     
     model = Model(
