@@ -75,7 +75,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 3, 
     restore_best_weights = True,
-    start_from_epoch = 30,
+    start_from_epoch = 20,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -178,7 +178,7 @@ if sys.argv[1] == "k_fold":
             cb_early_stopping = cbk.EarlyStopping(
                 patience = 3, 
                 restore_best_weights = True,
-                start_from_epoch = 30,
+                start_from_epoch = 20,
             )
             model.fit(
                         X_train, 
