@@ -17,7 +17,7 @@ def create_model(name: str):
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(512, activation="relu")(x)
-    out = layers.Dropout(rate=0.5)(x)
+    out = layers.Dropout(rate=0.25)(x)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -47,6 +47,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 32
+es_ep = 50
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
@@ -76,7 +77,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 3, 
     restore_best_weights = True,
-    start_from_epoch = 30,
+    start_from_epoch = es_ep,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
@@ -179,7 +180,7 @@ if sys.argv[1] == "k_fold":
             cb_early_stopping = cbk.EarlyStopping(
                 patience = 3, 
                 restore_best_weights = True,
-                start_from_epoch = 30,
+                start_from_epoch = es_ep,
             )
             model.fit(
                         X_train, 
