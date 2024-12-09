@@ -10,15 +10,14 @@ def create_model(name: str):
     x = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
-    x = layers.MaxPool1D(pool_size=4)(x)
+    x = layers.MaxPool1D(pool_size=2)(x)
     x = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(512, activation="relu")(x)
-    out = layers.Dropout(rate=0.25)(x)
-    out = layers.Dense(1, activation="sigmoid")(out)
+    out = layers.Dense(1, activation="sigmoid")(x)
     
     model = Model(
         inputs = inp,
