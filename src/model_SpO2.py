@@ -104,9 +104,9 @@ print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
 now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
-times = 1
-start_rate = 0.0
-remember_factor = 0.0
+times = 3
+start_rate = 0.2
+remember_factor = 0.8
 
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
