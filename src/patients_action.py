@@ -162,23 +162,28 @@ if sys.argv[1] == "pair":
     p_list = open(path.join("gen_data", "ECG-SpO2.txt"), "r").readlines()
     
 if sys.argv[1] == "augment":
+    overlap_size = 3000
     if "SpO2" in sys.argv:
         print("Augmenting SpO2...")
         X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
         X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
         
         a_X_0 = np.vstack(
-            [X_0, np.flip(X_0, axis=1)],
-        )
-        a_X_1 = np.vstack(
-            [X_1, np.flip(X_1, axis=1)],
-        )
-        
-        a_X_0 = np.vstack(
             [X_0, X_0 + np.random.normal(0, 0.01, X_0.shape)],
         )
         a_X_1 = np.vstack(
             [X_1, X_1 + np.random.normal(0, 0.02, X_1.shape)],
+        )
+        
+        tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
+        tmp = np.array(np.split(tmp, len(tmp)//6000))
+        a_X_0 = np.vstack(
+            [a_X_0, tmp]
+        )
+        tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
+        tmp = np.array(np.split(tmp, len(tmp)//6000))
+        a_X_1 = np.vstack(
+            [a_X_1, tmp]
         )
         
         np.save(path.join("gen_data", "a_SpO2_apnea.npy"), a_X_1)
@@ -195,6 +200,17 @@ if sys.argv[1] == "augment":
         )
         a_X_1 = np.vstack(
             [X_1, X_1 + np.random.normal(0, 0.0075, X_1.shape)],
+        )
+        
+        tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
+        tmp = np.array(np.split(tmp, len(tmp)//6000))
+        a_X_0 = np.vstack(
+            [a_X_0, tmp]
+        )
+        tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
+        tmp = np.array(np.split(tmp, len(tmp)//6000))
+        a_X_1 = np.vstack(
+            [a_X_1, tmp]
         )
         
         np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
