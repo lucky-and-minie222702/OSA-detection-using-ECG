@@ -52,7 +52,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 64
-es_ep = 40
+es_ep = 30
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
