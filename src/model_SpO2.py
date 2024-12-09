@@ -18,7 +18,7 @@ def create_model(name: str):
     x = layers.Flatten()(x)
     x = layers.Dense(512)(x)
     x = layers.BatchNormalization()(x)
-    x = layers.layers.LeakyReLU(negative_slope=0.3)(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
     out = layers.Dense(1, activation="sigmoid")(x)
     
     model = Model(
