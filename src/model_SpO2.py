@@ -104,7 +104,7 @@ print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
 now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
-times = 5
+times = 8
 start_rate = 0.75
 remember_factor = 0.75
 
