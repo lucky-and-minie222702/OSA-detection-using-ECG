@@ -99,7 +99,7 @@ print("Start at:", now, "\n")
 
 times = 5
 start_rate = 0.2
-remember_factor = 0.0
+remember_factor = 0.8
 
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
