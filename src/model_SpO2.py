@@ -7,16 +7,16 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
-    x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
+    x = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation("tanh")(x)
+    x = layers.ReLU()(x)
     x = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
-    x = layers.LeakyReLU(negative_slope=0.2)(x)
+    x = layers.ReLU()(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(512, activation="tanh")(x)
-    out = layers.Dropout(rate=0.05)(x)
+    x = layers.Dense(512, activation="relu")(x)
+    out = layers.Dropout(rate=0.1)(x)
     out = layers.Dense(1, activation="sigmoid")(out)
     
     model = Model(
@@ -98,8 +98,8 @@ now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
 times = 3
-start_rate = 0.2
-remember_factor = 0.8
+start_rate = 0.25
+remember_factor = 0.75
 
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
