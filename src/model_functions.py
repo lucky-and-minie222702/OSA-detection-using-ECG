@@ -240,7 +240,7 @@ class RandomForget(cbk.Callback):
         self.forget_rate *= self.remember_factor
         
 class DynamicWeightSparsification(cbk.Callback):
-    def __init__(self, sparsity_target: float = 0.2, layer_names = None):
+    def __init__(self, sparsity_target: float = 0.2, layer_names = None, show_logs: bool = False):
         super().__init__()
         self.sparsity_target = sparsity_target
         self.layer_names = layer_names
@@ -255,10 +255,11 @@ class DynamicWeightSparsification(cbk.Callback):
                         mask = np.abs(weights) >= threshold
                         sparsified_weights = weights * mask
                         weight_tensor.assign(sparsified_weights)
-                        print(f"Sparsified {layer.name} weights: {np.sum(mask == 0)} zeros added.")
+                        if self.show_logs:
+                            print(f"Sparsified {layer.name} weights: {np.sum(mask == 0)} zeros added.")
                         
 class WeightMemoryMechanism(cbk.Callback):
-    def __init__(self, patience: int = 3, monitor: str = 'val_loss'):
+    def __init__(self, patience: int = 3, monitor: str = 'val_loss', show_logs: bool = False):
         super().__init__()
         self.monitor = monitor
         self.patience = patience
@@ -266,6 +267,7 @@ class WeightMemoryMechanism(cbk.Callback):
         self.best_epoch = -1
         self.best_score = np.inf if 'loss' in monitor else -np.inf
         self.wait = 0
+        self.show_logs = show_logs
 
     def on_epoch_end(self, epoch, logs=None):
         current_score = logs.get(self.monitor)
@@ -275,10 +277,12 @@ class WeightMemoryMechanism(cbk.Callback):
                 self.best_score = current_score
                 self.best_epoch = epoch
                 self.wait = 0
-                print(f"Saved best weights at epoch {epoch + 1}.")
+                if self.show_logs:
+                    print(f"Saved best weights at epoch {epoch + 1}.")
             else:
                 self.wait += 1
                 if self.wait >= self.patience:
-                    print(f"Restoring best weights from epoch {self.best_epoch + 1}.")
+                    if self.show_logs:
+                        print(f"Restoring best weights from epoch {self.best_epoch + 1}.")
                     self.model.set_weights(self.best_weights)
                     self.wait = 0
