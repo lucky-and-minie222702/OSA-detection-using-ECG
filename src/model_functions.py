@@ -244,6 +244,7 @@ class DynamicWeightSparsification(cbk.Callback):
         super().__init__()
         self.sparsity_target = sparsity_target
         self.layer_names = layer_names
+        self.show_logs = show_logs
 
     def on_epoch_end(self, epoch: int, logs = None):
         for layer in self.model.layers:
