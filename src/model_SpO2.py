@@ -51,8 +51,8 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
-es_ep = 60
+batch_size = 32
+es_ep = 50
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
@@ -95,7 +95,7 @@ cb_weight_memory = WeightMemoryMechanism(
     patience = 3
 )
 cb_forget = DynamicWeightSparsification(
-    sparsity_target = 0.2
+    sparsity_target = 0.05
 )
 
 if not "id" in sys.argv:
