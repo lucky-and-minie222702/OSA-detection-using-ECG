@@ -95,7 +95,7 @@ cb_weight_memory = WeightMemoryMechanism(
     patience = 3
 )
 cb_forget = DynamicWeightSparsification(
-    sparsity_target = 0.05
+    sparsity_target = 0.01
 )
 
 if not "id" in sys.argv:
