@@ -9,13 +9,13 @@ def create_model(name: str):
     x = layers.Normalization()(inp)
     
     # inital
-    x = layers.Conv1D(filters=8, kernel_size=11, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.Conv1D(filters=8, kernel_size=11, kernel_regularizer=reg.L2(), padding="same", name="inital1")(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
-    x = layers.Conv1D(filters=8, kernel_size=7, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.Conv1D(filters=8, kernel_size=7, kernel_regularizer=reg.L2(), padding="same", name="inital2")(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
-    x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same", name="inital3")(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
     
@@ -105,7 +105,7 @@ lr_scheduler = cbk.ReduceLROnPlateau(
 )
 cb_forget = DynamicWeightSparsification(
     sparsity_target=0.2,
-    layer_names=["inital"]
+    layer_names=[f"inital{i+1}" for i in range(3)]
 )
 cb_weight_memory = WeightMemoryMechanism(
     patience = 3
