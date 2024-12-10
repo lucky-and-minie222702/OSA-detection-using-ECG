@@ -20,7 +20,7 @@ def create_model(name: str):
     x = layers.LeakyReLU(negative_slope=0.3)(x)
     x = layers.GlobalMaxPool1D()(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(128, name = "Inital")(x)
+    x = layers.Dense(128)(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
     out = layers.Dense(1, activation="sigmoid")(x)
@@ -93,11 +93,7 @@ lr_scheduler = cbk.ReduceLROnPlateau(
 )
 cb_weight_memory = WeightMemoryMechanism(
     patience = 3
-)
-cb_forget = DynamicWeightSparsification(
-    sparsity_target = 0.01,
-    layer_names = ["Initial"]
-)
+)   
 
 if not "id" in sys.argv:
     name = input("Please provide an id for this section: ")
