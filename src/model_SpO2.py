@@ -7,6 +7,18 @@ import os
 def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     x = layers.Normalization()(inp)
+    
+    # inital
+    x = layers.Conv1D(filters=8, kernel_size=11, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
+    x = layers.Conv1D(filters=8, kernel_size=7, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
+    x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same", name="inital")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.LeakyReLU(negative_slope=0.3)(x)
+    
     x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(negative_slope=0.3)(x)
@@ -90,6 +102,10 @@ cb_checkpoint = cbk.ModelCheckpoint(
 lr_scheduler = cbk.ReduceLROnPlateau(
     factor = 0.5,
     min_lr = 0.0001,
+)
+cb_forget = DynamicWeightSparsification(
+    sparsity_target=0.2,
+    layer_names=["inital"]
 )
 cb_weight_memory = WeightMemoryMechanism(
     patience = 3
