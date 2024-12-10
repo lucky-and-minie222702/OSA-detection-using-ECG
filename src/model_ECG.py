@@ -8,7 +8,7 @@ def create_model_raw():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 5, 0.0, 2),
+            (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
             (256, 3, 0.0, 2),
         ],
@@ -23,7 +23,7 @@ def create_model_fft():
     return CNN_model(
         input_shape = (None, 1),
         structures = [
-            (64, 5, 0.0, 2),
+            (64, 3, 0.0, 2),
             (128, 3, 0.0, 2),
             (256, 3, 0.0, 2),
         ],
@@ -43,18 +43,8 @@ def create_model(name: str):
         fft_model.output,
     ])
 
-    # decoder = layers.Reshape((list(encoder.shape[1::]) + [1]))(encoder)
-    # decoder = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
-    # decoder = layers.BatchNormalization()(decoder)
-    # decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
-    # decoder = layers.MaxPool1D(pool_size=2)(decoder)
-    # decoder = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(decoder)
-    # decoder = layers.BatchNormalization()(decoder)
-    # decoder = layers.LeakyReLU(negative_slope=0.2)(decoder)
-    # decoder = layers.MaxPool1D(pool_size=2)(decoder)
-    # decoder = layers.Flatten()(decoder)
-    decoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.5))(encoder)
-    decoder = layers.Dense(256, activation="tanh")(decoder)
+    decoder = layers.Dense(512, activation=layers.LeakyReLU(negative_slope=0.3))(encoder)
+    decoder = layers.Dense(256, activation=layers.LeakyReLU(negative_slope=0.3))(decoder)
     decoder = layers.Dropout(rate=0.1)(decoder)
     decoder = layers.Dense(1, activation="sigmoid")(decoder)
     
@@ -86,6 +76,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 128
+es_ep = 50
 
 print("Creating model architecture...")
 model, encoder = create_model("ECG_combined")
@@ -117,7 +108,7 @@ cb_timer = TimingCallback()
 cb_early_stopping = cbk.EarlyStopping(
     patience = 3, 
     restore_best_weights = True,
-    start_from_epoch = 50,
+    start_from_epoch = es_ep,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only = True
@@ -203,7 +194,7 @@ if sys.argv[1] == "k_fold":
         cb_early_stopping = cbk.EarlyStopping(
             patience = 3, 
             restore_best_weights = True,
-            start_from_epoch = 50,
+            start_from_epoch = es_ep,
         )
         idx += 1
         print(f"FOLD {idx}:")

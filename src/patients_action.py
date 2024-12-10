@@ -8,6 +8,7 @@ import sklearn.preprocessing as prep
 from data_functions import *
 import math
 from sklearn.model_selection import train_test_split
+import pickle
 
 f = open(path.join("database", "list"))
 records = f.read().splitlines()
@@ -124,10 +125,9 @@ if sys.argv[1] == "merge":
 
 
 if sys.argv[1] == "save_features":
-    _s = "a_" if "augmented" in sys.argv else ""
     print("Extracting ECG...")
-    X_0 = np.load(path.join("gen_data", f"{_s}ECG_normal.npy"))
-    X_1 = np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
+    X_0 = np.load(path.join("gen_data", "a_ECG_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "a_ECG_apnea.npy"))
     print("Extracting normal patients...")
     X_0_fft = extract_features(X_0, sampling_rate=100, verbose=True)
     print("Extracting apnea patients...")
@@ -138,10 +138,9 @@ if sys.argv[1] == "save_features":
     print("Done!")
     
 if sys.argv[1] == "save_stats":
-    _s = "a_" if "augmented" in sys.argv else ""
     print("Calculating SpO2...")
-    X_0 = np.load(path.join("gen_data", f"{_s}SpO2_normal.npy"))
-    X_1 = np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
+    X_0 = np.load(path.join("gen_data", "a_SpO2_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "a_SpO2_apnea.npy"))
     print("Extracting normal patients...")
     X_0, keys = extract_stats(X_0, sampling_rate=100, verbose=True)
     print("Extracting apnea patients...")
@@ -218,12 +217,11 @@ if sys.argv[1] == "augment":
         print("Done!")
         
 if sys.argv[1] == "split_dataset":
-    _s = "a_" if "augmented" in sys.argv else ""
     if "ECG" in sys.argv:
         print("Splitting ECG...")
         X_raw = np.vstack([
-            np.load(path.join("gen_data", f"{_s}ECG_normal.npy")), 
-            np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))])
+            np.load(path.join("gen_data", "a_ECG_normal.npy")), 
+            np.load(path.join("gen_data", "a_ECG_apnea.npy"))])
         X_fft = np.vstack([
             np.load(path.join("gen_data", "fft_ECG_normal.npy")), 
             np.load(path.join("gen_data", "fft_ECG_apnea.npy"))])
@@ -243,8 +241,8 @@ if sys.argv[1] == "split_dataset":
     if "SpO2" in sys.argv:
         print("Splitting SpO2...")
         X = np.vstack([
-            np.load(path.join("gen_data", f"{_s}SpO2_normal.npy")), 
-            np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
+            np.load(path.join("gen_data", "a_SpO2_normal.npy")), 
+            np.load(path.join("gen_data", "a_SpO2_apnea.npy"))
         ])
         y = np.array([[0] * (len(X) // 2) + [1] * (len(X) // 2)]).flatten()
         indices = np.arange(len(y))
