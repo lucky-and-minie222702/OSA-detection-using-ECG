@@ -9,15 +9,9 @@ def create_model(name: str):
     x = layers.Normalization()(inp)
     
     # inital
-    x = layers.Conv1D(filters=8, kernel_size=11, kernel_regularizer=reg.L2(), padding="same", name="inital1")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.LeakyReLU(negative_slope=0.3)(x)
-    x = layers.Conv1D(filters=8, kernel_size=7, kernel_regularizer=reg.L2(), padding="same", name="inital2")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.LeakyReLU(negative_slope=0.3)(x)
-    x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same", name="inital3")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.LeakyReLU(negative_slope=0.3)(x)
+    x = layers.Conv1D(filters=8, kernel_size=11, kernel_regularizer=reg.L2(), padding="same", name="inital1", activation="tanh")(x)
+    x = layers.Conv1D(filters=8, kernel_size=7, kernel_regularizer=reg.L2(), padding="same", name="inital2", activation="tanh")(x)
+    x = layers.Conv1D(filters=8, kernel_size=5, kernel_regularizer=reg.L2(), padding="same", name="inital3", activation="tanh")(x)
     
     x = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(x)
     x = layers.BatchNormalization()(x)
