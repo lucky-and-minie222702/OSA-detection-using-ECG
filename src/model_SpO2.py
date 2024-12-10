@@ -52,7 +52,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 64
-es_ep = 40
+es_ep = 60
 
 print("Creating model architecture...")
 model, encoder = create_model("SpO2_raw")
@@ -184,7 +184,7 @@ if sys.argv[1] == "k_fold":
                         lr_scheduler,
                         cb_early_stopping,
                         EpochProgressCallback(),
-                        RandomForget(forget_rate=0.2, remember_factor=0.8)
+                        RandomForget(forget_rate=0.5, remember_factor=0.75)
                     ],
                     validation_data=(X_test, y_test))
         
