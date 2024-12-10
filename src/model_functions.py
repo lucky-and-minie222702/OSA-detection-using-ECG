@@ -221,7 +221,7 @@ def forget(model, forget_rate: float):
             weights[i] = weights[i] * mask
     model.set_weights(weights)
     
-class RandomForget(tf.keras.callbacks.Callback):
+class RandomForget(cbk.Callback):
     def __init__(self, layer_names = None, forget_rate: float = 0.2, remember_factor: float = 0.8):
         super().__init__()
         self.layer_names = layer_names
@@ -238,3 +238,47 @@ class RandomForget(tf.keras.callbacks.Callback):
                         updated_weights = weights * mask
                         weight_tensor.assign(updated_weights)
         self.forget_rate *= self.remember_factor
+        
+class DynamicWeightSparsification(cbk.Callback):
+    def __init__(self, sparsity_target: float = 0.2, layer_names = None):
+        super().__init__()
+        self.sparsity_target = sparsity_target
+        self.layer_names = layer_names
+
+    def on_epoch_end(self, epoch: int, logs = None):
+        for layer in self.model.layers:
+            if self.layer_names is None or layer.name in self.layer_names:
+                if hasattr(layer, 'trainable_weights') and layer.trainable_weights:
+                    for weight_tensor in layer.trainable_weights:
+                        weights = weight_tensor.numpy()
+                        threshold = np.percentile(np.abs(weights), self.sparsity_target * 100)
+                        mask = np.abs(weights) >= threshold
+                        sparsified_weights = weights * mask
+                        weight_tensor.assign(sparsified_weights)
+                        print(f"Sparsified {layer.name} weights: {np.sum(mask == 0)} zeros added.")
+                        
+class WeightMemoryMechanism(cbk.Callback):
+    def __init__(self, patience: int = 3, monitor: str = 'val_loss'):
+        super().__init__()
+        self.monitor = monitor
+        self.patience = patience
+        self.best_weights = None
+        self.best_epoch = -1
+        self.best_score = np.inf if 'loss' in monitor else -np.inf
+        self.wait = 0
+
+    def on_epoch_end(self, epoch, logs=None):
+        current_score = logs.get(self.monitor)
+        if current_score is not None:
+            if ('loss' in self.monitor and current_score < self.best_score) or('accuracy' in self.monitor and current_score > self.best_score):
+                self.best_weights = self.model.get_weights()
+                self.best_score = current_score
+                self.best_epoch = epoch
+                self.wait = 0
+                print(f"Saved best weights at epoch {epoch + 1}.")
+            else:
+                self.wait += 1
+                if self.wait >= self.patience:
+                    print(f"Restoring best weights from epoch {self.best_epoch + 1}.")
+                    self.model.set_weights(self.best_weights)
+                    self.wait = 0

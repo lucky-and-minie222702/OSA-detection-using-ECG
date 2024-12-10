@@ -91,6 +91,12 @@ lr_scheduler = cbk.ReduceLROnPlateau(
     factor = 0.5,
     min_lr = 0.0001,
 )
+cb_weight_memory = WeightMemoryMechanism(
+    patience = 3
+)
+cb_forget = DynamicWeightSparsification(
+    sparsity_target = 0.2
+)
 
 if not "id" in sys.argv:
     name = input("Please provide an id for this section: ")
@@ -183,8 +189,9 @@ if sys.argv[1] == "k_fold":
                         cb_timer,
                         lr_scheduler,
                         cb_early_stopping,
+                        cb_forget,
+                        cb_weight_memory,
                         EpochProgressCallback(),
-                        RandomForget(forget_rate=0.5, remember_factor=0.75)
                     ],
                     validation_data=(X_test, y_test))
         
