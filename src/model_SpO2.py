@@ -154,7 +154,6 @@ if sys.argv[1] == "k_fold":
     scores = []
     
     f = open(path.join("history", f"{name}_k_fold_SpO2.txt"), "w")
-    rate = start_rate
     
     for train_index, test_index in kf.split(y):
         cb_timer = TimingCallback()
@@ -179,6 +178,7 @@ if sys.argv[1] == "k_fold":
                     epochs = epochs, 
                     batch_size = batch_size,
                     verbose = False,
+                    
                     callbacks = [
                         cb_timer,
                         lr_scheduler,
