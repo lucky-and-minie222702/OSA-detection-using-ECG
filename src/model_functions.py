@@ -215,10 +215,26 @@ def CNN_model(
 
 def forget(model, forget_rate: float):
     weights = model.get_weights()
-
     for i in range(len(weights)):
         if len(weights[i].shape) > 1: # ignore biases
             mask = np.random.rand(*weights[i].shape) > forget_rate # Set rate% to zero randomly
             weights[i] = weights[i] * mask
-
     model.set_weights(weights)
+    
+class RandomForget(tf.keras.callbacks.Callback):
+    def __init__(self, layer_names = None, forget_rate: float = 0.2, remember_factor: float = 0.8):
+        super().__init__()
+        self.layer_names = layer_names
+        self.forget_rate = forget_rate
+        self.remember_factor = remember_factor
+
+    def on_epoch_begin(self, epoch: int, logs = None):
+        for layer in self.model.layers:
+            if self.layer_names is None or layer.name in self.layer_names:
+                if hasattr(layer, 'trainable_weights') and layer.trainable_weights:
+                    for weight_tensor in layer.trainable_weights:
+                        weights = weight_tensor.numpy()
+                        mask = np.random.rand(*weights.shape) > self.forget_rate
+                        updated_weights = weights * mask
+                        weight_tensor.assign(updated_weights)
+        self.forget_rate *= self.remember_factor

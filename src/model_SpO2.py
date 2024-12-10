@@ -104,10 +104,6 @@ print(_space + "=" * len(_s), _space + _s, _space + "=" * len(_s), sep="\n")
 now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
-times = 8
-start_rate = 0.75
-remember_factor = 0.75
-
 if sys.argv[1] == "std":
     count_train = Counter(y_train)
     count_test = Counter(y_test)
@@ -177,32 +173,20 @@ if sys.argv[1] == "k_fold":
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
         
         model.set_weights(original)
-        for t in range(times):
-            lr_scheduler = cbk.ReduceLROnPlateau(
-                factor = 0.5,
-                min_lr = 0.0001,
-            )
-            cb_early_stopping = cbk.EarlyStopping(
-                patience = 3, 
-                restore_best_weights = True,
-                start_from_epoch = es_ep,
-            )
-            model.fit(
-                        X_train, 
-                        y_train, 
-                        epochs = epochs, 
-                        batch_size = batch_size,
-                        verbose = False,
-                        callbacks = [
-                            cb_timer,
-                            lr_scheduler,
-                            cb_early_stopping,
-                            EpochProgressCallback()
-                        ],
-                        validation_data=(X_test, y_test))
-            if t != times - 1:
-                forget(model, rate)
-            rate *= remember_factor
+        model.fit(
+                    X_train, 
+                    y_train, 
+                    epochs = epochs, 
+                    batch_size = batch_size,
+                    verbose = False,
+                    callbacks = [
+                        cb_timer,
+                        lr_scheduler,
+                        cb_early_stopping,
+                        EpochProgressCallback(),
+                        RandomForget(forget_rate=0.2, remember_factor=0.8)
+                    ],
+                    validation_data=(X_test, y_test))
         
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
