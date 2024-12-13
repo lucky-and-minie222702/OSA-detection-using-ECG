@@ -29,7 +29,7 @@ def create_model(name: str):
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
-    conv = layers.Activation("relu")
+    conv = layers.Activation("relu")(conv)
     conv = layers.Dropout(rate=0.25)(conv)
     
     flat = layers.GlobalMaxPool1D()(conv)
@@ -65,7 +65,6 @@ def create_model(name: str):
 
     if "show_size" in sys.argv:
         show_params(model, name)
-        model.summary()
         
     return model
 
