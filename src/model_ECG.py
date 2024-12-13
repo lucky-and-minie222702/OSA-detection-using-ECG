@@ -21,11 +21,11 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    shortcut1 = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
+    shortcut1 = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
@@ -34,14 +34,14 @@ def create_model(name: str):
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
-    att = layers.Dense(256)(flat)
+    att = layers.Dense(128)(flat)
     att = layers.BatchNormalization()(att)
     att = layers.Activation("tanh")(att)
     
-    att_score = layers.Dense(128)(flat)
+    att_score = layers.Dense(64)(flat)
     att_score = layers.BatchNormalization()(att_score)
     att_score = layers.Activation("relu")(att_score)
-    att_score = layers.Dense(256)(att_score)
+    att_score = layers.Dense(128)(att_score)
     att_score = layers.BatchNormalization()(att_score)
     att_score = layers.Activation("softmax")(att_score)
     
@@ -156,11 +156,11 @@ if sys.argv[1] == "std":
     print(f"Total training time: {convert_seconds(t)}")
     print(f"Total epochs: {len(cb_timer.logs)}")
     
-    score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::][0]
+    score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
     print(f"Accuracy: {score}")
     
     f = open(path.join("history", "ECG_train.txt"), "w")
-    pred = model.predict(X_test, verbose=False).squeeze()
+    pred = model.predict(X_test, batch_size=batch_size*2, verbose=False).squeeze()
     pred = [np.argmax(x) for x in pred]
     cm = confusion_matrix([np.argmax(x) for x in y_test], pred)
     print("Confusion matrix:\n", cm)
@@ -235,7 +235,7 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::][0]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
         scores.append(score)
         print(f"Accuracy: {score}")
         print(f"Accuracy: {score}", file=f)

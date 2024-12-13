@@ -142,11 +142,11 @@ if sys.argv[1] == "std":
     print(f"Total training time: {convert_seconds(t)}")
     print(f"Total epochs: {len(cb_timer.logs)}")
     
-    score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::][0]
+    score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
     print(f"Accuracy: {score}")
     
     f = open(path.join("history", "SpO2_train.txt"), "w")
-    pred = model.predict(X_test, verbose=False).squeeze()
+    pred = model.predict(X_test, batch_size=batch_size*2, verbose=False).squeeze()
     pred = [np.argmax(x) for x in pred]
     cm = confusion_matrix([np.argmax(x) for x in y_test], pred)
     print("Confusion matrix:\n", cm)
@@ -221,7 +221,7 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::][0]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
         scores.append(score)
         print(f"Accuracy: {score}")
         print(f"Accuracy: {score}", file=f)
