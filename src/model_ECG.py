@@ -11,6 +11,7 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
+    conv = layers.MaxPool1D(pool_size=2)(conv)
     
     conv = block(1, conv, 64)
     conv = block(1, conv, 64)
@@ -21,7 +22,7 @@ def create_model(name: str):
     conv = block(1, conv, 512, True)
     conv = block(1, conv, 512)
     
-    flat = layers.GlobalMaxPool1D()(conv)
+    flat = layers.GlobalAvgPool1D()(conv)
     flat  = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
