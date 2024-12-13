@@ -8,40 +8,18 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    shortcut1 = layers.Conv1D(filters=32 , kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
-    shortcut1 = layers.BatchNormalization()(shortcut1)
-    shortcut1 = layers.Activation("relu")(shortcut1)
-    
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    
-    shortcut1 = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
-    shortcut1 = layers.BatchNormalization()(shortcut1)
-    
-    conv = layers.Add()([conv, shortcut1])
+    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
-    # att = layers.Dense(128)(flat)
-    # att = layers.BatchNormalization()(att)
-    # att = layers.Activation("tanh")(att)
-    
-    # att_score = layers.Dense(64)(flat)
-    # att_score = layers.BatchNormalization()(att_score)
-    # att_score = layers.Activation("relu")(att_score)
-    # att_score = layers.Dense(128)(att_score)
-    # att_score = layers.BatchNormalization()(att_score)
-    # att_score = layers.Activation("softmax")(att_score)
-    
-    # score = layers.multiply([att, att_score])
     out = layers.Dense(2, activation="softmax")(flat)
     
     model = Model(
