@@ -11,16 +11,17 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
+    
+    conv = block(1, conv, 32)
+    conv = block(1, conv, 32)
+    conv = block(1, conv, 64, True)
+    conv = block(1, conv, 64)
+    conv = block(1, conv, 128, True)
+    conv = block(1, conv, 128)
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
-    out = layers.Dense(2, activation="softmax")(flat)
+    out = layers.Dense(1, activation="sigmoid")(flat)
     
     model = Model(
         inputs = inp,
@@ -30,7 +31,10 @@ def create_model(name: str):
     model.compile(
         optimizer = "adam",
         loss = "binary_crossentropy",
-        metrics = ["accuracy"],
+        metrics = [
+            metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                                    threshold = t/10) for t in range(1, 10)
+        ],
     )
 
     if "show_size" in sys.argv:
@@ -105,13 +109,16 @@ now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
 if sys.argv[1] == "std":    
+    if "threshold" in sys.argv:
+        threshold = float(sys.argv[sys.argv.index("threshold")+1])
+    else:
+        threshold = float(input("Please provide a valid threshold: "))
+    
     count_train = Counter(y_train)
     count_test = Counter(y_test)
     print(f"Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
     print(f"Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
-    y_train = to_categorical(y_train, num_classes=2)
-    y_test = to_categorical(y_test, num_classes=2)
     hist = model.fit(
                         X_train, 
                         y_train, 
@@ -129,13 +136,11 @@ if sys.argv[1] == "std":
     print(f"Total training time: {convert_seconds(t)}")
     print(f"Total epochs: {len(cb_timer.logs)}")
     
-    score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
-    print(f"Accuracy: {score}")
-    
     f = open(path.join("history", "ECG_train.txt"), "w")
-    pred = model.predict(X_test, batch_size=batch_size*2, verbose=False).squeeze()
-    pred = [np.argmax(x) for x in pred]
-    cm = confusion_matrix([np.argmax(x) for x in y_test], pred)
+    pred = model.predict(X_test, verbose=False)
+    arr = np.array([np.squeeze(x) for x in pred])
+    pred =  np.where(arr % 1 >= threshold, np.ceil(arr), np.floor(arr))
+    cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:\n", cm)
     print("Confusion matrix:\n", cm, file=f)
     f.close()
@@ -186,8 +191,6 @@ if sys.argv[1] == "k_fold":
         print(f"Train set: Apnea cases [1]: {counts_train[1]} - Normal cases [0]: {counts_train[0]}", file=f)
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
         
-        y_train = to_categorical(y_train, num_classes=2)
-        y_test = to_categorical(y_test, num_classes=2)
         model.set_weights(original)
         model.fit(
                     X_train, 
@@ -208,16 +211,18 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
         scores.append(score)
-        print(f"Accuracy: {score}")
-        print(f"Accuracy: {score}", file=f)
+        for threshold in range(1, 10):
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+        
         print()
     
-    avg = np.mean(np.array(scores))
+    scores = np.mean(np.array(scores), axis=0)
     print("AVERAGE SCORE")
     print("AVERAGE SCORE", file=f)
-    print(f"Accuracy: {avg}")
-    print(f"Accuracy: {avg}", file=f)
+    for threshold in range(1, 10):
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}")
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}", file=f)
         
     f.close()

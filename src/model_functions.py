@@ -95,7 +95,7 @@ def get_last_layer_outputs(model: Model):
     return K.function([model.layers[0].input],
                       [model.layers[-2]])
 
-def block(dimension: int, inp, filters: int, down_sample: bool = False):
+def block(dimension: int, inp, filters: int, down_sample: bool = False, layers_activation = layers.Activation("relu")):
     if dimension == 1:
         Conv = layers.Conv1D
     elif dimension == 2:
@@ -105,18 +105,18 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False):
 
     shorcut = inp
     strides = [2, 1] if down_sample else [1, 1]
-    x = Conv(filters, (3, 3), strides[0], padding="same")(inp)
+    x = Conv(filters, 3, strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation(layers.LeakyReLU(negative_slope=0.2))(x)
-    x = Conv(filters, (3, 3), strides[1], padding="same")(x)
+    x = layers_activation(x)
+    x = Conv(filters, 3, strides[1], padding="same")(x)
     x = layers.BatchNormalization()(x)
     
     if down_sample:
-        shorcut = Conv(filters, (3, 3), 2, padding="same")(shorcut)
+        shorcut = Conv(filters, 3, 2, padding="same")(shorcut)
         shorcut = layers.BatchNormalization()(shorcut)
     
     x = layers.Add()([x, shorcut])
-    x = layers.Activation(layers.LeakyReLU(negative_slope=0.2))(x)
+    x = layers_activation(x)
     return x
 
 def CNN_model(
@@ -124,7 +124,7 @@ def CNN_model(
         structures: List[Tuple[int, int, float]], 
         decoder_structures: List[Tuple[int, float]],
         name: str, 
-        layers_activation = layers.LeakyReLU(negative_slope=0.3),
+        layers_activation = layers.Activation("relu"),
         dimension: int = 1, 
         features: int = 512,
         only_features_map: bool = False, 
