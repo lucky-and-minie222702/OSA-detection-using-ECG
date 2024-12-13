@@ -25,7 +25,7 @@ def create_model(name: str):
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    shortcut1 = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
+    shortcut1 = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
