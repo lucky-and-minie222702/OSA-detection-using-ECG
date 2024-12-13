@@ -29,11 +29,11 @@ def create_model(name: str):
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
-    # conv = layers.Activation("relu")(conv)
-    # conv = layers.Dropout(rate=0.25)(conv)
+    conv = layers.Activation("relu")(conv)
+    conv = layers.Dropout(rate=0.25)(conv)
     
-    # flat = layers.GlobalMaxPool1D()(conv)
-    # flat  = layers.Flatten()(flat)
+    flat = layers.GlobalMaxPool1D()(conv)
+    flat  = layers.Flatten()(flat)
     # att = layers.Dense(128)(flat)
     # att = layers.BatchNormalization()(att)
     # att = layers.Activation("tanh")(att)
