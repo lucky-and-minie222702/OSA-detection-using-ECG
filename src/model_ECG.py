@@ -29,25 +29,25 @@ def create_model(name: str):
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
-    conv = layers.Activation("relu")(conv)
-    conv = layers.Dropout(rate=0.25)(conv)
+    # conv = layers.Activation("relu")(conv)
+    # conv = layers.Dropout(rate=0.25)(conv)
     
-    flat = layers.GlobalMaxPool1D()(conv)
-    flat  = layers.Flatten()(flat)
-    att = layers.Dense(128)(flat)
-    att = layers.BatchNormalization()(att)
-    att = layers.Activation("tanh")(att)
+    # flat = layers.GlobalMaxPool1D()(conv)
+    # flat  = layers.Flatten()(flat)
+    # att = layers.Dense(128)(flat)
+    # att = layers.BatchNormalization()(att)
+    # att = layers.Activation("tanh")(att)
     
-    att_score = layers.Dense(64)(flat)
-    att_score = layers.BatchNormalization()(att_score)
-    att_score = layers.Activation("relu")(att_score)
-    att_score = layers.Dense(128)(att_score)
-    att_score = layers.BatchNormalization()(att_score)
-    att_score = layers.Activation("softmax")(att_score)
+    # att_score = layers.Dense(64)(flat)
+    # att_score = layers.BatchNormalization()(att_score)
+    # att_score = layers.Activation("relu")(att_score)
+    # att_score = layers.Dense(128)(att_score)
+    # att_score = layers.BatchNormalization()(att_score)
+    # att_score = layers.Activation("softmax")(att_score)
     
-    score = layers.multiply([att, att_score])
-    score = layers.Dropout(rate=0.1)(score)
-    out = layers.Dense(2, activation="softmax")(score)
+    # score = layers.multiply([att, att_score])
+    # score = layers.Dropout(rate=0.1)(score)
+    out = layers.Dense(2, activation="softmax")(conv)
     
     model = Model(
         inputs = inp,
