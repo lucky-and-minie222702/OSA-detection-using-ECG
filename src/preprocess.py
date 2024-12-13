@@ -27,8 +27,8 @@ for i in range(len(records)):
     if records[i] in raw_SpO2_records:
         f.write(str(i+1) + " \n")
 
-    rec = wfdb.rdsamp(path.join("database", records[i]))
-    ann = wfdb.rdann(path.join("database", records[i]), extension="apn").symbol
+    rec = wfdb.rdsamp(path.join("database1", records[i]))
+    ann = wfdb.rdann(path.join("database1", records[i]), extension="apn").symbol
     
     ann = np.array([1 if x == "A" else 0 for x in ann])
     ann.resize(len(ann)-1)
@@ -51,8 +51,8 @@ f.close()
 
 records = SpO2_records
 for i in range(len(records)):
-    rec = wfdb.rdsamp(path.join("database", records[i]))
-    ann = wfdb.rdann(path.join("database", records[i]), extension="apn").symbol
+    rec = wfdb.rdsamp(path.join("database1", records[i]))
+    ann = wfdb.rdann(path.join("database1", records[i]), extension="apn").symbol
     ann = np.array([1 if x == "A" else 0 for x in ann])
     ann.resize(len(ann)-1)
     info = rec[1]
