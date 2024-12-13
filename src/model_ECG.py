@@ -8,16 +8,18 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    conv = block(1, conv, 32)
-    conv = block(1, conv, 32)
-    conv = block(1, conv, 64, True)
+    conv = block(1, conv, 64)
     conv = block(1, conv, 64)
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
+    conv = block(1, conv, 256, True)
+    conv = block(1, conv, 256)
+    conv = block(1, conv, 512, True)
+    conv = block(1, conv, 512)
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
@@ -48,7 +50,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
+batch_size = 128
 es_ep = 50
 
 print("Creating model architecture...")
