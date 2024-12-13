@@ -8,6 +8,7 @@ import sklearn.preprocessing as prep
 print("*** Make sure that you have changed the dataset directoríe name to \"database1\" and \"database2\" before")
 
 ### DATABASE1
+### https://www.physionet.org/content/apnea-ecg/1.0.0/
 f = open(path.join("database1", "list"))
 records = f.read().splitlines()
 f.close()
@@ -73,6 +74,7 @@ for i in range(len(records)):
     
     
 ### DATABASE2
+### https://www.physionet.org/content/slpdb/1.0.0/
 if not "extra" in sys.argv:
     exit()
 f = open(path.join("database2", "RECORDS"))
