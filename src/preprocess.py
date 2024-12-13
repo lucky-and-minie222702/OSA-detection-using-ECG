@@ -77,6 +77,8 @@ for i in range(len(records)):
     
     
 ### DATABASE2
+if not "extra" in sys.argv:
+    exit()
 f = open(path.join("database2", "RECORDS"))
 records = f.read().splitlines()
 f.close()
