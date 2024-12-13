@@ -8,24 +8,24 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    shortcut1 = layers.Conv1D(filters=32 , kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    shortcut1 = layers.Conv1D(filters=16 , kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     shortcut1 = layers.BatchNormalization()(shortcut1)
     shortcut1 = layers.Activation("relu")(shortcut1)
     
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
+    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
     conv = layers.Dropout(rate=0.25)(conv)
     
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
     conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
     
-    shortcut1 = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
+    shortcut1 = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(shortcut1)
     shortcut1 = layers.BatchNormalization()(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
@@ -34,7 +34,7 @@ def create_model(name: str):
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
-    att = layers.Dense(512)(flat)
+    att = layers.Dense(256)(flat)
     att = layers.BatchNormalization()(att)
     att = layers.Activation("tanh")(att)
     
@@ -42,9 +42,6 @@ def create_model(name: str):
     att_score = layers.BatchNormalization()(att_score)
     att_score = layers.Activation("relu")(att_score)
     att_score = layers.Dense(256)(att_score)
-    att_score = layers.BatchNormalization()(att_score)
-    att_score = layers.Activation("relu")(att_score)
-    att_score = layers.Dense(512)(att_score)
     att_score = layers.BatchNormalization()(att_score)
     att_score = layers.Activation("softmax")(att_score)
     
