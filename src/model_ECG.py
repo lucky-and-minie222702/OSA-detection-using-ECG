@@ -47,7 +47,7 @@ def create_model(name: str):
     
     # score = layers.multiply([att, att_score])
     # score = layers.Dropout(rate=0.1)(score)
-    out = layers.Dense(2, activation="softmax")(conv)
+    out = layers.Dense(2, activation="softmax")(flat)
     
     model = Model(
         inputs = inp,
