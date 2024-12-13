@@ -1,12 +1,8 @@
-import enum
-from IPython import start_ipython
 import numpy as np
 from os import path
 import os
 import sys
-import argparse
 import wfdb
-from librosa.feature import mfcc, delta, poly_features, tempogram
 import sklearn.preprocessing as prep
 
 print("*** Make sure that you have changed the dataset directoríe name to \"database1\" and \"database2\" before")
