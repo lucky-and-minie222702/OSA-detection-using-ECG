@@ -15,6 +15,9 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(shortcut1)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
+    
+    conv = layers.Dropout(rate=0.25)(conv)
+    
     conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
@@ -24,13 +27,16 @@ def create_model(name: str):
     
     shortcut1 = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2())(shortcut1)
     shortcut1 = layers.BatchNormalization()(shortcut1)
-    shortcut1 = layers.Activation("relu")(shortcut1)
     
     conv = layers.Add()([conv, shortcut1])
+    conv = layers.Activation("relu")
+    conv = layers.Dropout(rate=0.25)(conv)
     
     flat = layers.GlobalMaxPool1D()(conv)
     flat  = layers.Flatten()(flat)
     att = layers.Dense(512)(flat)
+    att = layers.BatchNormalization()(att)
+    att = layers.Activation("tanh")(att)
     
     att_score = layers.Dense(128)(flat)
     att_score = layers.BatchNormalization()(att_score)
@@ -43,6 +49,7 @@ def create_model(name: str):
     att_score = layers.Activation("softmax")(att_score)
     
     score = layers.multiply([att, att_score])
+    score = layers.Dropout(rate=0.1)(score)
     out = layers.Dense(2, activation="softmax")(score)
     
     model = Model(
