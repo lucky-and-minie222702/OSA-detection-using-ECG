@@ -9,15 +9,15 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     conv = layers.MaxPool1D(pool_size=2)(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2())(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     conv = layers.MaxPool1D(pool_size=2)(conv)
-    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2())(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     conv = layers.MaxPool1D(pool_size=2)(conv)
@@ -52,8 +52,8 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 512
-es_ep = 100
+batch_size = 256
+es_ep = 20
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
