@@ -227,12 +227,12 @@ if sys.argv[1] == "augment":
         
         if "overlap" in sys.argv:
             tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
             tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
             )
@@ -255,12 +255,12 @@ if sys.argv[1] == "augment":
         
         if "overlap" in sys.argv:
             tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
             tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
             )
@@ -305,6 +305,7 @@ if sys.argv[1] == "split_dataset":
         
 if sys.argv[1] == "chop":
     division = int(sys.argv[2])
+    print("Chopping...")
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
     X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
