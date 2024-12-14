@@ -223,16 +223,17 @@ if sys.argv[1] == "augment":
             [X_1, X_1 + np.random.normal(0, 0.02, X_1.shape)],
         )
         
-        tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-        tmp = np.array(np.split(tmp, len(tmp)//6000))
-        a_X_0 = np.vstack(
-            [a_X_0, tmp]
-        )
-        tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-        tmp = np.array(np.split(tmp, len(tmp)//6000))
-        a_X_1 = np.vstack(
-            [a_X_1, tmp]
-        )
+        if "overlap" in sys.argv:
+            tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
+            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            a_X_0 = np.vstack(
+                [a_X_0, tmp]
+            )
+            tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
+            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            a_X_1 = np.vstack(
+                [a_X_1, tmp]
+            )
         
         np.save(path.join("gen_data", "a_SpO2_apnea.npy"), a_X_1)
         np.save(path.join("gen_data", "a_SpO2_normal.npy"), a_X_0)
@@ -250,16 +251,17 @@ if sys.argv[1] == "augment":
             [X_1, X_1 + np.random.normal(0, 0.0075, X_1.shape)],
         )
         
-        tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-        tmp = np.array(np.split(tmp, len(tmp)//6000))
-        a_X_0 = np.vstack(
-            [a_X_0, tmp]
-        )
-        tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-        tmp = np.array(np.split(tmp, len(tmp)//6000))
-        a_X_1 = np.vstack(
-            [a_X_1, tmp]
-        )
+        if "overlap" in sys.argv:
+            tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
+            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            a_X_0 = np.vstack(
+                [a_X_0, tmp]
+            )
+            tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
+            tmp = np.array(np.split(tmp, len(tmp)//6000))
+            a_X_1 = np.vstack(
+                [a_X_1, tmp]
+            )
         
         np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
         np.save(path.join("gen_data", "a_ECG_apnea.npy"), a_X_1)
