@@ -9,13 +9,15 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    
-    conv = block(1, conv, 32)
-    conv = block(1, conv, 64, True)
-    conv = block(1, conv, 128, True)
+    conv = layers.Conv1D(filters=48, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
     
     att = SEBlock(reduction_ratio=2)(conv)
     flat = layers.GlobalMaxPool1D()(att)
