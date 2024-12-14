@@ -9,13 +9,13 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
+    conv = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    conv = block(1, conv, 32)
+    conv = block(1, conv, 16)
+    conv = block(1, conv, 32, True)
     conv = block(1, conv, 64, True)
-    conv = block(1, conv, 128, True)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalMaxPool1D()(att)
@@ -123,7 +123,7 @@ if sys.argv[1] == "std":
                         y_train, 
                         epochs = epochs, 
                         batch_size = batch_size, 
-                        validation_split = 0.2,
+                        validation_split = 0.3,
                         callbacks = [
                             cb_timer,
                             cb_early_stopping,
