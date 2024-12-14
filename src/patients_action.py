@@ -253,17 +253,17 @@ if sys.argv[1] == "augment":
         )
         
         a_X_0 = np.vstack(
-            [X_0, X_0 * 0.8],
+            [a_X_0, a_X_0 * 0.8],
         )
         a_X_1 = np.vstack(
-            [X_1, X_1 * 0.8],
+            [a_X_1, a_X_1 * 0.8],
         )
 
         a_X_0 = np.vstack(
-            [X_0, X_0 * 1.2],
+            [a_X_0, a_X_0 * 1.2],
         )
         a_X_1 = np.vstack(
-            [X_1, X_1 * 1.2],
+            [a_X_1, a_X_1 * 1.2],
         )
 
         if "overlap" in sys.argv:
