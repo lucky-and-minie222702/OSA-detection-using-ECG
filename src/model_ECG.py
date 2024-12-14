@@ -19,8 +19,8 @@ def create_model(name: str):
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    att = SEBlock(reduction_ratio=2)(conv)
-    flat = layers.GlobalMaxPool1D()(att)
+    # att = SEBlock(reduction_ratio=2)(conv)
+    flat = layers.GlobalMaxPool1D()(conv)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
