@@ -210,8 +210,7 @@ if sys.argv[1] == "pair":
     print("Done!")
     
 if sys.argv[1] == "augment":
-    if "overlap" in sys.argv:
-        overlap_size = int(sys.argv[sys.argv.index("overlap")+1])
+    overlap_size = 1500
 
     if "SpO2" in sys.argv:
         print("Augmenting SpO2...")
@@ -222,17 +221,17 @@ if sys.argv[1] == "augment":
             [X_0, X_0 + np.random.normal(0, 0.01, X_0.shape)],
         )
         a_X_1 = np.vstack(
-            [X_1, X_1 + np.random.normal(0, 0.02, X_1.shape)],
+            [X_1, X_1 + np.random.normal(0, 0.01, X_1.shape)],
         )
         
         if "overlap" in sys.argv:
-            tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
+            tmp = a_X_0.flatten()[3000:len(a_X_0)*6000-3000:]
+            tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
-            tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
+            tmp = a_X_1.flatten()[3000:len(a_X_1)*6000-3000:]
+            tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
             )
@@ -253,14 +252,28 @@ if sys.argv[1] == "augment":
             [X_1, X_1 + np.random.normal(0, 0.0075, X_1.shape)],
         )
         
+        a_X_0 = np.vstack(
+            [X_0, X_0 * 0.8],
+        )
+        a_X_1 = np.vstack(
+            [X_1, X_1 * 0.8],
+        )
+
+        a_X_0 = np.vstack(
+            [X_0, X_0 * 1.2],
+        )
+        a_X_1 = np.vstack(
+            [X_1, X_1 * 1.2],
+        )
+
         if "overlap" in sys.argv:
             tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
+            tmp = np.array(np.split(tmp, len(tmp) // 3000))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
             tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // overlap_size))
+            tmp = np.array(np.split(tmp, len(tmp) // 3000))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
             )
@@ -304,7 +317,7 @@ if sys.argv[1] == "split_dataset":
         print("Done!")
         
 if sys.argv[1] == "chop":
-    division = int(sys.argv[2])
+    division = 3000
     print("Chopping...")
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
