@@ -19,9 +19,11 @@ def create_model(name: str):
     conv = block(1, conv, 64)
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
+    conv = block(1, conv, 256, True)
+    conv = block(1, conv, 256)
     
     att = SEBlock(reduction_ratio=2)(conv)
-    flat = layers.GlobalMaxPool1D()(att)
+    flat = layers.GlobalAvgPool1D()(att)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
