@@ -34,7 +34,7 @@ def create_model(name: str):
     )
     
     model.compile(
-        optimizer = "S",
+        optimizer = "SGD",
         loss = "binary_crossentropy",
         metrics = [
             metrics.BinaryAccuracy(name = f"threshold_0.{t}",
