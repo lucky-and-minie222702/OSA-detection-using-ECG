@@ -7,23 +7,26 @@ import os
 def create_model(name: str):
     # 3000, 1
     inp = layers.Input(shape=(None, 1))
-    norm_inp = layers.Normalization()(inp)
+    conv = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=32, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
     conv = layers.Conv1D(filters=64, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=128, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
+    
+    conv = SEBlock(reduction_ratio=2)(conv)
+    
     conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    
+    conv = layers.Conv1D(filters=512, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
     
     att = SEBlock(reduction_ratio=4)(conv)
+
     flat = layers.GlobalMaxPool1D()(att)
     flat = layers.Flatten()(flat)
     flat = layers.Dropout(rate=0.5)(flat)
