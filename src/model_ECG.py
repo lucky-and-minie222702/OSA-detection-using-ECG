@@ -8,22 +8,21 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     conv = layers.MaxPool1D(pool_size=2)(conv)
     
-    conv = block(1, conv, 64)
+    conv = block(1, conv, 32)
+    conv = block(1, conv, 32)
+    conv = block(1, conv, 64, True)
     conv = block(1, conv, 64)
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
-    conv = block(1, conv, 256, True)
-    conv = block(1, conv, 256)
-    conv = block(1, conv, 512, True)
-    conv = block(1, conv, 512)
     
     flat = layers.GlobalAvgPool1D()(conv)
     flat  = layers.Flatten()(flat)
+    flat = layers.Dropout(rate=0.5)(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
     model = Model(
