@@ -13,10 +13,10 @@ def create_model(name: str):
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    conv = block(1, 32)
-    conv = block(1, 64, True)
-    conv = block(1, 128, True)
-    conv = block(1, 256, True)
+    conv = block(1, conv, 32)
+    conv = block(1, conv, 64, True)
+    conv = block(1, conv, 128, True)
+    conv = block(1, conv, 256, True)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalMaxPool1D()(conv)
