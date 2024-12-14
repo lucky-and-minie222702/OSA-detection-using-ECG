@@ -5,11 +5,9 @@ from data_functions import *
 import os
 
 def create_model(name: str):
-    # 3000, 1
     inp = layers.Input(shape=(None, 1))
-    conv = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=64, kernel_size=5, kernel_regularizer=reg.L2())(conv)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     

@@ -103,7 +103,7 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False, kernel_s
     elif dimension == 3:
         Conv = layers.Conv3D
 
-    shorcut = inp
+    shortcut = inp
     strides = [2, 1] if down_sample else [1, 1]
     x = Conv(filters, kernel_size, strides[0], padding="same")(inp)
     x = layers.BatchNormalization()(x)
@@ -112,12 +112,43 @@ def block(dimension: int, inp, filters: int, down_sample: bool = False, kernel_s
     x = layers.BatchNormalization()(x)
     
     if down_sample:
-        shorcut = Conv(filters, kernel_size, 2, padding="same")(shorcut)
-        shorcut = layers.BatchNormalization()(shorcut)
+        shortcut = Conv(filters, kernel_size, 2, padding="same")(shortcut)
+        shortcut = layers.BatchNormalization()(shortcut)
     
-    x = layers.Add()([x, shorcut])
+    x = layers.Add()([x, shortcut])
     x = layers_activation(x)
     return x
+
+def bottleneck_block(dimension: int, inp, filters: int, down_sample: bool = False, use_projection: bool = False, kernel_size: list[int] = [3], layers_activation = layers.Activation("relu")):
+    if dimension == 1:
+        Conv = layers.Conv1D
+    elif dimension == 2:
+        Conv = layers.Conv2D
+    elif dimension == 3:
+        Conv = layers.Conv3D
+        
+    shortcut = inp
+    
+    x = Conv(filters // 4, 1, 1, padding="same")
+    x = layers.BatchNormalization()(x)
+    x = layers_activation(x)
+    
+    x = Conv(filters // 4, kernel_size, 2 if down_sample else 1, padding="same")
+    x = layers.BatchNormalization()(x)
+    x = layers_activation(x)
+    
+    x = Conv(filters, 1, 1, padding="same")
+    x = layers.BatchNormalization()(x)
+    
+    if use_projection:
+        shortcut = Conv(filters, 2 if down_sample else 1, padding="same")
+        shortcut = layers.BatchNormalization()(shortcut)
+    
+    x = layers.Add()([x, shortcut])
+    x = layers_activation(x)
+    
+    return x
+    
 
 def CNN_model(
         input_shape: tuple, 
