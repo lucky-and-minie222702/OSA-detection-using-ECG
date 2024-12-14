@@ -16,7 +16,6 @@ def create_model(name: str):
     conv = block(1, conv, 32)
     conv = block(1, conv, 64, True)
     conv = block(1, conv, 128, True)
-    conv = block(1, conv, 256, True)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalMaxPool1D()(conv)
