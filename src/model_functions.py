@@ -289,3 +289,45 @@ class WeightMemoryMechanism(cbk.Callback):
                         print(f"Restoring best weights from epoch {self.best_epoch + 1}.")
                     self.model.set_weights(self.best_weights)
                     self.wait = 0
+
+class ExpandDimsLayer(layers.Layer):
+    def __init__(self, axis, **kwargs):
+        super(ExpandDimsLayer, self).__init__(**kwargs)
+        self.axis = axis
+
+    def call(self, x):
+        return tf.expand_dims(x, axis=self.axis)
+
+
+class SEBlock(layers.Layer):
+    def __init__(self, reduction_ratio: int = 2, **kwargs):
+        super(SEBlock, self).__init__(**kwargs)
+        self.reduction_ratio = reduction_ratio
+
+    def build(self, input_shape):
+        self.channels = input_shape[-1]
+        self.fc1 = layers.Dense(self.channels // self.reduction_ratio)
+        self.fc1_activation = layers.Activation("relu")
+        self.fc2 = layers.Dense(self.channels)
+        self.fc2_activation = layers.Activation("sigmoid")
+
+    def call(self, inputs):
+        input_rank = len(inputs.shape)
+
+        if input_rank == 3:
+            se = layers.GlobalAvgPool1D()(inputs)
+        elif input_rank == 4:
+            se = layers.GlobalAvgPool2D()(inputs)
+        elif input_rank == 5: 
+            se = layers.GlobalAvgPool3D()(inputs)
+        else:
+            raise ValueError(f"Unsupported input rank {input_rank}, expected 3, 4, or 5.")
+
+        se = self.fc1(se)
+        se = self.fc1_activation(se)
+        se = self.fc2(se)
+        se = self.fc2_activation(se)
+
+        se = tf.reshape(se, [-1] + [1] * (input_rank - 2) + [self.channels])
+
+        return layers.Multiply()([inputs, se])

@@ -20,10 +20,9 @@ def create_model(name: str):
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
     
-    flat = layers.GlobalAvgPool1D()(conv)
-    flat  = layers.Flatten()(flat)
-    flat = layers.Dropout(rate=0.5)(flat)
-    out = layers.Dense(1, activation="sigmoid")(flat)
+    att = SEBlock(reduction_ratio=2)(conv)
+
+    out = layers.Dense(1, activation="sigmoid")(att)
     
     model = Model(
         inputs = inp,
