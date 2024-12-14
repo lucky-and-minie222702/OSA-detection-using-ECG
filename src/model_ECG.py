@@ -18,6 +18,8 @@ def create_model(name: str):
     conv = block(1, conv, 128)
     conv = block(1, conv, 256, True)
     conv = block(1, conv, 256)
+    conv = block(1, conv, 512, True)
+    conv = block(1, conv, 512)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalAvgPool1D()(att)
@@ -49,7 +51,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 128
+batch_size = 512
 es_ep = 100
 
 print("Creating model architecture...")
