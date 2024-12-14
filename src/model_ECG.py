@@ -17,8 +17,10 @@ def create_model(name: str):
     conv = block(1, conv, 64)
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
+    conv = block(1, conv, 256, True)
+    conv = block(1, conv, 256)
     
-    att = SEBlock(reduction_ratio=2)(conv)
+    att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalAvgPool1D()(att)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
@@ -48,8 +50,8 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 128
-es_ep = 50
+batch_size = 64
+es_ep = 100
 
 print("Creating model architecture...")
 model = create_model("ECG_raw")
@@ -137,7 +139,7 @@ if sys.argv[1] == "std":
     print(f"Total epochs: {len(cb_timer.logs)}")
     
     f = open(path.join("history", "ECG_train.txt"), "w")
-    pred = model.predict(X_test, verbose=False)
+    pred = model.predict(X_test, verbose=False, batch_size=batch_size*2)
     arr = np.array([np.squeeze(x) for x in pred])
     pred =  np.where(arr % 1 >= threshold, np.ceil(arr), np.floor(arr))
     cm = confusion_matrix(y_test, pred)
@@ -211,7 +213,7 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=False)[1::]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")

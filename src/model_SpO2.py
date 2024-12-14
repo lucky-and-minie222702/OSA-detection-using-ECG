@@ -57,7 +57,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 64
+batch_size = 32
 es_ep = 50
 
 print("Creating model architecture...")
