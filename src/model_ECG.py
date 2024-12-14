@@ -9,10 +9,10 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     conv = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=16, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=32, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=43, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=32, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
@@ -21,7 +21,7 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
