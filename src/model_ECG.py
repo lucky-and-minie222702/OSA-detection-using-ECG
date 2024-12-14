@@ -15,7 +15,7 @@ def create_model(name: str):
     conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=48, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
@@ -50,7 +50,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 256
-es_ep = 30
+es_ep = 100
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
