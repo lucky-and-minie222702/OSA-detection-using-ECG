@@ -141,7 +141,7 @@ if sys.argv[1] == "std":
     print(f"Total epochs: {len(cb_timer.logs)}")
     
     f = open(path.join("history", "ECG_train.txt"), "w")
-    pred = model.predict(X_test, verbose=False, batch_size=batch_size*2)
+    pred = model.predict(X_test, verbose=False, batch_size=batch_size*4)
     arr = np.array([np.squeeze(x) for x in pred])
     pred =  np.where(arr % 1 >= threshold, np.ceil(arr), np.floor(arr))
     cm = confusion_matrix(y_test, pred)
@@ -215,7 +215,7 @@ if sys.argv[1] == "k_fold":
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size*4, verbose=False)[1::]
         scores.append(score)
         for threshold in range(1, 10):
             print(f"Threshold 0.{threshold}: {score[threshold-1]}")
