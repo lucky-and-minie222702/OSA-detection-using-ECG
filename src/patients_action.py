@@ -210,7 +210,7 @@ if sys.argv[1] == "pair":
     print("Done!")
     
 if sys.argv[1] == "augment":
-    overlap_size = 1500
+    overlap_size = 3000
 
     if "SpO2" in sys.argv:
         print("Augmenting SpO2...")
@@ -225,12 +225,12 @@ if sys.argv[1] == "augment":
         )
         
         if "overlap" in sys.argv:
-            tmp = a_X_0.flatten()[3000:len(a_X_0)*6000-3000:]
+            tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
             tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
-            tmp = a_X_1.flatten()[3000:len(a_X_1)*6000-3000:]
+            tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
             tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
@@ -268,12 +268,12 @@ if sys.argv[1] == "augment":
 
         if "overlap" in sys.argv:
             tmp = a_X_0.flatten()[overlap_size:len(a_X_0)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // 3000))
+            tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_0 = np.vstack(
                 [a_X_0, tmp]
             )
             tmp = a_X_1.flatten()[overlap_size:len(a_X_1)*6000-overlap_size:]
-            tmp = np.array(np.split(tmp, len(tmp) // 3000))
+            tmp = np.array(np.split(tmp, len(tmp) // 6000))
             a_X_1 = np.vstack(
                 [a_X_1, tmp]
             )
@@ -316,18 +316,18 @@ if sys.argv[1] == "split_dataset":
         np.save(path.join("gen_data", "ECG_y_test"), y[test_indices])
         print("Done!")
         
-if sys.argv[1] == "chop":
-    division = 3000
-    print("Chopping...")
-    X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
-    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
-    X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
-    X_1 = np.array(np.split(X_0, len(X_1) // division)).squeeze()
-    np.save(path.join("gen_data", "ECG_normal.npy"), X_0)
-    np.save(path.join("gen_data", "ECG_apnea.npy"), X_1)
-    print("Done!")
+# if sys.argv[1] == "chop":
+#     division = 3000
+#     print("Chopping...")
+#     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
+#     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
+#     X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
+#     X_1 = np.array(np.split(X_0, len(X_1) // division)).squeeze()
+#     np.save(path.join("gen_data", "ECG_normal.npy"), X_0)
+#     np.save(path.join("gen_data", "ECG_apnea.npy"), X_1)
+#     print("Done!")
 
-if sys.argv[1] == "add_extra":
-    X, y = get_patients_ECG(range(36, 54))
-    print(X.shape, y.shape)
-    pass
+# if sys.argv[1] == "add_extra":
+#     X, y = get_patients_ECG(range(36, 54))
+#     print(X.shape, y.shape)
+#     pass
