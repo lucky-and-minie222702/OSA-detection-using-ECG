@@ -15,11 +15,11 @@ def create_model(name: str):
     
     conv = block(1, conv, 64)
     conv = block(1, conv, 64)
-    conv = block(1, conv, 128, True)
-    conv = block(1, conv, 128)
+    conv = block(1, conv, 256, True)
+    conv = block(1, conv, 256)
     
     att = SEBlock(reduction_ratio=4)(conv)
-    flat = layers.GlobalAvgPool1D()(att)
+    flat = layers.GlobalMaxPool1D()(att)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
@@ -49,7 +49,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 512
-es_ep = 50
+es_ep = 100
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
