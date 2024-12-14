@@ -40,7 +40,7 @@ def create_model(name: str):
     if "show_size" in sys.argv:
         show_params(model, name)
         
-    return model
+    return model, flat
 
 save_path = path.join("res", "model_ECG.keras")
 
@@ -48,11 +48,11 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 512
-es_ep = 100
+batch_size = 256
+es_ep = 50
 
 print("Creating model architecture...")
-model = create_model("ECG_raw")
+model, analyzer = create_model("ECG_raw")
 original = model.weights
 
 print("Loading data...")
