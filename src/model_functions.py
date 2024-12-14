@@ -306,10 +306,8 @@ class SEBlock(layers.Layer):
 
     def build(self, input_shape):
         self.channels = input_shape[-1]
-        self.fc1 = layers.Dense(self.channels // self.reduction_ratio)
-        self.fc1_activation = layers.Activation("relu")
-        self.fc2 = layers.Dense(self.channels)
-        self.fc2_activation = layers.Activation("sigmoid")
+        self.fc1 = layers.Dense(self.channels // self.reduction_ratio, activation="relu")
+        self.fc2 = layers.Dense(self.channels, activation="sigmoid")
 
     def call(self, inputs):
         input_rank = len(inputs.shape)
@@ -322,9 +320,7 @@ class SEBlock(layers.Layer):
             se = layers.GlobalAvgPool3D()(inputs)
 
         se = self.fc1(se)
-        se = self.fc1_activation(se)
         se = self.fc2(se)
-        se = self.fc2_activation(se)
 
         se = tf.reshape(se, [-1] + [1] * (input_rank - 2) + [self.channels])
 
