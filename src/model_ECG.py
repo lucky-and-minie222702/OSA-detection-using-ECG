@@ -25,6 +25,7 @@ def create_model(name: str):
     att = SEBlock(reduction_ratio=2)(conv)
     flat = layers.GlobalMaxPool1D()(att)
     flat = layers.Flatten()(flat)
+    flat = layers.Dropout(rate=0.5)(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
     model = Model(
