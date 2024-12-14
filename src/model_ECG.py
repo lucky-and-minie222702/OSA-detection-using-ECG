@@ -9,17 +9,16 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
     conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
     
-    # att = SEBlock(reduction_ratio=2)(conv)
+    conv = block(1, 32)
+    conv = block(1, 64, True)
+    conv = block(1, 128, True)
+    conv = block(1, 256, True)
+    
+    att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalMaxPool1D()(conv)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
