@@ -9,17 +9,24 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=16, kernel_size=3, kernel_regularizer=reg.L2())(norm_inp)
+    conv = layers.Conv1D(filters=32, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
+    conv = layers.Conv1D(filters=64, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
+    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
+    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    conv = block(1, conv, 16)
-    conv = block(1, conv, 32, True)
-    conv = block(1, conv, 64, True)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalMaxPool1D()(att)
     flat = layers.Flatten()(flat)
+    flat = layers.Dropout(rate=0.5)(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
     model = Model(
@@ -83,7 +90,7 @@ cb_checkpoint = cbk.ModelCheckpoint(
 )
 lr_scheduler = cbk.ReduceLROnPlateau(
     factor = 0.5,
-    min_lr = 0.0001,
+    min_lr = 0.00005,
 )
 cb_forget = DynamicWeightSparsification(
     sparsity_target = 0.01,
@@ -123,7 +130,7 @@ if sys.argv[1] == "std":
                         y_train, 
                         epochs = epochs, 
                         batch_size = batch_size, 
-                        validation_split = 0.3,
+                        validation_split = 0.2,
                         callbacks = [
                             cb_timer,
                             cb_early_stopping,
