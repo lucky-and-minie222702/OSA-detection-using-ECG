@@ -210,7 +210,9 @@ if sys.argv[1] == "pair":
     print("Done!")
     
 if sys.argv[1] == "augment":
-    overlap_size = 3000
+    if "overlap" in sys.argv:
+        overlap_size = int(sys.argv[sys.argv.index("overlap")+1])
+
     if "SpO2" in sys.argv:
         print("Augmenting SpO2...")
         X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
@@ -303,12 +305,12 @@ if sys.argv[1] == "split_dataset":
         
 if sys.argv[1] == "chop":
     division = int(sys.argv[2])
-    X_0 = np.load(path.join("gen_data", "a_ECG_normal.npy")).flatten()
-    X_1 = np.load(path.join("gen_data", "a_ECG_apnea.npy")).flatten()
+    X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
+    X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
     X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
     X_1 = np.array(np.split(X_0, len(X_1) // division)).squeeze()
-    np.save(path.join("gen_data", "a_ECG_normal.npy"), X_0)
-    np.save(path.join("gen_data", "a_ECG_apnea.npy"), X_1)
+    np.save(path.join("gen_data", "ECG_normal.npy"), X_0)
+    np.save(path.join("gen_data", "ECG_apnea.npy"), X_1)
     print("Done!")
 
 if sys.argv[1] == "add_extra":
