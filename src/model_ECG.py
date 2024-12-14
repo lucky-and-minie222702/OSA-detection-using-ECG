@@ -50,7 +50,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 256
-es_ep = 20
+es_ep = 30
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
