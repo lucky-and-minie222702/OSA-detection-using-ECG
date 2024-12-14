@@ -186,7 +186,7 @@ def CNN_model(
             decoder = layers.BatchNormalization()(decoder)
         decoder = layers_activation(decoder)
         decoder = layers.Dropout(rate=dropout_rate)(decoder)
-    decoder = layers.Dense(1, activation="sigmoid")(decoder)
+    decoder = layers.Dense(1, activation="sigmoid")(decoder if len(decoder_structures) != 0 else encoder)
 
     model = Model(
         inputs = inp,
@@ -320,8 +320,6 @@ class SEBlock(layers.Layer):
             se = layers.GlobalAvgPool2D()(inputs)
         elif input_rank == 5: 
             se = layers.GlobalAvgPool3D()(inputs)
-        else:
-            raise ValueError(f"Unsupported input rank {input_rank}, expected 3, 4, or 5.")
 
         se = self.fc1(se)
         se = self.fc1_activation(se)

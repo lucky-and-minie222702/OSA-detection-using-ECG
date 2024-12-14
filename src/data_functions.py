@@ -85,7 +85,7 @@ class Legend:
             
         return np.array(res_fft)
     
-    def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False, name: str = "", use_scaler = None):
+    def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False, name: str = "", use_scaler = None, using_frequency_components: bool = False):
         val = []
         keys = []
         count = 0
@@ -107,12 +107,13 @@ class Legend:
             features['peak_mean'] = np.mean(signal[peaks]) if len(peaks) > 0 else 0
             zero_crossings = np.where(np.diff(np.sign(signal - np.mean(signal))) != 0)[0]
             features['zero_crossing_rate'] = len(zero_crossings) / len(signal)
-            freqs, psd = welch(signal, fs=sampling_rate)
-            features['psd_mean'] = np.mean(psd)
-            features['psd_max'] = np.max(psd)
-            features['dominant_frequency'] = freqs[np.argmax(psd)]
-            coeffs = pywt.wavedec(signal, 'haar', level=3)
-            features['wavelet_energy'] = sum(np.sum(c**2) for c in coeffs)
+            if using_frequency_components:
+                freqs, psd = welch(signal, fs=sampling_rate)
+                features['psd_mean'] = np.mean(psd)
+                features['psd_max'] = np.max(psd)
+                features['dominant_frequency'] = freqs[np.argmax(psd)]
+                coeffs = pywt.wavedec(signal, 'haar', level=3)
+                features['wavelet_energy'] = sum(np.sum(c**2) for c in coeffs)
             
             val.append(list(features.values()))
             keys = list(features.keys())

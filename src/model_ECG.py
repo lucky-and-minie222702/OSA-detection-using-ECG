@@ -5,6 +5,7 @@ from data_functions import *
 import os
 
 def create_model(name: str):
+    # 3000, 1
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
@@ -16,10 +17,6 @@ def create_model(name: str):
     conv = block(1, conv, 64)
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
-    conv = block(1, conv, 256, True)
-    conv = block(1, conv, 256)
-    conv = block(1, conv, 512, True)
-    conv = block(1, conv, 512)
     
     att = SEBlock(reduction_ratio=4)(conv)
     flat = layers.GlobalAvgPool1D()(att)
