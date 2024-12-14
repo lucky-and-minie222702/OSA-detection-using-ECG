@@ -21,8 +21,8 @@ def create_model(name: str):
     conv = block(1, conv, 128)
     
     att = SEBlock(reduction_ratio=2)(conv)
-
-    out = layers.Dense(1, activation="sigmoid")(att)
+    flat = layers.Flatten()(att)
+    out = layers.Dense(1, activation="sigmoid")(flat)
     
     model = Model(
         inputs = inp,
@@ -191,7 +191,7 @@ if sys.argv[1] == "k_fold":
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}")
         print(f"Train set: Apnea cases [1]: {counts_train[1]} - Normal cases [0]: {counts_train[0]}", file=f)
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
-        
+
         model.set_weights(original)
         model.fit(
                     X_train, 
