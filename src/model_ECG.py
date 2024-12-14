@@ -9,15 +9,14 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     norm_inp = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=32, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(norm_inp)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
-    conv = layers.BatchNormalization()(conv)
-    conv = layers.Activation("relu")(conv)
+    
+    conv = block(1, conv, 64)
+    conv = block(1, conv, 64)
+    conv = block(1, conv, 128, True)
+    conv = block(1, conv, 128)
     
     att = SEBlock(reduction_ratio=2)(conv)
     flat = layers.GlobalMaxPool1D()(att)
@@ -49,7 +48,7 @@ if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 512
+batch_size = 256
 es_ep = 20
 
 print("Creating model architecture...")
