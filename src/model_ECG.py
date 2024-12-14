@@ -9,19 +9,19 @@ def create_model(name: str):
     inp = layers.Input(shape=(None, 1))
     conv = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=64, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=16, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=128, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=43, kernel_size=5, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
     conv = SEBlock(reduction_ratio=2)(conv)
     
-    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
-    conv = layers.Conv1D(filters=512, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
@@ -58,7 +58,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 256
-es_ep = 100
+es_ep = 50
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
