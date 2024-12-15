@@ -85,7 +85,7 @@ class Legend:
             
         return np.array(res_fft)
     
-    def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False, name: str = "", use_scaler = None, using_frequency_components: bool = False):
+    def extract_stats(signals, sampling_rate: int = 100, save_scaler: bool = False, verbose: bool = False, name: str = "", use_scaler = None, using_frequency_components: bool = False, scale: bool = True):
         val = []
         keys = []
         count = 0
@@ -98,16 +98,16 @@ class Legend:
             features['median'] = np.median(signal)
             features['std_dev'] = np.std(signal)
             features['variance'] = np.var(signal)
-            features['rms'] = np.sqrt(np.mean(signal**2))
             features['max'] = np.max(signal)
             features['min'] = np.min(signal)
             features['range'] = features['max'] - features['min']
-            peaks, _ = find_peaks(signal)
-            features['num_peaks'] = len(peaks)
-            features['peak_mean'] = np.mean(signal[peaks]) if len(peaks) > 0 else 0
-            zero_crossings = np.where(np.diff(np.sign(signal - np.mean(signal))) != 0)[0]
-            features['zero_crossing_rate'] = len(zero_crossings) / len(signal)
-            if using_frequency_components:
+            if using_frequency_components:            
+                features['rms'] = np.sqrt(np.mean(signal**2))
+                peaks, _ = find_peaks(signal)
+                features['num_peaks'] = len(peaks)
+                features['peak_mean'] = np.mean(signal[peaks]) if len(peaks) > 0 else 0
+                zero_crossings = np.where(np.diff(np.sign(signal - np.mean(signal))) != 0)[0]
+                features['zero_crossing_rate'] = len(zero_crossings) / len(signal)
                 freqs, psd = welch(signal, fs=sampling_rate)
                 features['psd_mean'] = np.mean(psd)
                 features['psd_max'] = np.max(psd)
@@ -126,14 +126,15 @@ class Legend:
             print()
 
         val = np.array(val)
-        if use_scaler is None:
-            scaler = prep.MinMaxScaler()
-            val = scaler.fit_transform(val)
-        else:
-            scaler = joblib.load(path.join("res", f"{use_scaler}_stats_scaler.scaler"))
-            val = scaler.transform(val)
-        if save_scaler:
-            joblib.dump(scaler, path.join("res", f"{name}_stats_scaler.scaler"))
+        if scale:
+            if use_scaler is None:
+                scaler = prep.MinMaxScaler()
+                val = scaler.fit_transform(val)
+            else:
+                scaler = joblib.load(path.join("res", f"{use_scaler}_stats_scaler.scaler"))
+                val = scaler.transform(val)
+            if save_scaler:
+                joblib.dump(scaler, path.join("res", f"{name}_stats_scaler.scaler"))
         
         return val , keys
 

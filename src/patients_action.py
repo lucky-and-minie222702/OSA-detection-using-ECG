@@ -3,7 +3,6 @@ import numpy as np
 from os import path
 import sys
 from sklearn.utils import shuffle
-from librosa.feature import mfcc, delta
 import sklearn.preprocessing as prep
 from data_functions import *
 import math
@@ -144,54 +143,24 @@ if sys.argv[1] == "save_features":
     print("Done!")
 
 if sys.argv[1] == "save_stats":
-    if "SpO2" in sys.argv:
-        print("Calculating SpO2...")
-        X_0 = np.load(path.join("gen_data", "a_SpO2_normal.npy"))
-        X_1 = np.load(path.join("gen_data", "a_SpO2_apnea.npy"))
-        
-        print("Initializing scaler...")
-        tmp = np.vstack([X_0, X_1])
-        _, _ = Legend.extract_stats(tmp, sampling_rate=100, save_scaler=True, name="SpO2")
-        print("Done!")
-        
-        print("Extracting normal patients...")
-        X_0, keys = Legend.extract_stats(X_0, sampling_rate=100, verbose=True)
-        print("Extracting apnea patients...")
-        X_1, _ = Legend.extract_stats(X_1, sampling_rate=100, verbose=True)
-        print("Exporting...")
-        np.save(path.join("gen_data", "s_SpO2_normal"), X_0)
-        np.save(path.join("gen_data", "s_SpO2_apnea"), X_1)
-        
-        f = open(path.join("gen_data", "stats_keys.txt"), "w")
-        for k in keys:
-            f.write(k + "\n")
-        f.close()
-        
-        print("Done!")
-    if "ECG" in sys.argv:
-        print("Calculating ECG...")
-        X_0 = np.load(path.join("gen_data", "a_ECG_normal.npy"))
-        X_1 = np.load(path.join("gen_data", "a_ECG_apnea.npy"))
-        
-        print("Initializing scaler...")
-        tmp = np.vstack([X_0, X_1])
-        _, _ = Legend.extract_stats(tmp, sampling_rate=100, save_scaler=True, name="ECG")
-        print("Done!")
-        
-        print("Extracting normal patients...")
-        X_0, keys = Legend.extract_stats(X_0, sampling_rate=100, verbose=True)
-        print("Extracting apnea patients...")
-        X_1, _ = Legend.extract_stats(X_1, sampling_rate=100, verbose=True)
-        print("Exporting...")
-        np.save(path.join("gen_data", "s_ECG_normal"), X_0)
-        np.save(path.join("gen_data", "s_ECG_apnea"), X_1)
-        
-        f = open(path.join("gen_data", "stats_keys.txt"), "w")
-        for k in keys:
-            f.write(k + "\n")
-        f.close()
-        
-        print("Done!")
+    print("Calculating SpO2...")
+    X_0 = np.load(path.join("gen_data", "a_SpO2_normal.npy"))
+    X_1 = np.load(path.join("gen_data", "a_SpO2_apnea.npy"))
+    
+    print("Extracting normal patients...")
+    X_0, keys = Legend.extract_stats(X_0, sampling_rate=100, verbose=True, scale=False)
+    print("Extracting apnea patients...")
+    X_1, _ = Legend.extract_stats(X_1, sampling_rate=100, verbose=True, scale=False)
+    print("Exporting...")
+    np.save(path.join("gen_data", "s_SpO2_normal"), X_0)
+    np.save(path.join("gen_data", "s_SpO2_apnea"), X_1)
+    
+    f = open(path.join("gen_data", "stats_keys.txt"), "w")
+    for k in keys:
+        f.write(k + "\n")
+    f.close()
+    
+    print("Done!")
     
 if sys.argv[1] == "pair":
     print("Loading data...")
@@ -222,7 +191,7 @@ if sys.argv[1] == "augment":
         print("Augmenting SpO2...")
         X_0 = np.load(path.join("gen_data", "SpO2_normal.npy"))
         X_1 = np.load(path.join("gen_data", "SpO2_apnea.npy"))
-        
+
         a_X_0 = np.vstack(
             [X_0, X_0 + np.random.normal(0, 0.01, X_0.shape)],
         )
@@ -308,8 +277,13 @@ if sys.argv[1] == "chop":
     print("Chopping...")
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
+    
     X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
     X_1 = np.array(np.split(X_1, len(X_1) // division)).squeeze()
+    
+    X_0 = prep.MinMaxScaler().fit_transform(X_0).T
+    X_1 = prep.MinMaxScaler().fit_transform(X_1).T
+    
     np.save(path.join("gen_data", "ECG_normal.npy"), X_0)
     np.save(path.join("gen_data", "ECG_apnea.npy"), X_1)
     print("Done!")

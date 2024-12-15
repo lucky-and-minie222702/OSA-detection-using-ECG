@@ -1,39 +1,13 @@
-from data_functions import *
 import datetime
 from model_functions import *
 from data_functions import *
 import os
 
 def create_model(name: str):
-    inp = layers.Input(shape=(15,))
-    shortcut = layers.Normalization()(inp)
-    shortcut = layers.Dense(32)(shortcut)
-    shortcut = layers.BatchNormalization()(shortcut)
-    shortcut = layers.Activation("relu")(shortcut)
-    shortcut = layers.Dense(64)(shortcut)
-    shortcut = layers.BatchNormalization()(shortcut)
-    shortcut = layers.Activation("relu")(shortcut)
-
-    x = layers.Dense(128)(shortcut)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Dense(256)(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Dense(128)(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    x = layers.Dense(64)(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    
-    # residual connection
-    x = layers.Add()([x, shortcut])
-    
-    x = layers.Dense(32)(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-    out = layers.Dense(2, activation="softmax")(x)
+    inp = layers.Input(shape=(7,))
+    x = layers.Dense(64, activation="relu")(inp)
+    x = layers.Dense(64, activation="relu")(x)
+    out = layers.Dense(1, activation="sigmoid")(x)
     
     model = Model(
         inputs = inp,
@@ -41,9 +15,12 @@ def create_model(name: str):
     )
     
     model.compile(
-        optimizer = "adam",
+        optimizer = "Adam",
         loss = "binary_crossentropy",
-        metrics = ["accuracy"],
+        metrics = [
+            metrics.BinaryAccuracy(name = f"threshold_0.{t}",
+                                    threshold = t/10) for t in range(1, 10)
+        ],
     )
 
     if "show_size" in sys.argv:
@@ -51,13 +28,13 @@ def create_model(name: str):
         
     return model
 
-save_path = path.join("res", "model_SpO2.keras")
+save_path = path.join("res", "model_SpO2.weights.h5")
 
 if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
-batch_size = 32
+batch_size = 64
 es_ep = 50
 
 print("Creating model architecture...")
@@ -89,11 +66,14 @@ cb_early_stopping = cbk.EarlyStopping(
     start_from_epoch = es_ep,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
-    save_path, save_best_only=True
+    save_path, 
+    save_best_only=True,
+    save_weights_only=True,
 )
 lr_scheduler = cbk.ReduceLROnPlateau(
     factor = 0.5,
-    min_lr = 0.0001,
+    min_lr = 0.000001,
+    patience = 5,
 )
 cb_forget = DynamicWeightSparsification(
     sparsity_target = 0.01,
@@ -118,13 +98,16 @@ now = datetime.datetime.now()
 print("Start at:", now, "\n")
 
 if sys.argv[1] == "std":    
+    if "threshold" in sys.argv:
+        threshold = float(sys.argv[sys.argv.index("threshold")+1])
+    else:
+        threshold = float(input("Please provide a valid threshold: "))
+    
     count_train = Counter(y_train)
     count_test = Counter(y_test)
     print(f"Train set: Apnea cases [1]: {count_train[1]} - Normal cases [0]: {count_train[0]}")
     print(f"Validation set: Apnea cases [1]: {count_test[1]} - Normal cases [0]: {count_test[0]}")
 
-    y_train = to_categorical(y_train, num_classes=2)
-    y_test = to_categorical(y_test, num_classes=2)
     hist = model.fit(
                         X_train, 
                         y_train, 
@@ -139,18 +122,24 @@ if sys.argv[1] == "std":
                         ])
     t = sum(cb_timer.logs)
     
+    f = open(path.join("history", "SpO2_train.txt"), "w")
+    
     print(f"Total training time: {convert_seconds(t)}")
     print(f"Total epochs: {len(cb_timer.logs)}")
+    print(f"Total epochs: {len(cb_timer.logs)}", file=f)
     
-    score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
-    print(f"Accuracy: {score}")
-    
-    f = open(path.join("history", "SpO2_train.txt"), "w")
-    pred = model.predict(X_test, batch_size=batch_size*2, verbose=False).squeeze()
-    pred = [np.argmax(x) for x in pred]
-    cm = confusion_matrix([np.argmax(x) for x in y_test], pred)
+    pred = model.predict(X_test, verbose=False, batch_size=batch_size*4)
+    arr = np.array([np.squeeze(x) for x in pred])
+    pred =  np.where(arr % 1 >= threshold, np.ceil(arr), np.floor(arr))
+    cm = confusion_matrix(y_test, pred)
     print("Confusion matrix:\n", cm)
     print("Confusion matrix:\n", cm, file=f)
+    
+    score = model.evaluate(X_test, y_test, batch_size=batch_size*4, verbose=False)[1::]
+    for threshold in range(1, 10):
+        print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+        print(f"Threshold 0.{threshold}: {score[threshold-1]}", file=f)
+    
     f.close()
     print()
     
@@ -158,6 +147,7 @@ if sys.argv[1] == "std":
         data = np.array(value)
         his_path = path.join("history", f"{name}_{key}_SpO2")
         np.save(his_path, data)
+
     print("Saving history done!")
         
 if sys.argv[1] == "k_fold":
@@ -198,9 +188,7 @@ if sys.argv[1] == "k_fold":
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}")
         print(f"Train set: Apnea cases [1]: {counts_train[1]} - Normal cases [0]: {counts_train[0]}", file=f)
         print(f"Test set: Apnea cases [1]: {counts_test[1]} - Normal cases [0]: {counts_test[0]}", file=f)
-        
-        y_train = to_categorical(y_train, num_classes=2)
-        y_test = to_categorical(y_test, num_classes=2)
+
         model.set_weights(original)
         model.fit(
                     X_train, 
@@ -220,17 +208,21 @@ if sys.argv[1] == "k_fold":
         t = sum(cb_timer.logs)
         print(f"Total training time: {convert_seconds(t)}")
         print(f"Total epochs: {len(cb_timer.logs)}")
+        print(f"Total epochs: {len(cb_timer.logs)}", file=f)
         
-        score = model.evaluate(X_test, y_test, batch_size=batch_size*2, verbose=False)[1::][0]
+        score = model.evaluate(X_test, y_test, batch_size=batch_size*4, verbose=False)[1::]
         scores.append(score)
-        print(f"Accuracy: {score}")
-        print(f"Accuracy: {score}", file=f)
+        for threshold in range(1, 10):
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}")
+            print(f"Threshold 0.{threshold}: {score[threshold-1]}", file=f)
+        
         print()
     
-    avg = np.mean(np.array(scores))
+    scores = np.mean(np.array(scores), axis=0)
     print("AVERAGE SCORE")
     print("AVERAGE SCORE", file=f)
-    print(f"Accuracy: {avg}")
-    print(f"Accuracy: {avg}", file=f)
+    for threshold in range(1, 10):
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}")
+        print(f"Threshold 0.{threshold}: {scores[threshold-1]}", file=f)
         
     f.close()
