@@ -331,14 +331,16 @@ class ExpandDimsLayer(layers.Layer):
 
 
 class SEBlock(layers.Layer):
-    def __init__(self, reduction_ratio: int = 2, **kwargs):
+    def __init__(self, reduction_ratio: int = 2, layers_activation = layers.Activation("relu"), scores_actiation = layers.Activation("sigmoid"), **kwargs):
         super(SEBlock, self).__init__(**kwargs)
         self.reduction_ratio = reduction_ratio
+        self.la = layers_activation
+        self.sa = scores_actiation
 
     def build(self, input_shape):
         self.channels = input_shape[-1]
-        self.fc1 = layers.Dense(self.channels // self.reduction_ratio, activation="relu")
-        self.fc2 = layers.Dense(self.channels, activation="sigmoid")
+        self.fc1 = layers.Dense(self.channels // self.reduction_ratio, activation=self.la)
+        self.fc2 = layers.Dense(self.channels, activation=self.sa)
 
     def call(self, inputs):
         input_rank = len(inputs.shape)
