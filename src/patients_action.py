@@ -267,11 +267,11 @@ if sys.argv[1] == "split_dataset":
     _s = "s_" if "stats" in sys.argv else "a_" # Legend
     if "SpO2" in sys.argv:
         print("Splitting SpO2...")
+        a, b = np.load(path.join("gen_data", f"{_s}SpO2_normal.npy")), np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
         X = np.vstack([
-            np.load(path.join("gen_data", f"{_s}SpO2_normal.npy")), 
-            np.load(path.join("gen_data", f"{_s}SpO2_apnea.npy"))
+            a, b
         ])
-        y = np.array([[0] * (len(X) // 2) + [1] * (len(X) // 2)]).flatten()
+        y = np.array([[0] * len(a) + [1] * len(b)]).flatten()
         indices = np.arange(len(y))
         np.random.shuffle(indices)
         train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=np.random.randint(10000000))
@@ -282,12 +282,11 @@ if sys.argv[1] == "split_dataset":
         print("Done!")
 
     if "ECG" in sys.argv:
-        print("Splitting ECG...")
+        a, b = np.load(path.join("gen_data", f"{_s}ECG_normal.npy")), np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
         X = np.vstack([
-            np.load(path.join("gen_data", f"{_s}ECG_normal.npy")), 
-            np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
+            a, b
         ])
-        y = np.array([[0] * (len(X) // 2) + [1] * (len(X) // 2)]).flatten()
+        y = np.array([[0] * len(a) + [1] * len(b)]).flatten()
         indices = np.arange(len(y))
         np.random.shuffle(indices)
         train_indices, test_indices = train_test_split(indices, test_size=0.2, random_state=np.random.randint(10000000))
@@ -298,7 +297,7 @@ if sys.argv[1] == "split_dataset":
         print("Done!")
         
 if sys.argv[1] == "chop":
-    division = 3000
+    division = 500
     print("Chopping...")
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
