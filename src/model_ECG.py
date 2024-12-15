@@ -5,31 +5,37 @@ from data_functions import *
 import os
 
 def create_model(name: str):
+    # 500, 1
     inp = layers.Input(shape=(None, 1))
+    conv = layers.Normalization()(inp)
     
-    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(inp)
+    conv = layers.Conv1D(filters=64, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
     conv = block(1, conv, 64)
     conv = block(1, conv, 64)
+    conv = block(1, conv, 64)
     
-    conv = SEBlock(reduction_ratio=2, scores_actiation="tanh")(conv)
+    conv = SEBlock(reduction_ratio=2)(conv)
     
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
+    conv = block(1, conv, 128)
     
-    conv = SEBlock(reduction_ratio=4, scores_actiation="tanh")(conv)
+    conv = SEBlock(reduction_ratio=4)(conv)
     
     conv = block(1, conv, 256, True)
     conv = block(1, conv, 256)
+    conv = block(1, conv, 256)
     
-    conv = SEBlock(reduction_ratio=6, scores_actiation="tanh")(conv)
+    conv = SEBlock(reduction_ratio=6)(conv)
     
     conv = block(1, conv, 512, True)
     conv = block(1, conv, 512)
+    conv = block(1, conv, 512)
     
-    att = SEBlock(reduction_ratio=8, scores_actiation="tanh")(conv)
+    att = SEBlock(reduction_ratio=8)(conv)
     
     flat = layers.GlobalAvgPool1D()(att)
     flat = layers.Flatten()(flat)
@@ -95,8 +101,9 @@ cb_checkpoint = cbk.ModelCheckpoint(
     save_path, save_best_only=True
 )
 lr_scheduler = cbk.ReduceLROnPlateau(
-    factor = 0.75,
-    min_lr = 0.00005,
+    factor = 0.5,
+    min_lr = 0.000001,
+    patience = 5,
 )
 cb_forget = DynamicWeightSparsification(
     sparsity_target = 0.01,

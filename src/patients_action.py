@@ -282,6 +282,7 @@ if sys.argv[1] == "split_dataset":
         print("Done!")
 
     if "ECG" in sys.argv:
+        print("Splitting ECG...")
         a, b = np.load(path.join("gen_data", f"{_s}ECG_normal.npy")), np.load(path.join("gen_data", f"{_s}ECG_apnea.npy"))
         X = np.vstack([
             a, b
