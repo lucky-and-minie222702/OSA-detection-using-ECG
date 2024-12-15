@@ -303,7 +303,7 @@ if sys.argv[1] == "chop":
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
     X_0 = np.array(np.split(X_0, len(X_0) // division)).squeeze()
-    X_1 = np.array(np.split(X_0, len(X_1) // division)).squeeze()
+    X_1 = np.array(np.split(X_1, len(X_1) // division)).squeeze()
     np.save(path.join("gen_data", "ECG_normal.npy"), X_0)
     np.save(path.join("gen_data", "ECG_apnea.npy"), X_1)
     print("Done!")
