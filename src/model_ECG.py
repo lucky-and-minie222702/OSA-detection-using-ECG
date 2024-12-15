@@ -13,29 +13,15 @@ def create_model(name: str):
     conv = layers.BatchNormalization()(conv)
     conv = layers.Activation("relu")(conv)
     
-    conv = block(1, conv, 64)
-    conv = block(1, conv, 64)
-    conv = block(1, conv, 64)
+    conv = layers.Conv1D(filters=128, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
     
-    conv = SEBlock(reduction_ratio=2)(conv)
+    conv = layers.Conv1D(filters=256, kernel_size=3, kernel_regularizer=reg.L2(), padding="same")(conv)
+    conv = layers.BatchNormalization()(conv)
+    conv = layers.Activation("relu")(conv)
     
-    conv = block(1, conv, 128, True)
-    conv = block(1, conv, 128)
-    conv = block(1, conv, 128)
-    
-    conv = SEBlock(reduction_ratio=4)(conv)
-    
-    conv = block(1, conv, 256, True)
-    conv = block(1, conv, 256)
-    conv = block(1, conv, 256)
-    
-    conv = SEBlock(reduction_ratio=6)(conv)
-    
-    conv = block(1, conv, 512, True)
-    conv = block(1, conv, 512)
-    conv = block(1, conv, 512)
-    
-    att = SEBlock(reduction_ratio=8)(conv)
+    att = SEBlock(reduction_ratio=4)(conv)
     
     flat = layers.GlobalAvgPool1D()(att)
     flat = layers.Flatten()(flat)
