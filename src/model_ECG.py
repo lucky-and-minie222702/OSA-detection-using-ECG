@@ -1,4 +1,3 @@
-from data_functions import *
 import datetime
 from model_functions import *
 from data_functions import *
@@ -35,7 +34,13 @@ def create_model(name: str):
     conv = block(1, conv, 512)
     conv = block(1, conv, 512)
     
-    att = SEBlock(reduction_ratio=8)(conv)
+    conv = SEBlock(reduction_ratio=8)(conv)
+    
+    conv = block(1, conv, 1024, True)
+    conv = block(1, conv, 1024)
+    conv = block(1, conv, 1024)
+    
+    att = SEBlock(reduction_ratio=10)(conv)
     
     flat = layers.GlobalAvgPool1D()(att)
     flat = layers.Flatten()(flat)
@@ -60,14 +65,14 @@ def create_model(name: str):
         
     return model, flat
 
-save_path = path.join("res", "model_ECG.keras")
+save_path = path.join("res", "model_ECG.weights.h5")
 
 if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 256
-es_ep = 150
+es_ep = 50
 
 print("Creating model architecture...")
 model, analyzer = create_model("ECG_raw")
@@ -98,7 +103,9 @@ cb_early_stopping = cbk.EarlyStopping(
     start_from_epoch = es_ep,
 )
 cb_checkpoint = cbk.ModelCheckpoint(
-    save_path, save_best_only=True
+    save_path, 
+    save_best_only=True,
+    save_weights_only=True,
 )
 lr_scheduler = cbk.ReduceLROnPlateau(
     factor = 0.5,
@@ -169,8 +176,7 @@ if sys.argv[1] == "std":
         data = np.array(value)
         his_path = path.join("history", f"{name}_{key}_ECG")
         np.save(his_path, data)
-        
-    model.save(save_path)
+
     print("Saving history done!")
         
 if sys.argv[1] == "k_fold":
