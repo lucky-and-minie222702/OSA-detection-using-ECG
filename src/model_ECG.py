@@ -156,6 +156,8 @@ if sys.argv[1] == "std":
         data = np.array(value)
         his_path = path.join("history", f"{name}_{key}_ECG")
         np.save(his_path, data)
+        
+    model.save(save_path)
     print("Saving history done!")
         
 if sys.argv[1] == "k_fold":
