@@ -92,7 +92,7 @@ if sys.argv[1] == "merge":
         X, y = get_patients_ECG((range(1, 36)))
         
         scaler = prep.MinMaxScaler()
-        X = scaler.fit_transform(X.reshape(-1, 1)).flatten()
+        X = scaler.fit_transform(X.flatten().reshape(-1, 1)).reshape(-1, 6000)
         joblib.dump(scaler, path.join("res", "ECG_scaler.scaler"))
         
         counts = Counter(y)
