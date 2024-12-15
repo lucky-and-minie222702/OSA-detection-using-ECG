@@ -90,6 +90,11 @@ if sys.argv[1] == "merge":
     if "ECG" in sys.argv:
         print("Merging ECG...")
         X, y = get_patients_ECG((range(1, 36)))
+        
+        scaler = prep.MinMaxScaler()
+        X = scaler.fit_transform(X.reshape(-1, 1)).flatten()
+        joblib.dump(scaler, path.join("res", "ECG_scaler.scaler"))
+        
         counts = Counter(y)
         ideal = min(counts[0], counts[1])
         for i in range(len(y)):
@@ -108,6 +113,7 @@ if sys.argv[1] == "merge":
     if "SpO2" in sys.argv:
         print("Merging SpO2...")
         X, y = get_patients_SpO2((range(1, 9)))
+        
         counts = Counter(y)
         ideal = min(counts[0], counts[1])
         for i in range(len(y)):
