@@ -16,33 +16,33 @@ def create_model(name: str):
     conv = block(1, conv, 64)
     conv = block(1, conv, 64)
     
-    conv = SEBlock(reduction_ratio=2)(conv)
+    # conv = SEBlock(reduction_ratio=2)(conv)
     
     conv = block(1, conv, 128, True)
     conv = block(1, conv, 128)
     conv = block(1, conv, 128)
     
-    conv = SEBlock(reduction_ratio=4)(conv)
+    # conv = SEBlock(reduction_ratio=4)(conv)
     
     conv = block(1, conv, 256, True)
     conv = block(1, conv, 256)
     conv = block(1, conv, 256)
     
-    conv = SEBlock(reduction_ratio=6)(conv)
+    # conv = SEBlock(reduction_ratio=6)(conv)
     
     conv = block(1, conv, 512, True)
     conv = block(1, conv, 512)
     conv = block(1, conv, 512)
     
-    conv = SEBlock(reduction_ratio=8)(conv)
+    # conv = SEBlock(reduction_ratio=8)(conv)
     
     conv = block(1, conv, 1024, True)
     conv = block(1, conv, 1024)
     conv = block(1, conv, 1024)
     
-    att = SEBlock(reduction_ratio=10)(conv)
+    # att = SEBlock(reduction_ratio=10)(conv)
     
-    flat = layers.GlobalAvgPool1D()(att)
+    flat = layers.GlobalAvgPool1D()(conv)
     flat = layers.Flatten()(flat)
     out = layers.Dense(1, activation="sigmoid")(flat)
     
