@@ -228,10 +228,10 @@ if sys.argv[1] == "augment":
         )
         
         a_X_0 = np.vstack(
-            [a_X_0, a_X_0 - 0.03, a_X_0 + 0.03, a_X_0 * 1.1, a_X_0 * 0.9],
+            [a_X_0, a_X_0 - 0.03, a_X_0 + 0.03],
         )
         a_X_1 = np.vstack(
-            [a_X_1, a_X_1 - 0.03, a_X_1 + 0.03, a_X_1 * 1.1, a_X_1 * 0.9],
+            [a_X_1, a_X_1 - 0.03, a_X_1 + 0.03],
         )
         
         np.save(path.join("gen_data", "a_ECG_normal.npy"), a_X_0)
