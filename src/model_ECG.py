@@ -65,7 +65,7 @@ def create_model(name: str):
         
     return model, flat
 
-save_path = path.join("res", "model_ECG.weights.h5")
+save_path = path.join("res", "model_ECG_compare.weights.h5")
 
 if "epochs" in sys.argv:
     epochs = int(sys.argv[sys.argv.index("epochs")+1])
