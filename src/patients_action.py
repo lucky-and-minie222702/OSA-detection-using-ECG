@@ -273,7 +273,7 @@ if sys.argv[1] == "split_dataset":
         print("Done!")
         
 if sys.argv[1] == "chop":
-    division = 500
+    division = 1000
     print("Chopping...")
     X_0 = np.load(path.join("gen_data", "ECG_normal.npy")).flatten()
     X_1 = np.load(path.join("gen_data", "ECG_apnea.npy")).flatten()
