@@ -95,12 +95,12 @@ class Legend:
             features = {}
             signal = signal.flatten()
             features['mean'] = np.mean(signal)
-            features['median'] = np.median(signal)
-            features['std_dev'] = np.std(signal)
-            features['variance'] = np.var(signal)
+            # features['median'] = np.median(signal)
+            # features['std_dev'] = np.std(signal)
+            # features['variance'] = np.var(signal)
             features['max'] = np.max(signal)
             features['min'] = np.min(signal)
-            features['range'] = features['max'] - features['min']
+            # features['range'] = features['max'] - features['min']
             if using_frequency_components:            
                 features['rms'] = np.sqrt(np.mean(signal**2))
                 peaks, _ = find_peaks(signal)

@@ -4,7 +4,7 @@ from data_functions import *
 import os
 
 def create_model(name: str):
-    inp = layers.Input(shape=(7,))
+    inp = layers.Input(shape=(3,))
     x = layers.Dense(64, activation="relu")(inp)
     x = layers.Dense(64, activation="relu")(x)
     out = layers.Dense(1, activation="sigmoid")(x)
@@ -35,7 +35,7 @@ if "epochs" in sys.argv:
 else:
     epochs = int(input("Please provide a valid number of epochs: "))
 batch_size = 64
-es_ep = 50
+es_ep = 10
 
 print("Creating model architecture...")
 model = create_model("SpO2_raw")
