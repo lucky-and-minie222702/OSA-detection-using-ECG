@@ -174,3 +174,10 @@ def get_patients_ECG(plist: List[int]) -> Tuple[np.ndarray, np.ndarray]:
     X = np.array(np.split(X, siglen))
     return X, y
 
+def add_baseline_wander(ecg_signal, frequency: float, amplitude: float, sampling_rate: int):
+    res = []
+    for p in ecg_signal:
+        t = np.arange(len(p)) / sampling_rate
+        baseline = amplitude * np.sin(2 * np.pi * frequency * t)
+        res.append(t + baseline)
+    return np.array(res)
